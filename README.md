@@ -48,4 +48,7 @@ IDE推荐: vue使用VSCode、java使用IDEA <br>
 
 四、发布部署
 
-部署文档请前往流马测试官网获取，官网地址: http://www.liumatest.cn <br>
+部署文档请前往流马测试官网获取，官网地址: http://www.liumatest.cn <br><br>
+
+欢迎关注微信公众号：流马测试 <br>
+![qr](https://user-images.githubusercontent.com/96771570/161195670-3868f409-ed49-431f-8650-185e3e179679.png)
