@@ -1,22 +1,21 @@
-一、项目介绍<br><br>
+一、项目介绍
 
 流马测试平台是一款低代码的自动化测试工具平台，支持API/WEB/APP(APP开发中)自动化测试。演示平台地址: http://demo.liumatest.cn <br>
-为更好的随时随地、自由切换地支持自动化测试，流马测试平台分为管理平台和测试引擎两个项目。本项目即为管理平台前后端代码，前端项目为vue+elementUI、后端项目为java+springboot。<br><br>
+为更好的随时随地、自由切换地支持自动化测试，流马测试平台分为管理平台和测试引擎两个项目。本项目即为管理平台前后端代码，前端项目为vue+elementUI、后端项目为java+springboot。<br>
 
-二、 开发环境<br><br>
+二、 开发环境
 
 环境依赖: nodejs 14、java 1.8、mysql 8 <br>
 IDE推荐: vue使用VSCode、java使用IDEA <br>
 启动项目: <br><br>
 
-1. 前端<br>
+前端<br>
 第一步: 切换目录，cd Liuma-platform/LiuMa-frontent <br>
 第二步: 安装依赖，npm install <br>
 第三步: 启动项目，npm run dev <br>
 启动后，浏览器打开登录页，构建成功 <br><br>
 
-2. 后端<br><br>
-
+后端<br>
 第一步: IDEA打开目录 Liuma-platform/LiuMa-backend <br>
 第二步: 使用maven安装依赖 <br>
 第三步: 新建数据库名: liuma <br>
@@ -25,11 +24,11 @@ IDE推荐: vue使用VSCode、java使用IDEA <br>
 第六步: 启动LiuMaApplication文件 <br>
 首次启动后会创建相关数据表和基础数据，启动成功后，查看数据库liuma，所有数据表均已初始化成功 <br><br>
 
-3. 验证启动成功<br>
+验证启动成功<br>
 项目启动后，默认会新建两个用户: 系统管理员LMadmin/Liuma@123456、演示项目的项目管理员demo/123456 <br>
 使用上述初始用户登录平台，登录成功后，即表示项目启动成功 <br><br>
 
-三、第三方服务<br><br>
+三、第三方服务
 
 1. 阿里云邮件<br>
 主要用于计划执行后发送邮件 可用公司邮箱替换 需自行开发 <br>
