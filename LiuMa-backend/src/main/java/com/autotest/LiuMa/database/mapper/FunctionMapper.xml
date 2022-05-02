@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.FunctionMapper">
+  <insert id="addFunction" parameterType="com.autotest.LiuMa.database.domain.Function">
+    insert into `function` (id, `name`, `from`, param, code, expression, description,
+    project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{from}, #{param}, #{code}, #{expression}, #{description},
+    #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+  </insert>
+  <update id="updateFunction" parameterType="com.autotest.LiuMa.database.domain.Function">
+    update `function` set param=#{param}, code=#{code}, expression=#{expression}, description=#{description},
+    update_time=#{updateTime}, update_user=#{updateUser}
+    where id=#{id}
+  </update>
+  <select id="getFunctionDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
+    select * from `function` where id = #{id}
+  </select>
+  <select id="getCustomFunctionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
+    select * from `function` where `from` = 'custom' and project_id = #{projectId}
+  </select>
+  <select id="getFunctionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.FunctionDTO">
+    select fc.id, fc.`name`, fc.`from`, fc.expression, fc.description, fc.project_id, fc.create_time, fc.update_time,
+    fc.create_user, fc.update_user, u.username as username
+    from `function` fc left join user u on u.id = fc.create_user
+    where (fc.project_id = #{projectId} or fc.`from` = 'system')
+    <if test="condition != null and condition != ''">
+      and fc.name like #{condition}
+    </if>
+    order by fc.create_time desc
+  </select>
+  <delete id="deleteFunction" parameterType="java.lang.String">
+    delete from `function` where id = #{id}
+  </delete>
+</mapper>

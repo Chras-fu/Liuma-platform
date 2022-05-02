@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ReportMapper">
+  <insert id="addReport" parameterType="com.autotest.LiuMa.database.domain.Report">
+    insert into report (id, name, task_id, environment_id, source_type, source_id, start_time, end_time, status,
+    project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{taskId}, #{environmentId}, #{sourceType}, #{sourceId}, #{startTime}, #{endTime}, #{status},
+    #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+  </insert>
+  <insert id="addReportStatistics" parameterType="com.autotest.LiuMa.database.domain.ReportStatistics">
+    insert into report_statistics (id, report_id, total, pass_count, error_count, fail_count)
+    values (#{id}, #{reportId}, #{total}, #{passCount}, #{errorCount}, #{failCount})
+  </insert>
+  <select id="selectTimeoutReport" parameterType="java.lang.Long" resultType="com.autotest.LiuMa.database.domain.Report">
+    select * from report where (`status` = 'running' and update_time &lt; #{minLastUploadTime}) or (`status` = 'prepared' and update_time &lt; #{minLastToRunTime})
+  </select>
+  <update id="updateReportStartTime">
+    update report set start_time = #{startTime}, update_time = #{updateTime} where id = #{reportId}
+  </update>
+  <update id="updateReportEndTime">
+    update report set end_time = #{endTime}, update_time = #{updateTime} where id = #{reportId}
+  </update>
+  <select id="getReportStatistics" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ReportStatistics">
+    select * from report_statistics where report_id = #{reportId}
+  </select>
+  <update id="updateReportStatistics" parameterType="com.autotest.LiuMa.database.domain.ReportStatistics">
+    update report_statistics set pass_count=#{passCount}, fail_count=#{failCount}, error_count=#{errorCount} where report_id = #{reportId}
+  </update>
+  <update id="updateReportStatus" parameterType="java.lang.String">
+    update report set status=#{status} where id = #{id}
+  </update>
+  <update id="updateReportStatusByTask" parameterType="java.lang.String">
+    update report set status=#{status} where task_id = #{taskId}
+  </update>
+  <update id="updateAllReportStatusByEngine" parameterType="java.lang.String">
+    update report r set r.status=#{status} where r.task_id in
+    (
+    select t.id from task t where t.engine_id = #{engineId} and (t.status = 'prepared' or t.status = 'running')
+    )
+  </update>
+  <select id="getReportList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.ReportDTO">
+    select r.id, r.name, r.task_id, r.environment_id, r.source_type, r.source_id, r.start_time, r.end_time, r.status,
+    r.project_id, r.create_time, r.update_time, r.create_user, r.update_user, u.username as username,
+    rs.total, rs.pass_count, rs.fail_count, rs.error_count,
+    concat(round(rs.pass_count * 100 / rs.total, 2), '%') as passRate,
+    round((rs.pass_count + rs.fail_count + rs.error_count) * 100 / rs.total, 0) as progress
+    from report r
+    left join user u on u.id = r.create_user
+    left join report_statistics rs on rs.report_id = r.id
+    where r.project_id = #{projectId} and r.source_type != 'case' and r.source_type != 'temp'
+    <if test="condition != null and condition != ''">
+      and r.name like #{condition}
+    </if>
+    <if test="collectionId != null and collectionId != ''">
+      and r.source_id = #{collectionId} and r.source_type = 'collection'
+    </if>
+    <if test="collectionId == null or collectionId == ''">
+      and r.source_type != 'collection'
+    </if>
+    <if test="planId != null and planId != ''">
+      and r.source_id = #{planId}
+    </if>
+    order by r.create_time desc
+  </select>
+  <select id="getReportDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportDTO">
+    select r.id, r.name, r.task_id, r.environment_id, r.source_type, r.source_id, r.start_time, r.end_time, r.status,
+    r.project_id, r.create_time, r.update_time, r.create_user, r.update_user, rs.total, rs.pass_count, rs.fail_count, rs.error_count,
+    concat(round(rs.pass_count * 100 / rs.total, 2), '%') as passRate,
+    round((rs.pass_count + rs.fail_count + rs.error_count) * 100 / rs.total, 0) as progress
+    from report r left join report_statistics rs on rs.report_id = r.id
+    where r.id = #{reportId}
+  </select>
+  <delete id="deleteReport" parameterType="java.lang.String">
+    delete from report where id = #{id}
+  </delete>
+</mapper>

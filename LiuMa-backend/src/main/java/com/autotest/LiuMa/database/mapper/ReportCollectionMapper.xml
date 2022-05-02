@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ReportCollectionMapper">
+  <insert id="addReportCollection" parameterType="com.autotest.LiuMa.database.domain.ReportCollection">
+    insert into report_collection (id, report_id, collection_id, collection_name, collection_version, case_total)
+    values (#{id}, #{reportId}, #{collectionId}, #{collectionName}, #{collectionVersion}, #{caseTotal})
+  </insert>
+  <select id="getReportCollection" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ReportCollection">
+    select * from report_collection where report_id = #{reportId} and collection_id = #{collectionId}
+  </select>
+  <select id="getReportCollectionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionDTO">
+    select * from report_collection where report_id = #{reportId}
+  </select>
+</mapper>

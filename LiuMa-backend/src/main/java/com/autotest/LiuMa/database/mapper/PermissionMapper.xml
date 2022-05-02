@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.PermissionMapper">
+  <insert id="addRolePermission" parameterType="com.autotest.LiuMa.database.domain.RolePermission">
+    insert into `role_permission` (id, role_id, permission_id, create_time, update_time) values
+    <foreach collection="list" item="item" separator=",">
+    (#{id}, #{roleId}, #{permissionId}, #{createTime}, #{updateTime})
+    </foreach>
+  </insert>
+  <select id="getUserPermissionByProject" parameterType="java.lang.String" resultType="java.lang.String">
+    select distinct(rp.permission_id) from role_permission rp
+    left join role r on r.id=rp.role_id
+    left join user_role ur on ur.role_id = r.id
+    where ur.user_id = #{userId}
+    <if test="userId != 'system_admin_user'">
+      and r.project_id = #{projectId}
+    </if>
+  </select>
+</mapper>

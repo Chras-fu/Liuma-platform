@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.PlanCollectionMapper">
+  <insert id="addPlanCollection" parameterType="java.util.List">
+    insert into plan_collection (id, plan_id, collection_id) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id}, #{item.planId}, #{item.collectionId})
+    </foreach>
+  </insert>
+  <delete id="deletePlanCollection" parameterType="java.lang.String">
+    delete from plan_collection where plan_id = #{planId}
+  </delete>
+  <select id="getPlanCollectionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.PlanCollectionDTO">
+    select pc.id, pc.plan_id, pc.collection_id, c.name as collectionName,v.name as collectionVersion
+    from plan_collection pc
+    left join `collection` c on c.id = pc.collection_id
+    left join `version` v on v.id = c.version_id
+    where pc.plan_id = #{planId}
+  </select>
+  <select id="getPlanCaseCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(*) from plan_collection pc
+    left join collection_case cc on cc.collection_id = pc.collection_id
+    where pc.plan_id = #{planId}
+  </select>
+</mapper>

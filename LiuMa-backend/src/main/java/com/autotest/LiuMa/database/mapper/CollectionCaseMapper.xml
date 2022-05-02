@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.CollectionCaseMapper">
+  <insert id="addCollectionCase" parameterType="java.util.List">
+    insert into collection_case (id, `index`, collection_id, case_id) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id}, #{item.index}, #{item.collectionId}, #{item.caseId})
+    </foreach>
+  </insert>
+  <delete id="deleteCollectionCase" parameterType="java.lang.String">
+    delete from collection_case where collection_id = #{collectionId}
+  </delete>
+  <select id="getCollectionCaseList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CollectionCaseDTO">
+    select cc.id, cc.index, cc.case_id, cc.collection_id, c.name as caseName, c.type as caseType, cm.name as caseModule
+    from collection_case cc
+    left join `case` c on c.id = cc.case_id
+    left join `case_module` cm on cm.id = c.module_id
+    where cc.collection_id = #{collectionId} order by cc.index
+  </select>
+  <select id="getCollectionCaseCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(*) from collection_case where collection_id = #{collectionId}
+  </select>
+</mapper>

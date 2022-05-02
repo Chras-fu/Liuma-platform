@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ElementMapper">
+  <insert id="addElement" parameterType="com.autotest.LiuMa.database.domain.Element">
+    insert into element (id, name, module_id, project_id, `by`, expression, description,
+    create_time, update_time, create_user, update_user, status) values
+    ( #{id}, #{name}, #{moduleId}, #{projectId}, #{by}, #{expression}, #{description},
+    #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+  </insert>
+  <update id="updateElement" parameterType="com.autotest.LiuMa.database.domain.Element">
+    update element set name=#{name}, module_id=#{moduleId}, `by`=#{by}, expression=#{expression},
+    description=#{description}, update_time=#{updateTime}, update_user=#{updateUser}
+    where id=#{id}
+  </update>
+  <delete id="deleteElement" parameterType="java.lang.String">
+    update element set status = 'Trash' where id = #{id}
+  </delete>
+  <select id="getModuleElementList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Element">
+    select * from element where project_id = #{projectId} and module_id = #{moduleId} and status != 'Trash'
+  </select>
+  <select id="getElementList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.ElementDTO">
+    select element.id, element.num, element.name, element.module_id, element.project_id, pm.name as moduleName,
+    element.by, element.expression, element.description,
+    element.create_user, element.update_user, element.create_time, element.update_time, u.username as username from element
+    left join page_module pm on pm.id = element.module_id
+    left join user u on u.id = element.create_user
+    where element.status != 'Trash' and element.project_id = #{projectId}
+    <if test="moduleId != null and moduleId != ''">
+      and element.module_id = #{moduleId}
+    </if>
+    <if test="createUser != null and createUser != ''">
+      and element.create_user = #{createUser}
+    </if>
+    <if test="condition != null and condition != ''">
+      and ((element.name like #{condition}) or (element.num like #{condition}))
+    </if>
+    order by element.update_time desc
+  </select>
+</mapper>

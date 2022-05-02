@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.PlanMapper">
+  <insert id="addPlan" parameterType="com.autotest.LiuMa.database.domain.Plan">
+    insert into plan (id, name, version_id, environment_id, retry, engine_id, project_id, description,
+    create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{versionId}, #{environmentId}, #{retry}, #{engineId}, #{projectId}, #{description},
+    #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+  </insert>
+  <update id="updatePlan" parameterType="com.autotest.LiuMa.database.domain.Plan">
+    update plan set name=#{name}, version_id=#{versionId}, environment_id=#{environmentId}, retry=#{retry},
+    engine_id=#{engineId}, description=#{description},
+    update_time=#{updateTime}, update_user=#{updateUser} where id=#{id}
+  </update>
+  <delete id="deletePlan" parameterType="java.lang.String">
+    delete from plan where id = #{id}
+  </delete>
+  <select id="getPlanDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.PlanDTO">
+    select p.*, ps.start_time, ps.frequency from plan p
+    left join plan_schedule ps on ps.plan_id = p.id
+    where p.id = #{id}
+  </select>
+  <select id="getPlanList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.PlanDTO">
+    select pl.id, pl.name, pl.version_id, pl.environment_id, pl.retry, pl.engine_id, pl.description, pl.project_id,
+    pl.create_time, pl.update_time, pl.create_user, pl.update_user, u.username as username, v.name as versionName, en.name as environmentName
+    from plan pl left join user u on u.id = pl.create_user
+    left join version v on v.id = pl.version_id
+    left join environment en on en.id = pl.environment_id
+    where pl.project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and pl.name like #{condition}
+    </if>
+    order by pl.update_time desc
+  </select>
+</mapper>

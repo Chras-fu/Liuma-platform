@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.TestFileMapper">
+  <insert id="saveTestFile" parameterType="com.autotest.LiuMa.database.domain.TestFile">
+    insert into test_file (id, name, file_path, description, project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{filePath}, #{description}, #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+  </insert>
+  <select id="getAllTestFile" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.TestFile">
+    select * from test_file where project_id = #{projectId}
+  </select>
+  <select id="getTestFile" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.TestFile">
+    select * from test_file where id = #{id}
+  </select>
+  <select id="getTestFileList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TestFileDTO">
+    select tf.id, tf.name, tf.file_path, tf.description, tf.project_id, tf.create_time, tf.update_time,
+    tf.create_user, tf.update_user, u.username as username
+    from test_file tf left join user u on u.id = tf.create_user
+    where tf.project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and tf.name like #{condition} or tf.id like #{condition}
+    </if>
+    order by tf.create_time desc
+  </select>
+  <delete id="deleteTestFile" parameterType="java.lang.String">
+    delete from test_file where id = #{id}
+  </delete>
+</mapper>

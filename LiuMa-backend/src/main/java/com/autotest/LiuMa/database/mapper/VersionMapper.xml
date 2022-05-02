@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.VersionMapper">
+  <insert id="saveVersion" parameterType="com.autotest.LiuMa.database.domain.Version">
+    insert into `version` (id, name, description, project_id, create_time, update_time) values
+    (#{id}, #{name}, #{description}, #{projectId}, #{createTime}, #{updateTime})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+  </insert>
+  <delete id="deleteVersion" parameterType="java.lang.String">
+    delete from `version` where id = #{id}
+  </delete>
+  <select id="getVersionByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Version">
+    select * from `version` where project_id = #{projectId} and name = #{name}
+  </select>
+  <select id="getVersionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Version">
+    select * from `version` where project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and name like #{condition}
+    </if>
+    order by create_time desc
+  </select>
+</mapper>

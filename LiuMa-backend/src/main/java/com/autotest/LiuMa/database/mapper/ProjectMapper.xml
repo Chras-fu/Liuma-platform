@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ProjectMapper">
+  <select id="getUserProject" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Project">
+    select distinct(p.id), p.name, p.description, p.project_admin, p.create_time, p.update_time, p.status
+    from user_project up left join project p on up.project_id = p.id
+    where p.status = 'Normal'
+    <if test="userId != 'system_admin_user'">
+      and up.user_id = #{userId}
+    </if>
+  </select>
+  <select id="getAllProjectId" resultType="java.lang.String">
+    select id from project
+  </select>
+  <select id="getProjectByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Project">
+    select * from project where name = #{name}
+  </select>
+  <select id="getProjectById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Project">
+    select * from project where id = #{id}
+  </select>
+  <select id="getProjectUser" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.UserProject">
+    select * from user_project where project_id = #{projectId} and user_id = #{userId}
+  </select>
+  <insert id="addProjectUser" parameterType="com.autotest.LiuMa.database.domain.UserProject">
+    insert into user_project (id, user_id, project_id, create_time, update_time)
+    values (#{id},#{userId},#{projectId},#{createTime},#{updateTime})
+  </insert>
+  <insert id="addProject" parameterType="com.autotest.LiuMa.database.domain.Project">
+    insert into project (id, name, description, project_admin, create_time, update_time, status)
+    values (#{id},#{name},#{description}, #{projectAdmin},#{createTime},#{updateTime}, #{status})
+  </insert>
+  <update id="deleteProject" parameterType="java.lang.String">
+    update project set `status`='Trash' where id = #{id}
+  </update>
+  <delete id="deleteProjectUser" parameterType="java.lang.String">
+    delete from user_project where project_id = #{projectId} and user_id = #{userId}
+  </delete>
+  <insert id="recoverProject" parameterType="java.lang.String">
+    update project set `status`='Normal' where id = #{id}
+  </insert>
+  <select id="getProjectList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.ProjectDTO">
+    select p.*, u.username as username from project p
+    left join user u on u.id = p.project_admin
+    <if test="condition != null and condition != ''">
+      where p.name like #{condition}
+    </if>
+    order by p.create_time desc
+  </select>
+  <select id="getProjectUserList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.database.domain.User">
+    select distinct(u.id), u.username, u.account, u.email, u.create_time from `user` u left join user_project up on up.user_id = u.id
+    where u.id != 'system_admin_user'
+    <if test="requestUser != 'system_admin_user'">
+      and up.project_id = #{projectId}
+    </if>
+    <if test="condition != null and condition != ''">
+      and (u.username like #{condition} or u.account like #{condition})
+    </if>
+  </select>
+  <select id="getProjectRoleList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Role">
+    select * from `role` where project_id = #{projectId}
+  </select>
+</mapper>

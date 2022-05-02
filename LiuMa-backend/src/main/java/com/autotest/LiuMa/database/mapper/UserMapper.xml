@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.UserMapper">
+  <select id="getUserInfo" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.UserDTO">
+    select * from `user` where id = #{id}
+  </select>
+  <select id="getUser" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.UserDTO">
+    select * from `user` where account = #{account} or mobile = #{account}
+  </select>
+  <select id="getAllUser" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.User">
+    select id, username, account from `user`
+  </select>
+  <select id="queryUser" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.User">
+    select id, username, account from `user` where account = #{account} and account != 'system_admin_user'
+  </select>
+  <select id="getUserRoleList" parameterType="java.lang.String" resultType="java.lang.String">
+    select r.id from user_role ur left join role r on r.id = ur.role_id
+    where r.project_id = #{projectId} and ur.user_id = #{userId}
+  </select>
+  <update id="updateProject" parameterType="java.lang.String">
+    update `user` set last_project = #{projectId} where id = #{id}
+  </update>
+  <update id="updatePassword" parameterType="java.lang.String">
+    update `user` set password = #{password} where id = #{id}
+  </update>
+  <update id="updateInfo" parameterType="com.autotest.LiuMa.database.domain.User">
+    update `user` set username = #{username}, email = #{email}, update_time = #{updateTime} where id = #{id}
+  </update>
+  <insert id="addUser" parameterType="com.autotest.LiuMa.database.domain.User">
+    insert into `user` (id, username, account, password, mobile, email, status, last_project, create_time, update_time)
+    values
+    (#{id},#{username},#{account},#{password},#{mobile},#{email},#{status},#{lastProject},#{createTime},#{updateTime})
+  </insert>
+</mapper>

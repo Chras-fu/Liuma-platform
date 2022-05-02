@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.PlanScheduleMapper">
+  <insert id="addPlanSchedule" parameterType="com.autotest.LiuMa.database.domain.PlanSchedule">
+    insert into plan_schedule (id, plan_id, start_time, frequency, next_run_time)
+    values (#{id}, #{planId}, #{startTime}, #{frequency}, #{nextRunTime})
+  </insert>
+  <update id="updatePlanSchedule" parameterType="com.autotest.LiuMa.database.domain.PlanSchedule">
+    update plan_schedule set
+    <if test="startTime !=null">
+      start_time = #{startTime},
+    </if>
+    <if test="frequency !=null">
+      frequency = #{frequency},
+    </if>
+    <if test="nextRunTime !=null">
+      next_run_time = #{nextRunTime}
+    </if>
+    where plan_id=#{planId}
+  </update>
+  <delete id="deletePlanSchedule" parameterType="java.lang.String">
+    delete from plan_schedule where plan_id=#{planId}
+  </delete>
+  <select id="getPlanSchedule" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.PlanSchedule">
+    select * from plan_schedule where plan_id = #{planId}
+  </select>
+  <select id="getToRunPlanScheduleList" parameterType="java.lang.Long" resultType="com.autotest.LiuMa.database.domain.PlanSchedule">
+    select * from plan_schedule where next_run_time &gt;= #{minNextRunTime} and next_run_time &lt; #{maxNextRunTime}
+  </select>
+</mapper>

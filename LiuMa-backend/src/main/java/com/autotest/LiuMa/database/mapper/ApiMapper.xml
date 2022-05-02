@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ApiMapper">
+  <insert id="addApi" parameterType="com.autotest.LiuMa.database.domain.Api">
+    insert into api (id, name, level, module_id, project_id, method, path, protocol, domain_sign, description,
+    header, body, query, rest, create_time, update_time, create_user, update_user, status) values
+    ( #{id}, #{name},#{level}, #{moduleId}, #{projectId}, #{method}, #{path}, #{protocol}, #{domainSign},
+      #{description}, #{header}, #{body}, #{query}, #{rest}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+  </insert>
+  <update id="updateApi" parameterType="com.autotest.LiuMa.database.domain.Api">
+    update api set name=#{name}, level=#{level}, module_id=#{moduleId}, method=#{method}, path=#{path}, protocol=#{protocol},
+    domain_sign=#{domainSign}, description=#{description}, header=#{header}, body=#{body}, query=#{query}, rest=#{rest},
+    update_time=#{updateTime}, update_user=#{updateUser}
+    where id=#{id}
+  </update>
+  <delete id="deleteApi" parameterType="java.lang.String">
+    update api set status = 'Trash' where id = #{id}
+  </delete>
+  <select id="getApiDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ApiDTO">
+    select api.id, api.num, api.name, api.level, api.module_id as moduleId,api.project_id, am.name as moduleName, api.method, api.path,
+    api.protocol, api.domain_sign as domainSign, api.description, api.header, api.body, api.query, api.rest,
+    api.create_user, api.update_user, api.create_time, api.update_time from api
+    left join api_module am on am.id = api.module_id
+    where api.id = #{id}
+  </select>
+  <select id="getApiList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.ApiDTO">
+    select api.id as id, api.num as num, api.name as name, api.method as method, api.path as path, api.module_id as moduleId, am.name as moduleName,
+    api.description as description, u.username as username, api.update_time as updateTime from api
+    left join api_module am on am.id = api.module_id
+    left join user u on u.id = api.create_user
+    where api.status != 'Trash' and api.project_id = #{projectId}
+    <if test="moduleId != null and moduleId != ''">
+      and api.module_id = #{moduleId}
+    </if>
+    <if test="createUser != null and createUser != ''">
+      and api.create_user = #{createUser}
+    </if>
+    <if test="condition != null and condition != ''">
+      and ((api.name like #{condition}) or (api.path like #{condition}) or (api.num like #{condition}))
+    </if>
+    order by api.update_time desc
+  </select>
+
+</mapper>

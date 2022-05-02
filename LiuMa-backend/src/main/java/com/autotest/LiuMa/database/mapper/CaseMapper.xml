@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.CaseMapper">
+  <insert id="addCase" parameterType="com.autotest.LiuMa.database.domain.Case">
+    insert into `case` (id, name, level, module_id, project_id, type, third_party, description, environment_ids, common_param,
+    create_time, update_time, create_user, update_user, status ) values
+    ( #{id}, #{name}, #{level}, #{moduleId}, #{projectId}, #{type}, #{thirdParty}, #{description}, #{environmentIds},
+    #{commonParam}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+  </insert>
+  <update id="updateCase" parameterType="com.autotest.LiuMa.database.domain.Case">
+    update `case` set name=#{name}, level=#{level}, module_id=#{moduleId}, third_party=#{thirdParty}, description=#{description},
+    environment_ids=#{environmentIds}, common_param=#{commonParam},
+    update_time=#{updateTime}, update_user=#{updateUser}
+    where id=#{id}
+  </update>
+  <delete id="deleteCase" parameterType="java.lang.String">
+    update `case` set status = 'Trash' where id = #{id}
+  </delete>
+  <select id="getCaseDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CaseDTO">
+    select case.id, case.num, case.name, case.level, case.module_id as moduleId, case.project_id, cm.name as moduleName,
+    case.type, case.third_party, case.description, case.environment_ids, case.common_param,
+    case.create_user, case.update_user, case.create_time, case.update_time from `case`
+    left join case_module cm on cm.id = case.module_id
+    where case.id = #{id}
+  </select>
+  <select id="getCaseList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.CaseDTO">
+    select case.id, case.num, case.name, case.level, case.type, case.module_id as moduleId, cm.name as moduleName,
+    case.description, case.environment_ids, u.username as username, case.update_time as updateTime from `case`
+    left join case_module cm on cm.id = case.module_id
+    left join user u on u.id = case.create_user
+    where case.status != 'Trash' and case.project_id = #{projectId}
+    <if test="moduleId != null and moduleId != ''">
+      and case.module_id = #{moduleId}
+    </if>
+    <if test="createUser != null and createUser != ''">
+      and case.create_user = #{createUser}
+    </if>
+    <if test="caseType != null and caseType != ''">
+      and case.type = #{caseType}
+    </if>
+    <if test="condition != null and condition != ''">
+      and ((case.name like #{condition})or (case.num like #{condition}))
+    </if>
+    order by case.update_time desc
+  </select>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ReportCollectionCaseMapper">
+  <insert id="addReportCollectionCase" parameterType="com.autotest.LiuMa.database.domain.ReportCollectionCase">
+    insert into report_collection_case (id, report_collection_id, collection_case_index, case_id, case_type, case_name, case_desc,run_times,
+    start_time, end_time, during, status)
+    values (#{id}, #{reportCollectionId}, #{collectionCaseIndex}, #{caseId}, #{caseType}, #{caseName}, #{caseDesc}, #{runTimes},
+    #{startTime}, #{endTime}, #{during}, #{status})
+  </insert>
+  <select id="countReportResult" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(rcc.id) from report_collection_case rcc
+    left join report_collection rc on rc.id = rcc.report_collection_id
+    where rc.report_id = #{reportId} and rcc.status = #{status}
+    and not exists (
+    select 1 from report_collection_case where run_times &gt; rcc.run_times and
+    report_collection_id = rcc.report_collection_id and collection_case_index = rcc.collection_case_index
+    )
+  </select>
+  <select id="countReportCollectionResult" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(rcc.id) from report_collection_case rcc where rcc.status = #{status} and rcc.report_collection_id = #{reportCollectionId}
+    and not exists (
+    select 1 from report_collection_case where run_times &gt; rcc.run_times and
+    report_collection_id = rcc.report_collection_id and collection_case_index = rcc.collection_case_index
+    )
+  </select>
+  <select id="getCaseReportByTaskId" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionCaseDTO">
+    select rcc.* from report_collection_case rcc
+    left join report_collection rc on rc.id = rcc.report_collection_id
+    left join report r on r.id = rc.report_id
+    where r.task_id = #{taskId} limit 1
+  </select>
+  <select id="getReportCollectionCaseList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionCaseDTO">
+    select * from report_collection_case rcc where rcc.report_collection_id = #{reportCollectionId}
+    and not exists (
+    select 1 from report_collection_case where run_times &gt; rcc.run_times and
+    report_collection_id = rcc.report_collection_id and collection_case_index = rcc.collection_case_index
+    ) order by rcc.collection_case_index
+  </select>
+</mapper>

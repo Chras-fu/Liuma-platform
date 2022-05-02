@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.RoleMapper">
+  <select id="getRoleByProjectAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Role">
+    select * from `role` where project_id = #{projectId} and name = #{name}
+  </select>
+  <select id="getRoleList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.RoleDTO">
+    select r.*, p.name as projectName from `role` r left join project p on p.id = r.project_id
+    where r.id != 'system_admin_role'
+    <if test="requestUser != 'system_admin_user'">
+      and r.project_id = #{projectId}
+    </if>
+    <if test="condition != null and condition != ''">
+      and r.name like #{condition}
+    </if>
+    order by p.create_time desc
+  </select>
+  <select id="getRoleUserList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.database.domain.User">
+    select distinct(u.id), u.username, u.account, u.create_time from `user` u left join user_role ur on ur.user_id = u.id
+    where ur.role_id = #{roleId}
+    <if test="condition != null and condition != ''">
+      and (u.username like #{condition} or u.account like #{condition})
+    </if>
+  </select>
+  <insert id="addRoleUser" parameterType="com.autotest.LiuMa.database.domain.UserRole">
+    insert into user_role (id, user_id, role_id, create_time, update_time)
+    values (#{id},#{userId},#{roleId},#{createTime},#{updateTime})
+  </insert>
+  <insert id="addRoles" parameterType="com.autotest.LiuMa.database.domain.Role">
+    insert into role (id, name, project_id, create_time, update_time)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id},#{item.name},#{item.projectId},#{item.createTime},#{item.updateTime})
+    </foreach>
+  </insert>
+  <insert id="addRolePermissions" parameterType="com.autotest.LiuMa.database.domain.RolePermission">
+    insert into role_permission (id, role_id, permission_id, create_time, update_time)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id},#{item.roleId},#{item.permissionId},#{item.createTime},#{item.updateTime})
+    </foreach>
+  </insert>
+  <delete id="deleteRoleUser" parameterType="java.lang.String">
+    delete from user_role where role_id = #{roleId} and user_id = #{userId}
+  </delete>
+  <select id="getRoleUser" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.UserRole">
+    select * from user_role where role_id = #{roleId} and user_id = #{userId}
+  </select>
+</mapper>

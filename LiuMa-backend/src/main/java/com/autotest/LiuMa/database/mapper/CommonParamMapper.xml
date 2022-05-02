@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.CommonParamMapper">
+  <insert id="saveParamData" parameterType="com.autotest.LiuMa.database.domain.ParamData">
+    insert into param_data (id, name, param_data, group_id, data_type, description, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{paramData}, #{groupId}, #{dataType}, #{description}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}, update_user = #{updateUser}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="paramData != null and paramData != ''">
+      ,param_data = #{paramData}
+    </if>
+    <if test="dataType != null and dataType != ''">
+      ,data_type = #{dataType}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+  </insert>
+  <select id="getParamByGroupAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamData">
+    select * from param_data where group_id = #{groupId} and name = #{name}
+  </select>
+  <select id="getParamById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamData">
+    select * from param_data where id = #{id}
+  </select>
+  <select id="getParamGroupList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamGroup">
+    select * from param_group where project_id = #{projectId}
+  </select>
+  <select id="getCustomParamList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamData">
+    select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
+    pd.create_user, pd.update_user
+    from param_data pd left join param_group pg on pg.id = pd.group_id
+    where pg.param_type = 'custom' and pg.project_id = #{projectId}
+  </select>
+  <select id="getParamDataList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ParamDataDTO">
+    select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
+    pd.create_user, pd.update_user, u.username as username
+    from param_data pd left join user u on u.id = pd.create_user
+    where pd.group_id = #{groupId}
+    <if test="condition != null and condition != ''">
+      and pd.name like #{condition}
+    </if>
+    order by pd.update_time desc
+  </select>
+  <select id="getParamDataListByGroupName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ParamDataDTO">
+    select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
+    pd.create_user, pd.update_user from param_data pd left join param_group pg on pg.id = pd.group_id
+    where pg.name = #{groupName} and pg.project_id = #{projectId} order by pd.update_time desc
+  </select>
+  <delete id="deleteParamData" parameterType="java.lang.String">
+    delete from param_data where id = #{id}
+  </delete>
+  <insert id="insertParamGroup" parameterType="com.autotest.LiuMa.database.domain.ParamGroup">
+    insert into param_group (id, name, param_type, description, project_id, update_user, create_user, create_time, update_time)
+    values
+    <foreach collection="list" separator="," item="item">
+      (#{item.id},#{item.name},#{item.paramType},#{item.description},#{item.projectId},#{item.updateUser},#{item.createUser},#{item.createTime},#{item.updateTime})
+    </foreach>
+  </insert>
+</mapper>

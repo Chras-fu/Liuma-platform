@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.TaskMapper">
+  <insert id="addTask" parameterType="com.autotest.LiuMa.database.domain.Task">
+    insert into task (id, name, type, status, engine_id, project_id,
+    create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{type}, #{status}, #{engineId}, #{projectId},
+    #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+  </insert>
+  <select id="getTaskDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
+    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id,  r.source_type, r.source_id, r.id as reportId, t.create_user from task t
+    left join report r on r.task_id = t.id where t.id=#{id}
+  </select>
+  <select id="getTaskList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
+    select t.id, t.name, t.type, t.status, t.engine_id, t.project_id, t.create_time,
+    t.update_time, t.create_user, t.update_user, u.username as username
+    from task t left join user u on u.id = t.create_user
+    where t.engine_id = #{engineId} and (t.status = 'prepared' or t.status = 'running')
+    order by t.create_time
+  </select>
+  <select id="getToRunTask" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
+    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type, r.source_id, r.environment_id, r.id as reportId from task t
+    left join report r on r.task_id = t.id
+    where t.engine_id = #{engineId} and t.status = 'prepared'
+    order by
+    <if test="engineId =='system'">
+      t.type,
+    </if>
+    t.create_time limit 1
+  </select>
+  <update id="updateTask" parameterType="java.lang.String">
+    update task set status = #{status} where id = #{id}
+  </update>
+  <update id="updateTaskEngine" parameterType="java.lang.String">
+    update task set engine_id = #{engineId} where id = #{id} and engine_id = 'system'
+  </update>
+  <update id="updateEngineAllTask" parameterType="java.lang.String">
+    update task set status = #{status} where engine_id = #{engineId} and (status = 'prepared' or status = 'running')
+  </update>
+</mapper>

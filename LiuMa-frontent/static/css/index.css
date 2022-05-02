@@ -1,0 +1,51 @@
+
+.el-table thead tr th{
+    background-color: #efefef !important;
+    color: black !important;
+}
+
+.el-cascader-menu {
+    min-width: 240px !important;
+  }
+
+.el-cascader-menu__wrap {
+    height: 240px !important
+}
+
+.tree-header{
+    background-color: #efefef !important;
+    color: black !important;
+}
+
+.tip {
+    padding: 3px 5px;
+    font-size: 16px;
+    border-radius: 0;
+    border-left: 4px solid #1f2d3d;
+    margin: 0px 5px 10px 5px;
+}
+
+.left-tree{
+    margin-bottom: 20px;
+}
+
+.lm-success{
+    color: #67C23A;
+}
+
+.lm-error{
+    color: #F56C6C;
+}
+
+.lm-fail{
+    color: #E6A23C;
+}
+
+.lm-loading{
+    color: #409EFF;
+    font-style: normal;
+}
+
+.lm-info{
+    color: #535457;
+}

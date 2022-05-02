@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.EnvironmentMapper">
+  <insert id="saveEnvironment" parameterType="com.autotest.LiuMa.database.domain.Environment">
+    insert into environment (id, name, description, project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{description}, #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}, update_user = #{updateUser}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+  </insert>
+  <select id="getEnvironmentByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Environment">
+    select * from environment where project_id = #{projectId} and name = #{name}
+  </select>
+  <select id="getAllEnvironment" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Environment">
+    select * from environment where project_id = #{projectId}
+  </select>
+  <select id="getEnvironmentList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.EnvironmentDTO">
+    select env.id, env.name, env.description, env.project_id, env.create_time, env.update_time,
+    env.create_user, env.update_user, u.username as username
+    from environment env left join user u on u.id = env.create_user
+    where env.project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and env.name like #{condition}
+    </if>
+    order by env.update_time desc
+  </select>
+  <delete id="deleteEnvironment" parameterType="java.lang.String">
+    delete from environment where id = #{id}
+  </delete>
+</mapper>

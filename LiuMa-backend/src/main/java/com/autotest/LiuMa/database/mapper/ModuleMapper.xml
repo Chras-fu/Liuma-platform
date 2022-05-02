@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ModuleMapper">
+  <insert id="saveModule" parameterType="com.autotest.LiuMa.dto.ModuleDTO">
+    insert into ${moduleType} (id, name, parent_id, project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{parentId}, #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}, update_user = #{updateUser}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="parentId != null and parentId != ''">
+      ,parent_id = #{parentId}
+    </if>
+  </insert>
+  <select id="getModuleList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ModuleDTO">
+    select *, name as label, '${moduleType}_module' as moduleType from ${moduleType}_module where project_id = #{projectId} order by create_time
+  </select>
+  <select id="getModuleByProjectAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ModuleDTO">
+    select * from ${moduleType} where project_id = #{projectId} and name = #{name}
+  </select>
+  <delete id="deleteModule" parameterType="java.lang.String">
+    delete from ${moduleType} where id = #{id}
+  </delete>
+</mapper>
