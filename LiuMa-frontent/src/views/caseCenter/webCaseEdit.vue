@@ -6,8 +6,8 @@
     <page-header title="用例编辑" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
     <el-form ref="caseForm" :rules="rules" :model="caseForm" label-width="90px">
         <base-info :caseForm="caseForm"/>
-    </el-form>
     <p class="tip">操作步骤</p>
+    <el-form-item style="margin-left:-80px;" prop="caseWebs"/>
     <el-table :data="caseForm.caseWebs" row-key="id" class="sort-table" size="small">
         <el-table-column label="" width="60px">
             <template>
@@ -36,6 +36,7 @@
             </template>
         </el-table-column>
     </el-table>
+    </el-form>
     <el-button size="small" icon="el-icon-plus" type="text" @click="addCaseWeb(-1)">新增操作</el-button>
     <!-- 添加操作界面 -->
     <el-dialog title="选择操作" :visible.sync="editOperationVisible" width="750px" destroy-on-close>
@@ -179,7 +180,8 @@ export default {
                 moduleId: [{ required: true, message: '用例模块不能为空', trigger: 'blur' }],
                 operationId: [{ required: true, message: '操作名称不能为空', trigger: 'blur' }],
                 element: [{ required: true, message: '操作对象不能为空', trigger: 'blur' }],
-                data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }]
+                data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }],
+                caseWebs: [{ required: true, message: '请至少添加一条操作步骤', trigger: 'blur' }],
             }
         }
     },
@@ -305,8 +307,8 @@ export default {
             operationIds: row.operationIds,
             operationId: row.operationId,
             operationName: row.operationName,
-            element: row.element,
-            data: row.data
+            element: JSON.parse(JSON.stringify(row.element)),
+            data: JSON.parse(JSON.stringify(row.data))
           };
           for(let i=0;i<row.element.length;i++){
             if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){

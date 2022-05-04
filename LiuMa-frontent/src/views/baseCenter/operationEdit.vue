@@ -78,7 +78,7 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="addData">新增</el-button>
         <el-button size="small" type="text" @click="deleteAllData">删除全部</el-button>
-        <p class="tip">控件代码</p>
+        <p class="tip">控件代码<span style="font-size:5px;margin-left:10px">*代码内可直接使用定义的元素和数据名 关联/断言/条件提取值必须以sys_return(result)形式返回</span></p>
         <code-edit ref="editor" :data.sync='operationForm.code' :height='480' mode="python"/>
     </el-form>
   </div>

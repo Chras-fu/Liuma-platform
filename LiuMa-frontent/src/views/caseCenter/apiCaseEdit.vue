@@ -6,8 +6,8 @@
     <page-header title="用例编辑" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
     <el-form ref="caseForm" :rules="rules" :model="caseForm" label-width="90px">
         <base-info :caseForm="caseForm"/>
-    </el-form>
     <p class="tip">接口请求</p>
+    <el-form-item style="margin-left:-80px;" prop="caseApis"/>
     <el-table :data="caseForm.caseApis" row-key="id" class="sort-table" size="small">
         <el-table-column label="" width="60px">
             <template>
@@ -29,6 +29,7 @@
             </template>
         </el-table-column>
     </el-table>
+    </el-form>
     <el-button size="small" icon="el-icon-plus" type="text" @click="selectApiVisible=true">新增</el-button>
     <!-- 添加接口界面 -->
     <el-dialog title="选择接口" :visible.sync="selectApiVisible" width="800px" destroy-on-close>
@@ -139,7 +140,8 @@ export default {
             rules: {
                 name: [{ required: true, message: '用例名称不能为空', trigger: 'blur' }],
                 type: [{ required: true, message: '用例类型不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '用例模块不能为空', trigger: 'blur' }]
+                moduleId: [{ required: true, message: '用例模块不能为空', trigger: 'blur' }],
+                caseApis: [{ required: true, message: '请至少添加一条接口请求', trigger: 'blur' }]
             }
         }
     },
