@@ -259,7 +259,7 @@ export default new Router({
                 requireAuth: true
             }
         },{
-            path: '/caseCenter/caseManage/webCase/edit/:caseId',
+            path: '/caseCenter/caseManage/webCase/:type/:caseId',
             name: 'WEB用例编辑',
             component: WebCaseEdit,
             meta: {
@@ -267,7 +267,7 @@ export default new Router({
                 requireAuth: true
             }
         },{
-            path: '/caseCenter/caseManage/webCase/add',
+            path: '/caseCenter/caseManage/webCase/:type',
             name: 'WEB用例新增',
             component: WebCaseEdit,
             meta: {
@@ -275,7 +275,7 @@ export default new Router({
                 requireAuth: true
             }
         },{
-            path: '/caseCenter/caseManage/webCase/copy/:caseId',
+            path: '/caseCenter/caseManage/webCase/:type/:caseId',
             name: 'WEB用例复用',
             component: WebCaseEdit,
             meta: {

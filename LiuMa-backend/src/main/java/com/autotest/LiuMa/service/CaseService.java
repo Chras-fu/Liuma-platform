@@ -14,6 +14,7 @@ import com.autotest.LiuMa.database.mapper.ElementMapper;
 import com.autotest.LiuMa.dto.CaseApiDTO;
 import com.autotest.LiuMa.dto.CaseDTO;
 import com.autotest.LiuMa.dto.CaseWebDTO;
+import com.autotest.LiuMa.dto.ElementDTO;
 import com.autotest.LiuMa.request.CaseApiRequest;
 import com.autotest.LiuMa.request.CaseRequest;
 import com.autotest.LiuMa.request.CaseWebRequest;
@@ -118,6 +119,21 @@ public class CaseService {
             caseDTO.setCaseApis(caseApis);
         }else {
             List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(caseId);
+            // 加载最新的UI元素
+            for(CaseWebDTO caseWebDTO:caseWebs){
+                JSONArray elementList = JSONArray.parseArray(caseWebDTO.getElement());
+                for(int i=0;i<elementList.size();i++){
+                    JSONObject element = elementList.getJSONObject(i);
+                    String elementId = element.getString("id");
+                    ElementDTO elementDTO = elementMapper.getElementById(elementId);
+                    element.put("by", elementDTO.getBy());
+                    element.put("name", elementDTO.getName());
+                    element.put("expression", elementDTO.getExpression());
+                    element.put("moduleId", elementDTO.getModuleId());
+                    element.put("moduleName", elementDTO.getModuleName());
+                }
+                caseWebDTO.setElement(JSONArray.toJSONString(elementList));
+            }
             caseDTO.setCaseWebs(caseWebs);
         }
 

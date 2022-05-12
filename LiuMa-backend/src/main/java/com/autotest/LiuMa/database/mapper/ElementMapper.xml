@@ -36,4 +36,10 @@
     </if>
     order by element.update_time desc
   </select>
+  <select id="getElementById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ElementDTO">
+    select ele.id, ele.name, ele.module_id, ele.by, ele.expression, pm.name as moduleName
+    from element ele
+    left join page_module pm on pm.id = ele.module_id
+    where ele.id = #{id}
+  </select>
 </mapper>

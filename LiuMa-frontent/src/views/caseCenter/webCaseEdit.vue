@@ -187,11 +187,11 @@ export default {
     },
     created() {
         this.$root.Bus.$emit('initBread', ["用例中心", "WEB用例"]);
-        this.getDetail(this.$route.params);
         this.getOperations();
         this.getDomain();
         this.getAssertion();
         this.getPages();
+        this.getDetail(this.$route.params);
     },
     methods: {
         // 行拖拽
@@ -413,7 +413,7 @@ export default {
             });
         },
         getDetail(param){
-            if (param.caseId){  // 编辑操作
+            if (param.caseId){  // 编辑
                 let url = "/autotest/case/detail/web/" + param.caseId;
                 this.$get(url, response => {
                     let data = response.data;
@@ -432,7 +432,7 @@ export default {
                         caseWeb.elementText = this.elementToText(caseWeb.element);
                         caseWeb.dataText = this.dataToText(caseWeb.data);
                     }
-                    if(param.type === "copy"){ //复用操作
+                    if(param.type === "copy"){ //复用
                         data.id = "";
                     }
                     this.caseForm = data;

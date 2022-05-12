@@ -71,6 +71,9 @@ public class CaseJsonCreateService {
     @Resource
     private TaskMapper taskMapper;
 
+    @Resource
+    private ElementMapper elementMapper;
+
     public String getDownloadUrl(TaskDTO task, List<TaskTestCollectionResponse> testCollectionList){
         String taskFilePath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId();
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId();
@@ -281,9 +284,11 @@ public class CaseJsonCreateService {
         for(int i=0;i<elements.size();i++){
             JSONObject element = elements.getJSONObject(i);
             JSONObject elementData = new JSONObject();
-            elementData.put("by", element.getString("by"));
-            elementData.put("expression", element.getString("expression"));
-            elementData.put("target", element.getString("moduleName") + " / " + element.getString("name"));
+            // 获取最新元素
+            ElementDTO elementDTO = elementMapper.getElementById(element.getString("id"));
+            elementData.put("by", elementDTO.getBy());
+            elementData.put("expression", elementDTO.getExpression());
+            elementData.put("target", elementDTO.getModuleName() + " / " + elementDTO.getName());
             elementObj.put(element.getString("paramName"), elementData);
         }
         return elementObj;

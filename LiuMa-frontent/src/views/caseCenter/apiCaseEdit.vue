@@ -228,7 +228,7 @@ export default {
             }
         },
         getDetail(param){
-            if (param.caseId){  // 编辑接口
+            if (param.caseId){  // 编辑
                 let url = "/autotest/case/detail/api/" + param.caseId;
                 this.$get(url, response => {
                     let data = response.data;
@@ -262,7 +262,7 @@ export default {
                             caseApi.controller = JSON.parse(caseApi.controller);
                         }
                     }
-                    if(param.type === "copy"){ //复用接口
+                    if(param.type === "copy"){ //复用
                         data.id = "";
                     }
                     this.caseForm = data;    
