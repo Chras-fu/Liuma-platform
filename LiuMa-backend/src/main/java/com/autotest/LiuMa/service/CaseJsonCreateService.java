@@ -17,14 +17,12 @@ import com.autotest.LiuMa.request.CaseWebRequest;
 import com.autotest.LiuMa.response.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class CaseJsonCreateService {
 
     @Value("${task.file.path}")
@@ -286,9 +284,15 @@ public class CaseJsonCreateService {
             JSONObject elementData = new JSONObject();
             // 获取最新元素
             ElementDTO elementDTO = elementMapper.getElementById(element.getString("id"));
-            elementData.put("by", elementDTO.getBy());
-            elementData.put("expression", elementDTO.getExpression());
-            elementData.put("target", elementDTO.getModuleName() + " / " + elementDTO.getName());
+            if(elementDTO != null) {
+                elementData.put("by", elementDTO.getBy());
+                elementData.put("expression", elementDTO.getExpression());
+                elementData.put("target", elementDTO.getModuleName() + " / " + elementDTO.getName());
+            }else {
+                elementData.put("by", element.getString("by"));
+                elementData.put("expression", element.getString("expression"));
+                elementData.put("target", element.getString("moduleName") + " / " + element.getString("name"));
+            }
             elementObj.put(element.getString("paramName"), elementData);
         }
         return elementObj;
@@ -423,7 +427,7 @@ public class CaseJsonCreateService {
             JSONArray params = JSONArray.parseArray(function.getParam());
             JSONObject paramObj = new JSONObject();
             for(int j=0; j<params.size(); j++){
-                paramObj.put(params.getJSONObject(j).getString("name"), params.getJSONObject(j).getString("type"));
+                paramObj.put(params.getJSONObject(j).getString("paramName"), params.getJSONObject(j).getString("type"));
             }
             functionObj.put("params", paramObj);
             functionList.add(functionObj);
