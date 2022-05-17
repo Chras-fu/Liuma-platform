@@ -13,7 +13,7 @@
         <div class="tree-body">
             <el-tree class="filter-tree" :accordion="true" :data="treeData" :current-node-key="currentModule" 
             :props="defaultProps" node-key="id" :expand-on-click-node="false" :filter-node-method="filterNode" 
-            @node-click="clickModule" ref="tree">
+            @node-click="clickModule" ref="tree" draggable @node-drag-end="dragNode">
                 <span class="custom-tree-node" slot-scope="{ node, data }">
                     <span class="tree-label">{{node.label}}</span>
                     <span class="tree-opt">
@@ -60,6 +60,19 @@ export default {
     },
     appendModule(data) {
         this.$emit("appendModule", data);
+    },
+    dragNode(dragNode, tarNode, position, event) {
+        if(position === "inner"){
+            // 如果是拖拽进目标节点内 且目标节点不是父节点 做更改父节点请求
+            if(tarNode.data.id !== dragNode.data.parentId){
+                this.$emit("dragNode", dragNode, tarNode.data.id);
+            }  
+        }else{
+            // 如果是拖拽至目标节点前后 且目标节点不是兄弟节点 做更改父节点请求
+            if(tarNode.data.parentId !== dragNode.data.parentId ){
+                this.$emit("dragNode", dragNode, tarNode.data.parentId);
+            }
+        } 
     },
     removeModule(node, data) {
         this.$confirm('确定要删除模块吗?', '提示', {

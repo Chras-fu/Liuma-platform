@@ -19,9 +19,9 @@ public class ModuleService {
     private ModuleMapper moduleMapper;
 
     public ModuleDTO save(ModuleDTO module) {
-        ModuleDTO oldModule = moduleMapper.getModuleByProjectAndName(module.getModuleType(), module.getName(), module.getProjectId());
+        ModuleDTO oldModule = moduleMapper.getModuleByParentAndName(module.getModuleType(), module.getName(), module.getParentId());
         if(oldModule != null){
-            throw new DuplicateContentException("当前项目已有重名模块");
+            throw new DuplicateContentException("当前父模块下已有重名模块");
         }
         if(module.getId() == null){
             //新增模块

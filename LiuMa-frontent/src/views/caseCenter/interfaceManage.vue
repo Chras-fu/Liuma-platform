@@ -18,7 +18,8 @@
     </el-form>
     <!-- 接口模块 -->
     <el-col :span="4" class="left-tree">
-        <module-tree title="接口模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)" @removeModule="removeModule(arguments)"/>
+        <module-tree title="接口模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)" 
+            @removeModule="removeModule(arguments)" @dragNode="dragNode(arguments)"/>
     </el-col>
     <!--接口列表-->
     <el-col :span="20" class="right-table">
@@ -117,6 +118,17 @@ export default {
                 const index = children.findIndex(d => d.id === data.id);
                 children.splice(index, 1);
                 this.$message.success("模块删除成功")
+            });
+        },
+        // 拖拽模块
+        dragNode(args){
+            let dragNode = args[0];
+            let newParent = args[1];
+            let url = '/autotest/module/save';
+            let moduleForm = dragNode.data;
+            moduleForm.parentId = newParent;
+            this.$post(url, moduleForm, response =>{
+                this.$message.success("更改成功")
             });
         },
         // 关闭弹框

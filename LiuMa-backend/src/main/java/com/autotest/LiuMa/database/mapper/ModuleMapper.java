@@ -1,6 +1,5 @@
 package com.autotest.LiuMa.database.mapper;
 
-import com.autotest.LiuMa.database.domain.Module;
 import com.autotest.LiuMa.dto.ModuleDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,7 +11,7 @@ public interface ModuleMapper {
 
     void deleteModule(String moduleType, String id);
 
-    ModuleDTO getModuleByProjectAndName(String moduleType, String name, String projectId);
+    ModuleDTO getModuleByParentAndName(String moduleType, String name, String parentId);
 
     List<ModuleDTO> getModuleList(String moduleType, String projectId);
 }

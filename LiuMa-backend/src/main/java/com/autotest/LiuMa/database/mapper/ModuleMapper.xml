@@ -16,8 +16,8 @@
   <select id="getModuleList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ModuleDTO">
     select *, name as label, '${moduleType}_module' as moduleType from ${moduleType}_module where project_id = #{projectId} order by create_time
   </select>
-  <select id="getModuleByProjectAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ModuleDTO">
-    select * from ${moduleType} where project_id = #{projectId} and name = #{name}
+  <select id="getModuleByParentAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ModuleDTO">
+    select * from ${moduleType} where parent_id = #{parentId} and name = #{name}
   </select>
   <delete id="deleteModule" parameterType="java.lang.String">
     delete from ${moduleType} where id = #{id}
