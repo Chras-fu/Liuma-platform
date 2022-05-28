@@ -66,6 +66,7 @@ export default {
                 {label: "保存Session", name: "saveSession"},
                 {label: "文件下载缓冲", name: "requireStream"},
                 {label: "证书验证", name: "requireVerify"},
+                {label: "错误继续执行", name: "errorContinue"},
                 {label: "前置脚本", name: "preScript"},
                 {label: "后置脚本", name: "postScript"},
             ],
