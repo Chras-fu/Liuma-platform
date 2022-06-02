@@ -66,6 +66,8 @@ public class OperationService {
                 for(int i=0; i< elements.size(); i++){
                     JSONObject element = elements.getJSONObject(i);
                     element.put("custom", false);
+                    element.put("moduleId", "");
+                    element.put("moduleName", "");
                     element.put("id", "");
                     element.put("name", "");
                     element.put("by", "");
