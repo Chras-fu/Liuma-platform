@@ -13,7 +13,9 @@
             </el-table-column>
             <el-table-column label="值" prop="value">
                 <template slot-scope="scope">
-                    <el-button v-if="controller[scope.$index].name === 'preScript' || controller[scope.$index].name === 'postScript'"
+                    <el-button v-if="controller[scope.$index].name === 'whetherExec'"
+                        size="mini" type="text" @click="editCondition(scope.$index)">编辑判断条件</el-button>
+                    <el-button v-else-if="controller[scope.$index].name === 'preScript' || controller[scope.$index].name === 'postScript'"
                         size="mini" type="text" @click="editCode(scope.$index)">编辑脚本</el-button>
                     <el-input v-else-if="controller[scope.$index].name === 'sleepBeforeRun' || controller[scope.$index].name === 'sleepAfterRun'"
                         size="small" style="width: 95%" placeholder="请输入等待时间 单位秒" v-model="controller[scope.$index].value"/>
@@ -30,7 +32,7 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="add">新增</el-button>
         <el-button size="small" type="text" @click="deleteAll">删除全部</el-button>
-        <div v-if="showCode" style="margin-top: 20px">
+        <div v-if="showType === 'code'" style="margin-top: 20px">
             <el-row>
                 <el-col :span="20">
                     <p class="tip">
@@ -41,11 +43,53 @@
                     </p>
                 </el-col>
                 <el-col :span="4">
-                    <el-button size="small" type="cancel" @click="showCode=false">取消</el-button>
+                    <el-button size="small" type="cancel" @click="showType=null">取消</el-button>
                     <el-button size="small" type="primary" @click="saveCode">保存</el-button>
                 </el-col>
             </el-row>
             <code-edit ref="editor" :data.sync='code' :height='480' mode="python"/>
+        </div>
+        <div v-if="showType === 'table'" style="margin-top: 20px">
+            <el-row>
+                <el-col :span="20">
+                    <p class="tip">
+                        <span>编辑判断条件</span>
+                        <el-tooltip :content="text" placement="bottom" effect="light">
+                        <i class="el-icon-info"></i>
+                        </el-tooltip>
+                    </p>
+                </el-col>
+                <el-col :span="4">
+                    <el-button size="small" type="cancel" @click="showType=null">取消</el-button>
+                    <el-button size="small" type="primary" @click="saveCondition">保存</el-button>
+                </el-col>
+            </el-row>
+            <el-table :data="conditions"  size="small">
+                <el-table-column label="判断目标" prop="expect" min-width="160px">
+                    <template slot-scope="scope">
+                        <el-input size="small" style="width: 90%" placeholder="请输入判断目标 关联参数填写{{}}格式" v-model="conditions[scope.$index].target"/>
+                    </template>
+                </el-table-column>
+                <el-table-column label="判断条件" prop="assertion" width="150px">
+                    <template slot-scope="scope">
+                        <el-select size="small" style="width: 90%" placeholder="判断条件" filterable v-model="conditions[scope.$index].assertion">
+                            <el-option v-for="item in functionList" :key="item.id" :label="item.name" :value="item.id"/>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column label="预期值" prop="expect" min-width="160px">
+                    <template slot-scope="scope">
+                        <el-input size="small" style="width: 90%" placeholder="请输入预期值" v-model="conditions[scope.$index].expect"/>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="60px">
+                <template slot-scope="scope">
+                    <el-button size="mini" type="text" @click="removeCondition(scope.$index)">删除</el-button>
+                </template>
+                </el-table-column>
+            </el-table>
+            <el-button size="small" icon="el-icon-plus" type="text" @click="addCondition">新增</el-button>
+            <el-button size="small" type="text" @click="deleteAllCondition">删除全部</el-button>
         </div>
     </div>
 </template>
@@ -67,20 +111,32 @@ export default {
                 {label: "文件下载缓冲", name: "requireStream"},
                 {label: "证书验证", name: "requireVerify"},
                 {label: "错误继续执行", name: "errorContinue"},
+                {label: "判断是否执行", name: "whetherExec"},
                 {label: "前置脚本", name: "preScript"},
                 {label: "后置脚本", name: "postScript"},
             ],
+            functionList: [],
             optList: [
                 {label: "是", value: true},
                 {label: "否", value: false},
             ],
-            showCode: false,
+            showType: null,
             code: "",
+            conditions: Array,
             index: null,
             text: "获取关联参数/公共参数使用sys_get(name)函数，保存关联参数使用sys_put(name, val)函数，支持直接使用变量名res_code/res_header/res_data/res_cookies/res_bytes获取响应内容"
         }
     },
+    created() {
+        this.getAssertion();
+    },
     methods: {
+        getAssertion(){
+            let url = '/autotest/system/assertion/list';
+            this.$get(url, response =>{
+                this.functionList = response.data;
+            });
+        },
         add(){
             this.controller.push({name:"", value:null });
         },
@@ -93,6 +149,10 @@ export default {
         changeController(val, index){
             if(val === "sleepBeforeRun" | val ==="sleepAfterRun"){
                 this.controller[index].value = 30;
+            }else if(val ==="preScript" | val ==="postScript"){
+                this.controller[index].value = "";
+            }else if(val === "whetherExec"){
+                this.controller[index].value = "[]";
             }else{
                 this.controller[index].value = false;
             }
@@ -100,12 +160,30 @@ export default {
         editCode(index){
             this.index = index;
             this.code = this.controller[index].value;
-            this.showCode = true;
+            this.showType = "code";
         },
         saveCode(){
             this.controller[this.index].value = this.code;
-            this.showCode = false;
-        }
+            this.showType = null;
+        },
+        editCondition(index){
+            this.index = index;
+            this.conditions = JSON.parse(this.controller[index].value);
+            this.showType = "table";
+        },
+        saveCondition(){
+            this.controller[this.index].value = JSON.stringify(this.conditions);
+            this.showType = null;
+        },
+        addCondition(){
+            this.conditions.push({target:"", assertion:"equals", expect:""});
+        },
+        removeCondition(index){
+            this.conditions.splice(index, 1);
+        },
+        deleteAllCondition(){
+            this.conditions.splice(0, this.conditions.length);
+        },
     }
 }
 </script>
