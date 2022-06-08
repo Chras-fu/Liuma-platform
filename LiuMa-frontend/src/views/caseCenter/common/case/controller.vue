@@ -54,9 +54,6 @@
                 <el-col :span="20">
                     <p class="tip">
                         <span>编辑判断条件</span>
-                        <el-tooltip :content="text" placement="bottom" effect="light">
-                        <i class="el-icon-info"></i>
-                        </el-tooltip>
                     </p>
                 </el-col>
                 <el-col :span="4">
