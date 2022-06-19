@@ -167,7 +167,8 @@ export default {
         this.settingForm = {
           id: row.id,
           name: row.name,
-          description: row.description
+          description: row.description,
+          createTime: row.createTime
         };
         this.settingVisible = true;
       },
