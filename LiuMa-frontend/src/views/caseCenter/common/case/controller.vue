@@ -15,6 +15,8 @@
                 <template slot-scope="scope">
                     <el-button v-if="controller[scope.$index].name === 'whetherExec'"
                         size="mini" type="text" @click="editCondition(scope.$index)">编辑判断条件</el-button>
+                    <el-button v-else-if="controller[scope.$index].name === 'loopExec'"
+                        size="mini" type="text" @click="editLoop(scope.$index)">编辑循环机制</el-button>
                     <el-button v-else-if="controller[scope.$index].name === 'preScript' || controller[scope.$index].name === 'postScript'"
                         size="mini" type="text" @click="editCode(scope.$index)">编辑脚本</el-button>
                     <el-input v-else-if="controller[scope.$index].name === 'sleepBeforeRun' || controller[scope.$index].name === 'sleepAfterRun'"
@@ -49,11 +51,35 @@
             </el-row>
             <code-edit ref="editor" :data.sync='code' :height='480' mode="python"/>
         </div>
+        <div v-if="showType === 'form'" style="margin-top: 20px">
+            <el-row>
+                <el-col :span="20">
+                    <p class="tip">
+                        <span>编辑循环控制器</span>
+                    </p>
+                </el-col>
+                <el-col :span="4">
+                    <el-button size="small" type="cancel" @click="showType=null">取消</el-button>
+                    <el-button size="small" type="primary" @click="saveLoop">保存</el-button>
+                </el-col>
+            </el-row>
+            <el-form label-width="120px" style="padding-right: 30px;" :model="loop" :rules="rules" ref="loop">
+                <el-form-item label="循环索引名" prop="indexName">
+                    <el-input size="small" style="width: 400px" v-model="loop.indexName" placeholder="自定义循环索引名称 同用例下的循环索引不得重名"/>
+                </el-form-item>
+                <el-form-item label="循环次数" prop="times">
+                    <el-input size="small" style="width: 400px" v-model="loop.times" placeholder="循环执行次数"/>
+                </el-form-item>
+                <el-form-item label="循环接口数" prop="num">
+                    <el-input size="small" style="width: 400px" v-model="loop.num" placeholder="循环执行接口数 以本接口开始计算往后的n个接口"/>
+                </el-form-item>
+            </el-form>
+        </div>
         <div v-if="showType === 'table'" style="margin-top: 20px">
             <el-row>
                 <el-col :span="20">
                     <p class="tip">
-                        <span>编辑判断条件</span>
+                        <span>编辑条件控制器</span>
                     </p>
                 </el-col>
                 <el-col :span="4">
@@ -62,9 +88,9 @@
                 </el-col>
             </el-row>
             <el-table :data="conditions"  size="small">
-                <el-table-column label="判断目标" prop="expect" min-width="160px">
+                <el-table-column label="判断对象" prop="expect" min-width="160px">
                     <template slot-scope="scope">
-                        <el-input size="small" style="width: 90%" placeholder="请输入判断目标 关联参数填写{{}}格式" v-model="conditions[scope.$index].target"/>
+                        <el-input size="small" style="width: 90%" placeholder="请输入判断对象 关联参数填写{{}}格式" v-model="conditions[scope.$index].target"/>
                     </template>
                 </el-table-column>
                 <el-table-column label="判断条件" prop="assertion" width="150px">
@@ -101,16 +127,17 @@ export default {
     data() {
         return{
             controllerList:[
-                {label: "请求前等待", name: "sleepBeforeRun"},
-                {label: "响应后等待", name: "sleepAfterRun"},
-                {label: "使用Session", name: "useSession"},
-                {label: "保存Session", name: "saveSession"},
-                {label: "文件下载缓冲", name: "requireStream"},
-                {label: "证书验证", name: "requireVerify"},
-                {label: "错误继续执行", name: "errorContinue"},
-                {label: "判断是否执行", name: "whetherExec"},
                 {label: "前置脚本", name: "preScript"},
                 {label: "后置脚本", name: "postScript"},
+                {label: "前置等待", name: "sleepBeforeRun"},
+                {label: "后置等待", name: "sleepAfterRun"},
+                {label: "引用Session", name: "useSession"},
+                {label: "存储Session", name: "saveSession"},
+                {label: "下载缓冲", name: "requireStream"},
+                {label: "证书验证", name: "requireVerify"},
+                {label: "错误屏蔽", name: "errorContinue"},
+                {label: "条件控制器", name: "whetherExec"},
+                {label: "循环控制器", name: "loopExec"},
             ],
             functionList: [],
             optList: [
@@ -120,6 +147,16 @@ export default {
             showType: null,
             code: "",
             conditions: Array,
+            loop: {
+                indexName: "",
+                times: "",
+                num: ""
+            },
+            rules: {
+                indexName: [{ required: true, message: '循环索引名不能为空', trigger: 'blur' }],
+                times: [{ required: true, message: '循环次数不能为空', trigger: 'blur' }],
+                num: [{ required: true, message: '循环接口数不能为空', trigger: 'blur' }],
+            },
             index: null,
             text: "获取关联参数/公共参数使用sys_get(name)函数，保存关联参数使用sys_put(name, val)函数，支持直接使用变量名res_code/res_header/res_data/res_cookies/res_bytes获取响应内容"
         }
@@ -150,8 +187,10 @@ export default {
                 this.controller[index].value = "";
             }else if(val === "whetherExec"){
                 this.controller[index].value = "[]";
+            }else if(val === "loopExec"){
+                this.controller[index].value = "{}";
             }else{
-                this.controller[index].value = false;
+                this.controller[index].value = true;
             }
         },
         editCode(index){
@@ -180,6 +219,21 @@ export default {
         },
         deleteAllCondition(){
             this.conditions.splice(0, this.conditions.length);
+        },
+        editLoop(index){
+            this.index = index;
+            this.loop = JSON.parse(this.controller[index].value);
+            this.showType = "form";
+        },
+        saveLoop(){
+            this.$refs["loop"].validate(valid => {
+                if (valid) {
+                    this.controller[this.index].value = JSON.stringify(this.loop);
+                    this.showType = null;
+                }else{
+                    return false;
+                }
+            })
         },
     }
 }

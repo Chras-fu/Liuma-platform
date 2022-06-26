@@ -1,5 +1,6 @@
 package com.autotest.LiuMa.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.utils.PageUtils;
 import com.autotest.LiuMa.common.utils.Pager;
 import com.autotest.LiuMa.dto.ApiDTO;
@@ -8,6 +9,7 @@ import com.autotest.LiuMa.request.ApiRequest;
 import com.autotest.LiuMa.request.CaseRequest;
 import com.autotest.LiuMa.request.QueryRequest;
 import com.autotest.LiuMa.service.CaseService;
+import com.autotest.LiuMa.service.ReportService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,9 @@ public class CaseController {
 
     @Resource
     private CaseService caseService;
+
+    @Resource
+    private ReportService reportService;
 
     @PostMapping("/save")
     public void saveCase(@RequestBody CaseRequest caseRequest, HttpServletRequest request) {
@@ -46,5 +51,10 @@ public class CaseController {
                                            @RequestBody QueryRequest request) {
         Page<Object> page = PageHelper.startPage(goPage, pageSize, true);
         return PageUtils.setPageInfo(page, caseService.getCaseList(request));
+    }
+
+    @GetMapping("/api/report/{apiId}")
+    public JSONObject getLastApiReport(@PathVariable String apiId){
+        return reportService.getLastApiReport(apiId);
     }
 }

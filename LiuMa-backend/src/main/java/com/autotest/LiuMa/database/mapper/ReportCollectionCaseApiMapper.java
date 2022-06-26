@@ -11,4 +11,6 @@ public interface ReportCollectionCaseApiMapper {
     void batchAddReportCollectionCaseApi(List<ReportCollectionCaseApi> reportCollectionCaseApis);
 
     List<ReportCollectionCaseTransDTO> getReportCaseActionList(String reportCaseId);
+
+    String getLastApiReport(String apiId);
 }

@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.autotest.LiuMa.common.exception.DuplicateContentException;
 import com.autotest.LiuMa.database.domain.Function;
 import com.autotest.LiuMa.database.mapper.FunctionMapper;
 import com.autotest.LiuMa.dto.FunctionDTO;
@@ -25,6 +26,10 @@ public class FunctionService {
             function.setParam(params.toJSONString());
         }
         if(function.getId().equals("") || function.getId() == null){ // 新增函数
+            Function oldFunction = functionMapper.getFunctionByName(function.getName());
+            if (oldFunction != null){
+                throw new DuplicateContentException("函数名称重复");
+            }
             function.setId(UUID.randomUUID().toString());
             function.setCreateTime(System.currentTimeMillis());
             function.setUpdateTime(System.currentTimeMillis());

@@ -77,6 +77,7 @@
                             <span v-if="scope.row.status==='success'" class="lm-success"><i class="el-icon-success"/> 成功</span>
                             <span v-if="scope.row.status==='fail'" class="lm-fail"><i class="el-icon-warning"/> 失败</span>
                             <span v-if="scope.row.status==='error'" class="lm-error"><i class="el-icon-error"/> 错误</span>
+                            <span v-if="scope.row.status==='skip'" class="lm-info"><i class="el-icon-remove"/> 跳过</span>
                         </template>
                     </el-table-column>
                     <el-table-column label="用例名称" prop="caseName" min-width="150px">

@@ -1,5 +1,5 @@
 /**
-* 响应断言
+* 关联参数
 */ 
 <template>
     <div>
@@ -32,16 +32,33 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="add">新增</el-button>
         <el-button size="small" type="text" @click="deleteAll">删除全部</el-button>
+        <el-button size="small" type="text" @click="showJsonpath=true">关联辅助</el-button>
+
+        <div v-if="showJsonpath" style="margin: 20px 0px">
+            <el-row>
+                <el-col :span="22">
+                    <p class="tip">
+                        <span>关联辅助</span>
+                    </p>
+                </el-col>
+                <el-col :span="2">
+                    <el-button size="small" type="primary" @click="showJsonpath=false">关闭</el-button>
+                </el-col>
+            </el-row>
+            <json-path :apiId="apiId" @addContent="addContent($event)"/>
+        </div>
         
     </div>
 </template>
 <script>
-
+import JsonPath from './jsonPath'
 export default {
     name: 'Relation',
     props:{
         relation: Array,
+        apiId: String
     },
+    components: { JsonPath },
     data() {
         return{
             fromList:[
@@ -55,6 +72,7 @@ export default {
                 {label: "jsonpath", value: "jsonpath"},
                 {label: "正则表达式", value: "regular"},
             ],
+            showJsonpath: false
         }
     },
     methods: {
@@ -67,6 +85,15 @@ export default {
         deleteAll(){
             this.relation.splice(0, this.relation.length);
         },
+        addContent(item){
+            let relation = {
+                from: "resBody", 
+                method: "jsonpath", 
+                expression: item.path, 
+                name: item.key
+            }
+            this.relation.push(relation);
+        }
     }
 }
 </script>

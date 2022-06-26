@@ -15,6 +15,9 @@
   <select id="getOperationDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Operation">
     select * from `operation` where id = #{id}
   </select>
+  <select id="getOperationByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Operation">
+    select * from `operation` where name = #{name} and (project_id = #{projectId} or project_id = 'system')
+  </select>
   <select id="getGroupOperationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.OperationDTO">
     select * from `operation` where (project_id = #{projectId} or `from` = 'system') and `type` = #{operationType}
   </select>
@@ -26,7 +29,7 @@
     <if test="condition != null and condition != ''">
       and op.name like #{condition}
     </if>
-    order by op.create_time desc
+    order by op.create_time desc, op.name
   </select>
   <delete id="deleteOperation" parameterType="java.lang.String">
     delete from `operation` where id = #{id}

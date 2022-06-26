@@ -39,16 +39,32 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="add">新增</el-button>
         <el-button size="small" type="text" @click="deleteAll">删除全部</el-button>
-        
+        <el-button size="small" type="text" @click="showJsonpath=true">断言辅助</el-button>
+
+        <div v-if="showJsonpath" style="margin: 20px 0px">
+            <el-row>
+                <el-col :span="22">
+                    <p class="tip">
+                        <span>断言辅助</span>
+                    </p>
+                </el-col>
+                <el-col :span="2">
+                    <el-button size="small" type="primary" @click="showJsonpath=false">关闭</el-button>
+                </el-col>
+            </el-row>
+            <json-path :apiId="apiId" @addContent="addContent($event)"/>
+        </div>
     </div>
 </template>
 <script>
-
+import JsonPath from './jsonPath'
 export default {
     name: 'Assertion',
     props:{
         assertion: Array,
+        apiId: String
     },
+    components: { JsonPath },
     data() {
         return{
             fromList:[
@@ -60,7 +76,8 @@ export default {
                 {label: "jsonpath", value: "jsonpath"},
                 {label: "正则表达式", value: "regular"},
             ],
-            functionList: []
+            functionList: [],
+            showJsonpath: false
         }
     },
     created() {
@@ -82,6 +99,48 @@ export default {
         deleteAll(){
             this.assertion.splice(0, this.assertion.length);
         },
+        addContent(item){
+            const type = item.type;
+            let assertion = {
+                from: "resBody", 
+                method: "jsonpath", 
+                expression: item.path, 
+                assertion: "", 
+                expect: item.childValue
+            }
+            switch(type) {
+                case 'object':
+                    assertion.assertion = "equalsDict";
+                    assertion.expect = JSON.stringify(item.childValue);
+                    break;
+                case 'array':
+                    assertion.assertion = "equalsList";
+                    assertion.expect = JSON.stringify(item.childValue);
+                    break;
+                case 'null':
+                    assertion.assertion = "isNone";
+                    assertion.expect = "";
+                    break;
+                case 'boolean':
+                    if(item.childValue === true){
+                        assertion.assertion = "isTrue";
+                        assertion.expect = "";
+                    }else{
+                        assertion.assertion = "isFalse";
+                        assertion.expect = "";
+                    }
+                    break;
+                case 'string':
+                    assertion.assertion = "equals";
+                    break;
+                case 'number':
+                    assertion.assertion = "equalsNumber";
+                    break;
+                default:
+                    assertion.assertion = "contains";
+            }
+            this.assertion.push(assertion);
+        }
     }
 }
 </script>

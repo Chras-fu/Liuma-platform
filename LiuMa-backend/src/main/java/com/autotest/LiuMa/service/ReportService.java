@@ -1,5 +1,6 @@
 package com.autotest.LiuMa.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.ReportStatus;
 import com.autotest.LiuMa.database.domain.Report;
 import com.autotest.LiuMa.database.domain.ReportCollectionCase;
@@ -43,6 +44,24 @@ public class ReportService {
             request.setCondition(("%"+request.getCondition()+"%"));
         }
         return reportMapper.getReportList(request);
+    }
+
+    public JSONObject getLastApiReport(String apiId){
+        JSONObject result = new JSONObject();
+        String report = reportCollectionCaseApiMapper.getLastApiReport(apiId);
+        if(report == null){
+            return null;
+        }
+        if(!report.contains("<br><b>响应体: ") || !report.contains("</b><br><br>")){
+            return null;
+        }
+        String response = report.substring(report.indexOf("<br><b>响应体: ")+12, report.indexOf("</b><br><br>"));
+        try{
+            result = JSONObject.parseObject(response);
+        }catch (Exception e){
+            return result;
+        }
+        return result;
     }
 
     public ReportCollectionCaseDTO getCaseResult(String taskId){

@@ -12,6 +12,8 @@ public interface FunctionMapper {
 
     void updateFunction(Function function);
 
+    Function getFunctionByName(String name);
+
     Function getFunctionDetail(String id);
 
     List<Function> getCustomFunctionList(String projectId);

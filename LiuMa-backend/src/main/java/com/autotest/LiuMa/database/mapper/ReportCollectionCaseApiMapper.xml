@@ -13,4 +13,9 @@
     select status, api_id as transId, api_name as transName, api_path as content, exec_log, concat(during, 'ms') as during from report_collection_case_api
     where report_collection_case_id = #{reportCaseId} order by case_api_index
   </select>
+  <select id="getLastApiReport" parameterType="java.lang.String" resultType="java.lang.String">
+    select rcca.exec_log from report_collection_case_api rcca
+    left join report_collection_case rcc on rcc.id = rcca.report_collection_case_id
+    where rcca.api_id = #{apiId} and rcca.status = 'success' order by rcc.end_time desc limit 1
+  </select>
 </mapper>

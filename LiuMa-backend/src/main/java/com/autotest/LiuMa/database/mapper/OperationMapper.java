@@ -14,6 +14,8 @@ public interface OperationMapper {
 
     Operation getOperationDetail(String id);
 
+    Operation getOperationByName(String name, String projectId);
+
     List<OperationDTO> getGroupOperationList(String projectId, String operationType);
 
     void deleteOperation(String id);

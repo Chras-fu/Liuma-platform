@@ -60,10 +60,10 @@
                     <request-rest :reqRest="caseApiForm.rest" style="width: 100%"/>
                 </el-tab-pane>
                 <el-tab-pane label="响应断言" name="assertion">
-                    <assertion :assertion="caseApiForm.assertion" style="width: 100%"/>
+                    <assertion :assertion="caseApiForm.assertion" :apiId="caseApiForm.apiId" style="width: 100%"/>
                 </el-tab-pane>
                 <el-tab-pane label="关联取值" name="relation">
-                    <relation :relation="caseApiForm.relation" style="width: 100%"/>
+                    <relation :relation="caseApiForm.relation" :apiId="caseApiForm.apiId" style="width: 100%"/>
                 </el-tab-pane>
                 <el-tab-pane label="逻辑控件" name="controller">
                     <controller :controller="caseApiForm.controller" style="width: 100%"/>
