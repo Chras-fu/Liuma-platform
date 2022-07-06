@@ -2,13 +2,13 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.autotest.LiuMa.common.constants.ReportStatus;
-import com.autotest.LiuMa.common.utils.UploadUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.CollectionDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
 import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.TransResultRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +20,9 @@ import java.util.UUID;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ReportUpdateService {
+
+    @Value("${qiniu.cloud.downloadUrl}")
+    private String downloadUrl;  // 七牛云加速域名
 
     @Resource
     private ReportMapper reportMapper;
@@ -110,7 +113,7 @@ public class ReportUpdateService {
                     reportCollectionCaseWeb.setExecLog(transactionResult.getLog());
                     List<String> screenshot = new ArrayList<>();
                     for(String screenshotId:transactionResult.getScreenShotList()){
-                        String url = UploadUtils.getDownloadUrl(screenshotId+".png");
+                        String url = downloadUrl + "/" + screenshotId + ".png";
                         screenshot.add(url);
                     }
                     reportCollectionCaseWeb.setScreenshot(JSONArray.toJSONString(screenshot));

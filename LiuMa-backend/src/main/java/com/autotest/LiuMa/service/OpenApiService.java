@@ -29,6 +29,30 @@ public class OpenApiService {
     @Value("${task.file.path}")
     public String TASK_FILE_PATH;
 
+    @Value("${qiniu.cloud.ak}")
+    private String ak;   // 七牛云ak
+
+    @Value("${qiniu.cloud.sk}")
+    private String sk;    // 七牛云sk
+
+    @Value("${qiniu.cloud.bucket}")
+    private String imageBucket;    // 七牛云空间名
+
+    @Value("${qiniu.cloud.uploadUrl}")
+    private String uploadUrl;   // 七牛云上传域名
+
+    @Value("${aliyun.email.accessKey}")
+    private String accessKey;    // 阿里云邮件key
+
+    @Value("${aliyun.email.accessSecret}")
+    private String accessSecret;     // 阿里云邮件secret
+
+    @Value("${aliyun.email.runnerSenderAddress}")
+    private String runnerSenderAddress;  // 发送人邮箱地址
+
+    @Value("${aliyun.email.runnerSenderName}")
+    private String runnerSenderName;
+
     @Resource
     private UserMapper userMapper;
 
@@ -176,7 +200,7 @@ public class OpenApiService {
             String title = "测试任务执行完成通知";
             String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
                     + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
-            EmailUtils.sendMail(user.getEmail(), title, content);
+            EmailUtils.sendMail(user.getEmail(), title, content, accessKey, accessSecret, runnerSenderAddress, runnerSenderName);
         }else {
             Report report = reportMapper.getReportDetail(task.getReportId());
             if (report.getSourceType().equals(ReportSourceType.TEMP.toString())){
@@ -189,7 +213,7 @@ public class OpenApiService {
 
     public void uploadScreenshot(EngineRequest request) {
         try{
-            UploadUtils.uploadImageB64(request.getFileName(), request.getBase64String());
+            UploadUtils.uploadImageB64(request.getFileName(), request.getBase64String(), uploadUrl, imageBucket, ak, sk);
         } catch (Exception exception) {
             throw new LMException("截图文件上传失败");
         }

@@ -11,12 +11,8 @@ import com.aliyuncs.profile.IClientProfile;
 
 public class EmailUtils {
 
-    private static final String accessKey = "*****";    // 阿里云邮件key
-    private static final String accessSecret = "*****";     // 阿里云邮件secret
-    private static final String runnerSenderAddress = "*****";  // 发送人邮箱地址
-    private static final String runnerSenderName = "执行通知机器人";
-
-    public static void sendMail(String receiver, String title, String content) {
+    public static void sendMail(String receiver, String title, String content, String accessKey, String accessSecret,
+                                String runnerSenderAddress, String runnerSenderName) {
         IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKey, accessSecret);
         IAcsClient client = new DefaultAcsClient(profile);
         SingleSendMailRequest request = new SingleSendMailRequest();
