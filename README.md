@@ -35,7 +35,7 @@ IDE推荐: vue使用VSCode、java使用IDEA <br>
 配置步骤: <br>
 第一步: 注册阿里云账号 申请开通邮件服务 <br>
 第二步: 获取accessKey/accessSecret 设置邮件发送人 <br>
-第三步: 将以上信息填写在文件~/common/utils/EmailUtils.java对应位置 <br>
+第三步: 将以上信息填写在文件~/application.properties对应位置 <br>
 注: 阿里云邮件每天有200封免费额度，超过则需要计费(价格不贵)，如果不愿意使用可对接公司自己的邮箱 <br>
 
 七牛云存储<br>
@@ -43,7 +43,7 @@ IDE推荐: vue使用VSCode、java使用IDEA <br>
 配置步骤: <br>
 第一步: 注册七牛云账号 开通空间存储服务 <br>
 第二步: 创建存储空间bucket 获取ak/sk信息 同时获取加速域名(可以先试用测试域名 后期配置自定义域名) <br>
-第三步: 将以上信息填写在文件~/common/utils/UploadUtils.java对应位置 <br>
+第三步: 将以上信息填写在文件~/application.properties对应位置 <br>
 注: 七牛云存储每个用户有10G免费空间容量，超过则需要计费(价格不贵)，如果不愿意使用也可用公司自己的文件存储服务 <br>
 
 四、发布部署
