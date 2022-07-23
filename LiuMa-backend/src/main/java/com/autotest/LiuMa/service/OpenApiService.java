@@ -153,6 +153,7 @@ public class OpenApiService {
         response.setTaskType(task.getType());
         response.setTestCollectionList(testCollectionList);
         // 更新任务及报告状态
+        engineMapper.updateStatus(engine.getId(), EngineStatus.RUNNING.toString());
         taskMapper.updateTask(ReportStatus.RUNNING.toString(), task.getId());
         reportMapper.updateReportStatus(ReportStatus.RUNNING.toString(), task.getReportId());
         reportMapper.updateReportStartTime(task.getReportId(), System.currentTimeMillis(), System.currentTimeMillis());
@@ -162,6 +163,8 @@ public class OpenApiService {
     public String getTaskStatus(EngineRequest request){
         TaskDTO task = taskMapper.getTaskDetail(request.getTaskId());
         if(task.getStatus().equals(ReportStatus.DISCONTINUE.toString())){
+            // 任务终止时 更新引擎状态为在线
+            engineMapper.updateStatus(task.getEngineId(), EngineStatus.ONLINE.toString());
             return "STOP";
         }
         return null;
@@ -189,6 +192,7 @@ public class OpenApiService {
         }else {
             reportStatus = ReportStatus.SKIP.toString();
         }
+        engineMapper.updateStatus(request.getEngineCode(), EngineStatus.ONLINE.toString());
         reportMapper.updateReportStatus(reportStatus, task.getReportId());
         reportMapper.updateReportEndTime(task.getReportId(), System.currentTimeMillis(), System.currentTimeMillis());
         // 删除任务文件 并通知执行人

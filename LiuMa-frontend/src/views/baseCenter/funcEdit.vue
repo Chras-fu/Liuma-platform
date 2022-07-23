@@ -8,7 +8,12 @@
     <page-header v-else-if="functionForm.createUser!==currentUser" title="查看函数" :showSave="false" :cancel="cancelAdd"/>
     <page-header v-else title="编辑函数" :cancel="cancelAdd" :save="saveAdd"/>
     <el-form ref="functionForm" :rules="rules" :model="functionForm" label-width="80px">
-        <p class="tip">基础信息<span style="font-size:5px;margin-left:10px">*函数名称限字母及下划线 且首字符不得为下划线</span></p>
+        <p class="tip">
+            <span>基础信息</span>
+            <el-tooltip content="函数名称限字母及下划线 且首字符不得为下划线" placement="bottom">
+                <i class="el-icon-info"></i>
+            </el-tooltip>
+        </p>
         <el-row :gutter="10">
             <el-col :span="6">
                 <el-form-item label="函数名称" prop="name">
@@ -53,7 +58,12 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="add">新增</el-button>
         <el-button size="small" type="text" @click="deleteAll">删除全部</el-button>
-        <p class="tip">函数代码<span style="font-size:5px;margin-left:10px">*代码内可直接使用定义的参数名 执行结果必须以sys_return(result)形式返回</span></p>
+        <p class="tip">
+            <span>函数代码</span>
+            <el-tooltip content="代码内可直接使用定义的参数名 执行结果必须以sys_return(result)形式返回" placement="bottom">
+                <i class="el-icon-info"></i>
+            </el-tooltip>
+        </p>
         <code-edit ref="editor" :data.sync='functionForm.code' :height='480' mode="python"/>
     </el-form>
   </div>

@@ -25,7 +25,7 @@
             <template slot-scope="scope">
                 <span v-if="scope.row.status === 'online'" class="el-icon-circle-check lm-success" style="font-weight:bold"> 在线</span>
                 <span v-if="scope.row.status === 'offline'" class="el-icon-circle-close lm-info" style="font-weight:bold"> 离线</span>
-                <span v-if="scope.row.status === 'running'" class="el-icon-video-pause lm-error" style="font-weight:bold"> 运行中</span>
+                <span v-if="scope.row.status === 'running'" class="el-icon-video-pause lm-error" style="font-weight:bold"> 测试中</span>
             </template>
         </el-table-column>
         <el-table-column prop="engineType" label="引擎类型">

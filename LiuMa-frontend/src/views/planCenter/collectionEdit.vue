@@ -53,7 +53,7 @@
     <el-dialog title="选择用例" :visible.sync="selectCaseVisible" width="800px" destroy-on-close>
         <select-case :selections="selections" :selectCaseVisible="selectCaseVisible"/>
         <div slot="footer" class="dialog-footer">
-            <el-button size="small" @click="selectApiVisible=false">取消</el-button>
+            <el-button size="small" @click="selectCaseVisible=false">取消</el-button>
             <el-button size="small" type="primary" @click="selectCaseSave">保存</el-button>
         </div>
     </el-dialog>

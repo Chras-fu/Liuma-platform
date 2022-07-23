@@ -33,7 +33,9 @@
             <el-table-column prop="num" label="NO" width="60px"/>
             <el-table-column prop="name" label="用例名称" min-width="200px" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
-                    <el-button type="text" size="mini" @click="editCase(scope.row)">{{scope.row.name}}</el-button>
+                    <el-button type="text" class="case-name" @click="editCase(scope.row)">
+                        <a>{{scope.row.name}}</a>
+                    </el-button>
                 </template>
             </el-table-column>
             <el-table-column prop="level" label="用例等级"/>
@@ -326,5 +328,12 @@ export default {
 }
 .right-table {
     padding-left: 5px;
+}
+.case-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
 }
 </style>

@@ -52,7 +52,12 @@
                 </el-form-item>
             </el-col>
         </el-row>
-        <p class="tip">配置信息<span style="font-size:5px;margin-left:10px">*如若使用自定义函数和公参 请先导入 否则无法使用</span></p>
+        <p class="tip">
+            <span>配置信息</span>
+            <el-tooltip content="如若使用自定义函数和公参 请先导入 否则无法使用" placement="bottom">
+                <i class="el-icon-info"></i>
+            </el-tooltip>
+        </p>
         <el-row :gutter="40">
             <el-col :span="12">
                 <el-form-item label="导入函数">
