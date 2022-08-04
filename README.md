@@ -49,6 +49,7 @@
 ## 三、开发环境
 
 环境依赖: nodejs 14、java 1.8、mysql 8
+
 IDE推荐: vue使用VSCode、java使用IDEA
 
 1. 前端启动
