@@ -7,6 +7,8 @@
 
 项目体验地址: [演示环境](http://demo.liumatest.cn)，用户名密码: demo/123456
 
+如果本项目对您有帮助，请给我们一个Star，您的支持是我们前进的动力。
+
 ## 二、功能介绍
 
 ![system](https://user-images.githubusercontent.com/96771570/182859649-bf10af76-16ce-4961-bab6-a8ec36111daa.png)
