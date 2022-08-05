@@ -121,6 +121,10 @@ Step3: 将以上信息填写在文件~/application.properties对应位置
 
 流马秉持着帮助中小企业的测试团队快速建立自动化体系的目标，将会不断迭代并吸取用户的建议，欢迎大家给我们提出宝贵的意见。
 
-如需在线交流，可关注微信公众号【流马测试】
+如需学习平台开发相关内容，可关注个人微信公众号【流马测试】
 
 ![qr](https://user-images.githubusercontent.com/96771570/161195670-3868f409-ed49-431f-8650-185e3e179679.png)
+
+如需在线交流，扫描下方二维码加入微信群聊
+
+<img src="http://www.liumatest.cn/assets/images/qr/qr-wxq.png" width="270" height="270"/>
