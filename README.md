@@ -127,4 +127,5 @@ Step3: 将以上信息填写在文件~/application.properties对应位置
 
 如需在线交流，扫描下方二维码加入微信群聊
 
-<img src="http://www.liumatest.cn/assets/images/qr/qr-wxq.png" width="270" height="270"/>
+![qr](http://www.liumatest.cn/assets/images/qr/qr-wxq.png)
+
