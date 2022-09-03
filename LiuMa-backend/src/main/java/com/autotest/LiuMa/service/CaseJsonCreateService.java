@@ -426,8 +426,12 @@ public class CaseJsonCreateService {
             functionObj.put("code", function.getCode());
             JSONArray params = JSONArray.parseArray(function.getParam());
             JSONObject paramObj = new JSONObject();
+            paramObj.put("names", new JSONArray());
+            paramObj.put("types", new JSONArray());
             for(int j=0; j<params.size(); j++){
-                paramObj.put(params.getJSONObject(j).getString("paramName"), params.getJSONObject(j).getString("type"));
+                JSONObject param = params.getJSONObject(j);
+                paramObj.getJSONArray("names").add(param.getString("paramName"));
+                paramObj.getJSONArray("types").add(param.getString("type"));
             }
             functionObj.put("params", paramObj);
             functionList.add(functionObj);
