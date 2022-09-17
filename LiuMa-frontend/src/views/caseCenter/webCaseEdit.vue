@@ -243,23 +243,25 @@ export default {
         dataToText(datas){
           let text = "";
           for(let i=0;i<datas.length;i++){
-            let newText = '';
+            let newText = datas[i].paramName + " : ";
             if(datas[i].paramName === "domain"){
               for(let j=0;j<this.domains.length;j++){
                 if(this.domains[j].id === datas[i].value){
-                  newText = datas[i].paramName+ " : " +this.domains[j].name;
+                  newText = newText + this.domains[j].name;
                   break;
                 }
               }
             }else if(datas[i].paramName === "assertion"){
               for(let j=0;j<this.assertions.length;j++){
                 if(this.assertions[j].id === datas[i].value){
-                  newText = datas[i].paramName+ " : " + this.assertions[j].name;
+                  newText = newText + this.assertions[j].name;
                   break;
                 }
               }
             }else{
-              newText = datas[i].paramName+ " : " +datas[i].value;
+              if(datas[i].value){
+                newText = newText + datas[i].value;
+              }
             }
             if(i===0){
               text = newText;
