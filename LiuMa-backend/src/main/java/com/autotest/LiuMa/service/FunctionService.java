@@ -26,7 +26,7 @@ public class FunctionService {
             function.setParam(params.toJSONString());
         }
         if(function.getId().equals("") || function.getId() == null){ // 新增函数
-            Function oldFunction = functionMapper.getFunctionByName(function.getName());
+            Function oldFunction = functionMapper.getFunctionByName(function.getProjectId(), function.getName());
             if (oldFunction != null){
                 throw new DuplicateContentException("函数名称重复");
             }

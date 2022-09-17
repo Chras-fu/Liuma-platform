@@ -16,7 +16,7 @@
     select * from `function` where id = #{id}
   </select>
   <select id="getFunctionByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
-    select * from `function` where name = #{name}
+    select * from `function` where name = #{name} and (project_id=#{projectId} or project_id='system')
   </select>
   <select id="getCustomFunctionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
     select * from `function` where `from` = 'custom' and project_id = #{projectId}

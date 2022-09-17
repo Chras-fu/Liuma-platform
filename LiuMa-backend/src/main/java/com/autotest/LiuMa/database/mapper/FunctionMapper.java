@@ -12,7 +12,7 @@ public interface FunctionMapper {
 
     void updateFunction(Function function);
 
-    Function getFunctionByName(String name);
+    Function getFunctionByName(String projectId, String name);
 
     Function getFunctionDetail(String id);
 
