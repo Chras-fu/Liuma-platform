@@ -168,11 +168,12 @@ export default {
       saveAdd(){
           this.$refs["operationForm"].validate(valid => {
               if (valid) {
-                  this.operationForm.projectId = this.$store.state.projectId;
-                  this.operationForm.element = JSON.stringify(this.operationForm.element);
-                  this.operationForm.data = JSON.stringify(this.operationForm.data);
+                  let form = JSON.parse(JSON.stringify(this.operationForm));
+                  form.projectId = this.$store.state.projectId;
+                  form.element = JSON.stringify(form.element);
+                  form.data = JSON.stringify(form.data);
                   let url = '/autotest/operation/save';
-                  this.$post(url, this.operationForm, response =>{
+                  this.$post(url, form, response =>{
                       this.$message.success("保存成功");
                       this.$router.push({path: '/common/operationManage'});
                   });

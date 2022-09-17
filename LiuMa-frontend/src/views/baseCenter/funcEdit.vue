@@ -120,10 +120,11 @@ export default {
       saveAdd(){
           this.$refs["functionForm"].validate(valid => {
               if (valid) {
-                  this.functionForm.projectId = this.$store.state.projectId;
-                  this.functionForm.param = JSON.stringify(this.functionForm.param);
+                  let form = JSON.parse(JSON.stringify(this.functionForm));
+                  form.projectId = this.$store.state.projectId;
+                  form.param = JSON.stringify(form.param);
                   let url = '/autotest/function/save';
-                  this.$post(url, this.functionForm, response =>{
+                  this.$post(url, form, response =>{
                       this.$message.success("保存成功");
                       this.$router.push({path: '/common/funcManage'});
                   });
