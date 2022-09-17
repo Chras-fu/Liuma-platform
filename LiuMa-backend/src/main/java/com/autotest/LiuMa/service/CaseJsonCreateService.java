@@ -321,14 +321,11 @@ public class CaseJsonCreateService {
                 }
             }else {  // 根据path来获取域名
                 if(dataObj.containsKey("path")){
-                    String path = dataObj.getString("path");
+                    String path = dataObj.getJSONObject("path").getString("value");
                     List<Domain> domainList = domainMapper.getPathDomainList(environmentId);
                     for(Domain domain: domainList){
                         String domainKey = domain.getDomainKey();
-                        if(path.length() < domainKey.length()){
-                            continue;
-                        }
-                        if(path.substring(0, domainKey.length()).equals(domainKey)){
+                        if(path.startsWith(domainKey)){
                             dataObj.getJSONObject("domain").put("value", domain.getDomainData());
                             break;
                         }
@@ -465,10 +462,7 @@ public class CaseJsonCreateService {
             List<Domain> domainList = domainMapper.getPathDomainList(environmentId);
             for(Domain domain: domainList){
                 String domainKey = domain.getDomainKey();
-                if(path.length() < domainKey.length()){
-                    continue;
-                }
-                if(path.substring(0, domainKey.length()).equals(domainKey)){
+                if(path.startsWith(domainKey)){
                     url = domain.getDomainData();
                     break;
                 }
