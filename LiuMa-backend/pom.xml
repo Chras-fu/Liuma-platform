@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.autotest</groupId>
 	<artifactId>LiuMa</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.3</version>
 	<name>LiuMa</name>
 	<description>autotest</description>
 	<properties>
