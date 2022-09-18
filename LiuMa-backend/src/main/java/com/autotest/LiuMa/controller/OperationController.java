@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Locale;
 
 
 @RestController
@@ -32,17 +33,17 @@ public class OperationController {
 
     @PostMapping("/delete")
     public void deleteOperation(@RequestBody Operation operation) {
-        operationService.deleteOperation(operation.getId());
+        operationService.deleteOperation(operation.getId(), operation.getUiType());
     }
 
-    @GetMapping("/detail/{operationId}")
-    public Operation getOperationDetail(@PathVariable String operationId) {
-        return operationService.getOperationDetail(operationId);
+    @GetMapping("/detail/{uiType}/{operationId}")
+    public Operation getOperationDetail(@PathVariable String uiType, @PathVariable String operationId) {
+        return operationService.getOperationDetail(operationId, uiType);
     }
 
-    @GetMapping("/group/list/{projectId}")
-    public List<OperationGroupDTO> getGroupOperationList(@PathVariable String projectId) {
-        return operationService.getGroupOperationList(projectId);
+    @GetMapping("/group/{uiType}/list/{projectId}")
+    public List<OperationGroupDTO> getGroupOperationList(@PathVariable String uiType,@RequestParam String system, @PathVariable String projectId) {
+        return operationService.getGroupOperationList(uiType, system, projectId);
     }
 
     @PostMapping("/list/{goPage}/{pageSize}")

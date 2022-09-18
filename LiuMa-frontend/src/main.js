@@ -16,8 +16,10 @@ import './assets/icon/iconfont.css';
 // 引入全局样式
 import '../static/css/index.css';
 // 引入axios
-import ajax from './utils/ajax'
+import ajax from './utils/ajax';
+import axios from 'axios';
 Vue.use(ajax);
+Vue.prototype.$axios = axios;
 
 Vue.config.productionTip = false;
 

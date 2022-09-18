@@ -3,7 +3,7 @@
 */ 
 <template>
   <div class = "page-header">
-      <span>{{title}}</span>
+      <span style="font-weight: bold">{{title}}</span>
       <div>
           <el-button v-if="showCancel" size="small" @click="cancel">返回</el-button>
           <el-button v-if="showDebug" size="small" type="success" @click="debug">调试</el-button>

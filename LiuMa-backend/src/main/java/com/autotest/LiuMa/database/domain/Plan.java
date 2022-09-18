@@ -16,6 +16,8 @@ public class Plan implements Serializable {
 
     private String environmentId;
 
+    private Integer maxThread;
+
     private String retry;
 
     private String engineId;

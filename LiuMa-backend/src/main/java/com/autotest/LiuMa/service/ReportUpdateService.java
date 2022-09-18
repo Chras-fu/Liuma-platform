@@ -45,6 +45,9 @@ public class ReportUpdateService {
     @Resource
     ReportCollectionCaseWebMapper reportCollectionCaseWebMapper;
 
+    @Resource
+    ReportCollectionCaseAppMapper reportCollectionCaseAppMapper;
+
     public void updateReport(TaskDTO task, List<CaseResultRequest> caseResultList) {
         // 更新报告 每次可更新多条用例
         for(CaseResultRequest caseResult:caseResultList){
@@ -99,7 +102,7 @@ public class ReportUpdateService {
                     reportCollectionCaseApiList.add(reportCollectionCaseApi);
                 }
                 reportCollectionCaseApiMapper.batchAddReportCollectionCaseApi(reportCollectionCaseApiList);
-            }else {
+            }else if(caseResult.getCaseType().equals("WEB")){
                 List<ReportCollectionCaseWeb> reportCollectionCaseWebList = new ArrayList<>();
                 for(int index=1; index <= caseResult.getTransactionList().size(); index++){
                     TransResultRequest transactionResult =caseResult.getTransactionList().get(index-1);
@@ -121,6 +124,28 @@ public class ReportUpdateService {
                     reportCollectionCaseWebList.add(reportCollectionCaseWeb);
                 }
                 reportCollectionCaseWebMapper.batchAddReportCollectionCaseWeb(reportCollectionCaseWebList);
+            }else {
+                List<ReportCollectionCaseApp> reportCollectionCaseAppList = new ArrayList<>();
+                for(int index=1; index <= caseResult.getTransactionList().size(); index++){
+                    TransResultRequest transactionResult =caseResult.getTransactionList().get(index-1);
+                    ReportCollectionCaseApp reportCollectionCaseApp = new ReportCollectionCaseApp();
+                    reportCollectionCaseApp.setId(UUID.randomUUID().toString());
+                    reportCollectionCaseApp.setReportCollectionCaseId(reportCollectionCase.getId());
+                    reportCollectionCaseApp.setCaseAppIndex(index);
+                    reportCollectionCaseApp.setOperationId(transactionResult.getId());
+                    reportCollectionCaseApp.setOperationName(transactionResult.getName());
+                    reportCollectionCaseApp.setOperationElement(transactionResult.getContent());
+                    reportCollectionCaseApp.setExecLog(transactionResult.getLog());
+                    List<String> screenshot = new ArrayList<>();
+                    for(String screenshotId:transactionResult.getScreenShotList()){
+                        String url = downloadUrl + "/" + screenshotId + ".png";
+                        screenshot.add(url);
+                    }
+                    reportCollectionCaseApp.setScreenshot(JSONArray.toJSONString(screenshot));
+                    reportCollectionCaseApp.setStatus(getStatusByIndex(transactionResult.getStatus()));
+                    reportCollectionCaseAppList.add(reportCollectionCaseApp);
+                }
+                reportCollectionCaseAppMapper.batchAddReportCollectionCaseApp(reportCollectionCaseAppList);
             }
         }
         // 更新报告时间

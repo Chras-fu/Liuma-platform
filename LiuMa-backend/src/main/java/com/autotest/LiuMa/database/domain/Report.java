@@ -14,6 +14,8 @@ public class Report implements Serializable {
 
     private String environmentId;
 
+    private String deviceId;
+
     private String sourceType;
 
     private String sourceId;

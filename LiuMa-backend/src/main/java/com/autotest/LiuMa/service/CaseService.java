@@ -3,28 +3,18 @@ package com.autotest.LiuMa.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.database.domain.Case;
-import com.autotest.LiuMa.database.domain.CaseApi;
-import com.autotest.LiuMa.database.domain.CaseWeb;
-import com.autotest.LiuMa.database.domain.Element;
-import com.autotest.LiuMa.database.mapper.CaseApiMapper;
-import com.autotest.LiuMa.database.mapper.CaseMapper;
-import com.autotest.LiuMa.database.mapper.CaseWebMapper;
-import com.autotest.LiuMa.database.mapper.ElementMapper;
-import com.autotest.LiuMa.dto.CaseApiDTO;
-import com.autotest.LiuMa.dto.CaseDTO;
-import com.autotest.LiuMa.dto.CaseWebDTO;
-import com.autotest.LiuMa.dto.ElementDTO;
-import com.autotest.LiuMa.request.CaseApiRequest;
-import com.autotest.LiuMa.request.CaseRequest;
-import com.autotest.LiuMa.request.CaseWebRequest;
-import com.autotest.LiuMa.request.QueryRequest;
+import com.autotest.LiuMa.common.exception.LMException;
+import com.autotest.LiuMa.database.domain.*;
+import com.autotest.LiuMa.database.mapper.*;
+import com.autotest.LiuMa.dto.*;
+import com.autotest.LiuMa.request.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -41,7 +31,13 @@ public class CaseService {
     private CaseWebMapper caseWebMapper;
 
     @Resource
+    private CaseAppMapper caseAppMapper;
+
+    @Resource
     private ElementMapper elementMapper;
+
+    @Resource
+    private ControlMapper controlMapper;
 
     public void saveCase(CaseRequest caseRequest) {
         JSONObject caseObject = (JSONObject) JSON.toJSON(caseRequest);
@@ -69,7 +65,7 @@ public class CaseService {
                 caseApis.add(caseApi);
             }
             caseApiMapper.addCaseApi(caseApis);
-        }else{ // 新增web操作步骤
+        }else if (caseRequest.getType().equals("WEB")){ // 新增web操作步骤
             caseWebMapper.deleteCaseWeb(testCase.getId());  //先删除全部用例接口
             List<CaseWebRequest> caseWebArray = caseRequest.getCaseWebs();
             List<CaseWeb> caseWebs = new ArrayList<>();
@@ -91,7 +87,11 @@ public class CaseService {
                         ele.setCreateUser(testCase.getUpdateUser());
                         ele.setUpdateUser(testCase.getUpdateUser());
                         ele.setStatus("Normal");
-                        elementMapper.addElement(ele);
+                        try {
+                            elementMapper.addElement(ele);
+                        }catch (Exception e){
+                            throw new LMException("自定义的元素新增失败 请检查命名是否重复");
+                        }
                         // 回写元素
                         element.put("id", ele.getId());
                         element.put("custom", false);
@@ -105,6 +105,47 @@ public class CaseService {
                 caseWebs.add(caseWeb);
             }
             caseWebMapper.addCaseWeb(caseWebs);
+        }else { // 新增app操作步骤
+            caseAppMapper.deleteCaseApp(testCase.getId());  //先删除全部用例接口
+            List<CaseAppRequest> caseAppArray = caseRequest.getCaseApps();
+            List<CaseApp> caseApps = new ArrayList<>();
+            for(CaseAppRequest caseAppRequest: caseAppArray){
+                String operationId = caseAppRequest.getOperationId();
+                JSONArray controls = caseAppRequest.getElement();
+                for(int i=0;i<controls.size();i++){
+                    JSONObject control = controls.getJSONObject(i);
+                    if(control.getBoolean("custom")){
+                        Control con = new Control();
+                        con.setId(UUID.randomUUID().toString());
+                        con.setName(control.getString("name"));
+                        con.setSystem(control.getString("system"));
+                        con.setBy(control.getString("by"));
+                        con.setExpression(control.getString("expression"));
+                        con.setModuleId(control.getString("moduleId"));
+                        con.setProjectId(testCase.getProjectId());
+                        con.setCreateTime(System.currentTimeMillis());
+                        con.setUpdateTime(System.currentTimeMillis());
+                        con.setCreateUser(testCase.getUpdateUser());
+                        con.setUpdateUser(testCase.getUpdateUser());
+                        con.setStatus("Normal");
+                        try {
+                            controlMapper.addControl(con);
+                        }catch (Exception e){
+                            throw new LMException("自定义的控件新增失败 请检查命名是否重复");
+                        }
+                        // 回写元素
+                        control.put("id", con.getId());
+                        control.put("custom", false);
+                    }
+                }
+                JSONObject caseAppObject = (JSONObject) JSON.toJSON(caseAppRequest);
+                CaseApp caseApp = caseAppObject.toJavaObject(CaseApp.class);
+                caseApp.setOperationId(operationId);
+                caseApp.setCaseId(testCase.getId());
+                caseApp.setId(UUID.randomUUID().toString());
+                caseApps.add(caseApp);
+            }
+            caseAppMapper.addCaseApp(caseApps);
         }
     }
 
@@ -117,8 +158,8 @@ public class CaseService {
         if(caseType.equalsIgnoreCase("API")){
             List<CaseApiDTO> caseApis = caseApiMapper.getCaseApiList(caseId);
             caseDTO.setCaseApis(caseApis);
-        }else {
-            List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(caseId);
+        }else if(caseType.equalsIgnoreCase("WEB")){
+            List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(caseId, caseType.toLowerCase(Locale.ROOT));
             // 加载最新的UI元素
             for(CaseWebDTO caseWebDTO:caseWebs){
                 JSONArray elementList = JSONArray.parseArray(caseWebDTO.getElement());
@@ -135,6 +176,25 @@ public class CaseService {
                 caseWebDTO.setElement(JSONArray.toJSONString(elementList));
             }
             caseDTO.setCaseWebs(caseWebs);
+        }else {
+            List<CaseAppDTO> caseApps = caseAppMapper.getCaseAppList(caseId, caseType.toLowerCase(Locale.ROOT));
+            // 加载最新的UI元素
+            for(CaseAppDTO caseAppDTO:caseApps){
+                JSONArray controlList = JSONArray.parseArray(caseAppDTO.getElement());
+                for(int i=0;i<controlList.size();i++){
+                    JSONObject control = controlList.getJSONObject(i);
+                    String controlId = control.getString("id");
+                    ControlDTO controlDTO = controlMapper.getControlById(controlId);
+                    control.put("system", controlDTO.getSystem());
+                    control.put("by", controlDTO.getBy());
+                    control.put("name", controlDTO.getName());
+                    control.put("expression", controlDTO.getExpression());
+                    control.put("moduleId", controlDTO.getModuleId());
+                    control.put("moduleName", controlDTO.getModuleName());
+                }
+                caseAppDTO.setElement(JSONArray.toJSONString(controlList));
+            }
+            caseDTO.setCaseApps(caseApps);
         }
 
         return caseDTO;

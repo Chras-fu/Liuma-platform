@@ -64,8 +64,8 @@
     </el-table>
     <!-- 分页组件 -->
     <Pagination v-bind:child-msg="pageparam" @callFather="planCallFather"/>
-    <!-- 集合执行选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <!-- 计划执行选择引擎和环境 -->
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="showEnvironment" @closeRun="closeRun" @run="run($event)"/>
   </div>
 </template>
 
@@ -92,9 +92,11 @@ export default {
                 total: 0
             },
             runVisible: false,
+            showEnvironment: false,
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
         }
     },
@@ -204,8 +206,14 @@ export default {
             this.$router.push({path: '/planManage/testplan/edit/' + row.id});
         },
         runPlan(row){
+            if(row.environmentId != null){
+                this.showEnvironment = true;
+            }else{
+                this.showEnvironment = false;
+            }
             this.runForm.engineId = row.engineId;
             this.runForm.environmentId = row.environmentId;
+            this.runForm.deviceId = null;
             this.runForm.sourceType = "plan";
             this.runForm.sourceId = row.id;
             this.runForm.sourceName = row.name;
@@ -220,10 +228,7 @@ export default {
             let url = '/autotest/run';
             this.$post(url, runForm, response =>{
                 this.$message.success("执行成功 执行结果请查看报告");
-                let taskId = response.data.id;
-                // 执行结果框
             });
-
             this.runVisible = false;
         },
         // 查看报告

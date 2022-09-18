@@ -12,6 +12,7 @@ import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.*;
 import com.autotest.LiuMa.request.CaseApiRequest;
+import com.autotest.LiuMa.request.CaseAppRequest;
 import com.autotest.LiuMa.request.CaseRequest;
 import com.autotest.LiuMa.request.CaseWebRequest;
 import com.autotest.LiuMa.response.*;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class CaseJsonCreateService {
@@ -44,6 +46,9 @@ public class CaseJsonCreateService {
 
     @Resource
     private CaseWebMapper caseWebMapper;
+
+    @Resource
+    private CaseAppMapper caseAppMapper;
 
     @Resource
     private DebugDataMapper debugDataMapper;
@@ -72,6 +77,9 @@ public class CaseJsonCreateService {
     @Resource
     private ElementMapper elementMapper;
 
+    @Resource
+    private ControlMapper controlMapper;
+
     public String getDownloadUrl(TaskDTO task, List<TaskTestCollectionResponse> testCollectionList){
         String taskFilePath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId();
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId();
@@ -84,8 +92,13 @@ public class CaseJsonCreateService {
                     JSONObject taskCase = JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
                     // 同一个集合下同一条用例文件重复就覆盖 因数据一样没必要生成两份
                     FileUtils.createJsonFile(taskCase, collectionFilePath + "/" + testCase.getCaseId() + ".json");
-                }else { // WEB用例
+                }else if(taskTestCase.getCaseType().equals("WEB")){ // WEB用例
                     TestCaseWebResponse testCase = this.getWebTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
+                    JSONObject taskCase = JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
+                    // 同一个集合下同一条用例文件重复就覆盖 因数据一样没必要生成两份
+                    FileUtils.createJsonFile(taskCase, collectionFilePath + "/" + testCase.getCaseId() + ".json");
+                }else { // APP用例
+                    TestCaseAppResponse testCase = this.getAppTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
                     JSONObject taskCase = JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
                     // 同一个集合下同一条用例文件重复就覆盖 因数据一样没必要生成两份
                     FileUtils.createJsonFile(taskCase, collectionFilePath + "/" + testCase.getCaseId() + ".json");
@@ -107,10 +120,88 @@ public class CaseJsonCreateService {
         if(taskTestCase.getCaseType().equals("API")){
             TestCaseApiResponse testCase = this.getApiTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
             return JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
-        }else { // web用例
+        }else if(taskTestCase.getCaseType().equals("WEB")){ // web用例
             TestCaseWebResponse testCase = this.getWebTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
             return JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
+        }else { // app用例
+            TestCaseAppResponse testCase = this.getAppTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
+            return JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
         }
+    }
+
+    public TestCaseAppResponse getAppTestCaseJson(String environmentId, String SourceType, TaskTestCaseResponse taskTestCase){
+        // 拼装App用例
+        TestCaseAppResponse testCaseApp = new TestCaseAppResponse();
+        if(SourceType.equals(ReportSourceType.TEMP.toString())) {
+            DebugData debugData = debugDataMapper.getDebugData(taskTestCase.getCaseId());
+            CaseRequest caseRequest = JSONObject.parseObject(debugData.getData(), CaseRequest.class);
+            testCaseApp.setComment(caseRequest.getDescription());
+            testCaseApp.setCaseId(taskTestCase.getCaseId());
+            testCaseApp.setCaseName(caseRequest.getName());
+            // 组装自定义函数
+            testCaseApp.setFunctions(this.getCaseFunctions(caseRequest.getCommonParam().getJSONArray("functions")));
+            // 组装用例公参
+            testCaseApp.setParams(this.getCaseParams(caseRequest.getCommonParam().getJSONArray("params")));
+            // 组装浏览器开关配置
+            testCaseApp.setStartDriver(caseRequest.getCommonParam().getBoolean("startDriver"));
+            testCaseApp.setCloseDriver(caseRequest.getCommonParam().getBoolean("closeDriver"));
+            // 组装操作
+            List<CaseAppRequest> caseApps = caseRequest.getCaseApps();
+            List<TestCaseAppDataResponse> optList = new ArrayList<>();
+            for (CaseAppRequest caseAppRequest:caseApps){
+                TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
+                Operation operation = operationMapper.getOperationDetail(caseAppRequest.getOperationId(), caseRequest.getType().toLowerCase(Locale.ROOT));
+                optData.setOperationType(operation.getType());
+                optData.setOperationId(caseAppRequest.getOperationId());
+                if(operation.getFrom().equals("custom")){
+                    optData.setOperationName("自定义");
+                    optData.setOperationCode(operation.getCode());
+                }else {
+                    optData.setOperationName(operation.getName());
+                    optData.setOperationCode(null);
+                }
+                optData.setOperationTrans(operation.getName());
+                optData.setOperationElement(this.getAppElement(caseAppRequest.getElement()));
+                optData.setOperationData(this.getAppData(caseAppRequest.getData(), environmentId));
+                optList.add(optData);
+            }
+            testCaseApp.setOptList(optList);
+        }else {
+            CaseDTO caseDTO = caseMapper.getCaseDetail(taskTestCase.getCaseId());
+            testCaseApp.setComment(caseDTO.getDescription());
+            testCaseApp.setCaseId(taskTestCase.getCaseId());
+            testCaseApp.setCaseName(caseDTO.getName());
+            JSONObject commonParam = JSONObject.parseObject(caseDTO.getCommonParam());
+            // 组装自定义函数
+            testCaseApp.setFunctions(this.getCaseFunctions(commonParam.getJSONArray("functions")));
+            // 组装用例公参
+            testCaseApp.setParams(this.getCaseParams(commonParam.getJSONArray("params")));
+            // 组装浏览器开关配置
+            testCaseApp.setStartDriver(commonParam.getBoolean("startDriver"));
+            testCaseApp.setCloseDriver(commonParam.getBoolean("closeDriver"));
+            // 组装操作
+            List<CaseAppDTO> caseApps = caseAppMapper.getCaseAppList(taskTestCase.getCaseId(), taskTestCase.getCaseType());
+            List<TestCaseAppDataResponse> optList = new ArrayList<>();
+            for (CaseAppDTO caseAppDTO:caseApps){
+                TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
+                Operation operation = operationMapper.getOperationDetail(caseAppDTO.getOperationId(), caseDTO.getType().toLowerCase(Locale.ROOT));
+                optData.setOperationType(operation.getType());
+                optData.setOperationId(caseAppDTO.getOperationId());
+                if(operation.getFrom().equals("custom")){
+                    optData.setOperationName("自定义");
+                    optData.setOperationCode(operation.getCode());
+                }else {
+                    optData.setOperationName(operation.getName());
+                    optData.setOperationCode(null);
+                }
+                optData.setOperationTrans(operation.getName());
+                optData.setOperationElement(this.getAppElement(JSONArray.parseArray(caseAppDTO.getElement())));
+                optData.setOperationData(this.getAppData(JSONArray.parseArray(caseAppDTO.getData()), environmentId));
+                optList.add(optData);
+            }
+            testCaseApp.setOptList(optList);
+        }
+        return testCaseApp;
     }
 
     public TestCaseWebResponse getWebTestCaseJson(String environmentId, String SourceType, TaskTestCaseResponse taskTestCase){
@@ -134,7 +225,7 @@ public class CaseJsonCreateService {
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
             for (CaseWebRequest caseWebRequest:caseWebs){
                 TestCaseWebDataResponse optData = new TestCaseWebDataResponse();
-                Operation operation = operationMapper.getOperationDetail(caseWebRequest.getOperationId());
+                Operation operation = operationMapper.getOperationDetail(caseWebRequest.getOperationId(), caseRequest.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
                 optData.setOperationId(caseWebRequest.getOperationId());
                 if(operation.getFrom().equals("custom")){
@@ -164,11 +255,11 @@ public class CaseJsonCreateService {
             testCaseWeb.setStartDriver(commonParam.getBoolean("startDriver"));
             testCaseWeb.setCloseDriver(commonParam.getBoolean("closeDriver"));
             // 组装操作
-            List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(taskTestCase.getCaseId());
+            List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(taskTestCase.getCaseId(), taskTestCase.getCaseType().toLowerCase(Locale.ROOT));
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
             for (CaseWebDTO caseWebDTO:caseWebs){
                 TestCaseWebDataResponse optData = new TestCaseWebDataResponse();
-                Operation operation = operationMapper.getOperationDetail(caseWebDTO.getOperationId());
+                Operation operation = operationMapper.getOperationDetail(caseWebDTO.getOperationId(), caseDTO.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
                 optData.setOperationId(caseWebDTO.getOperationId());
                 if(operation.getFrom().equals("custom")){
@@ -272,6 +363,45 @@ public class CaseJsonCreateService {
         }
 
         return testCaseApi;
+    }
+
+    public JSONObject getAppElement(JSONArray elements){
+        JSONObject elementObj = new JSONObject();
+        if(elements == null){
+            return elementObj;
+        }
+        for(int i=0;i<elements.size();i++){
+            JSONObject element = elements.getJSONObject(i);
+            JSONObject elementData = new JSONObject();
+            // 获取最新元素
+            ControlDTO controlDTO = controlMapper.getControlById(element.getString("id"));
+            if(controlDTO != null) {
+                elementData.put("by", controlDTO.getBy());
+                elementData.put("expression", controlDTO.getExpression());
+                elementData.put("target", controlDTO.getModuleName() + " / " + controlDTO.getName());
+            }else {
+                elementData.put("by", element.getString("by"));
+                elementData.put("expression", element.getString("expression"));
+                elementData.put("target", element.getString("moduleName") + " / " + element.getString("name"));
+            }
+            elementObj.put(element.getString("paramName"), elementData);
+        }
+        return elementObj;
+    }
+
+    public JSONObject getAppData(JSONArray dataList, String environmentId){
+        JSONObject dataObj = new JSONObject();
+        if(dataList == null){
+            return dataObj;
+        }
+        for(int i=0;i<dataList.size();i++){
+            JSONObject data = dataList.getJSONObject(i);
+            JSONObject dataValue = new JSONObject();
+            dataValue.put("type", data.getString("type"));
+            dataValue.put("value", data.getString("value"));
+            dataObj.put(data.getString("paramName"), dataValue);
+        }
+        return dataObj;
     }
 
     public JSONObject getWebElement(JSONArray elements){

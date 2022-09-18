@@ -18,9 +18,9 @@
         </el-table-column>
         <el-table-column label="接口名称" prop="apiName">
         </el-table-column>
-        <el-table-column label="请求方法" prop="apiMethod">
-        </el-table-column>
         <el-table-column label="接口地址" prop="apiPath">
+        </el-table-column>
+        <el-table-column label="描述" prop="description">
         </el-table-column>
         <el-table-column label="操作" width="120px">
             <template slot-scope="scope">
@@ -72,9 +72,9 @@
         </div>
     </el-drawer>
     <!-- 用例调试选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="true" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
-    <run-result :taskId="taskId" :caseType="caseType" :resultVisable="resultVisable" @closeResult="closeResult"/>
+    <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
 </template>
 
@@ -132,11 +132,11 @@ export default {
             activeTab: "body",
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
             resultVisable: false,
             taskId: "",
-            caseType: "API",
             rules: {
                 name: [{ required: true, message: '用例名称不能为空', trigger: 'blur' }],
                 type: [{ required: true, message: '用例类型不能为空', trigger: 'blur' }],
@@ -181,6 +181,7 @@ export default {
                     apiMethod: this.selections[i].method,
                     apiName: this.selections[i].name,
                     apiPath: this.selections[i].path,
+                    description: this.selections[i].description
                 }
                 this.caseForm.caseApis.push(caseApi);
             }

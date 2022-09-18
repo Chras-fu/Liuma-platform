@@ -12,5 +12,5 @@ public interface CaseWebMapper {
 
     void deleteCaseWeb(String caseId);
 
-    List<CaseWebDTO> getCaseWebList(String caseId);
+    List<CaseWebDTO> getCaseWebList(String caseId, String caseType);
 }

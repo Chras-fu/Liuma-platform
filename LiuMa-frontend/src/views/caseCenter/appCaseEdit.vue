@@ -1,0 +1,563 @@
+/**
+ * 用例中心  APP用例
+ */
+<template>
+  <div>
+    <page-header title="用例编辑" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
+    <el-form ref="caseForm" :rules="rules" :model="caseForm" label-width="90px">
+      <base-info :caseForm="caseForm"/>
+      <p class="tip">操作步骤</p>
+      <el-form-item style="margin-left:-80px;" prop="caseApps"/>
+      <el-table :data="caseForm.caseApps" row-key="id" class="sort-table" size="small">
+        <el-table-column label="" width="60px">
+            <template>
+                <i class="iconfont icon-paixu" @mousedown="rowDrop" style="font-size: 24px"/>
+            </template>
+        </el-table-column>
+        <el-table-column label="序号" prop="index" width="100px">
+        </el-table-column>
+        <el-table-column label="操作名称" prop="operationName" width="180px">
+        </el-table-column>
+        <el-table-column label="操作对象" prop="elementText">
+          <template slot-scope="scope">
+              <span v-html="scope.row.elementText"/>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作数据" prop="dataText">
+          <template slot-scope="scope">
+              <span v-html="scope.row.dataText"/>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150px">
+            <template slot-scope="scope">
+                <el-button size="mini" type="text" @click="editCaseApp(scope.$index, scope.row)">编辑</el-button>
+                <el-button size="mini" type="text" @click="copyCaseApp(scope.row)">复用</el-button>
+                <el-button size="mini" type="text" @click="deleteCaseApp(scope.$index)">删除</el-button>
+            </template>
+        </el-table-column>
+      </el-table>
+    </el-form>
+    <el-button size="small" icon="el-icon-plus" type="text" @click="addCaseApp(-1)">新增操作</el-button>
+    <!-- 添加操作界面 -->
+    <el-dialog title="选择操作" :visible.sync="editOperationVisible" width="750px" destroy-on-close>
+        <el-form ref="operationForm" :rules="rules" :model="operationForm" label-width="100px" label-position="top">
+          <el-form-item label="操作名称" prop="operationId">
+            <el-cascader size="small" style="width: 100%" filterable :options="operations" v-model="operationForm.operationIds" :show-all-levels="false"
+              :props="{ expandTrigger: 'hover', value: 'id', label: 'name', children:'operationList' }" placeholder="请选择操作" @change="changeOperation"/>
+          </el-form-item>
+          <el-form-item v-if="operationForm.element.length !== 0" label="操作对象" prop="element">
+            <el-row :gutter="10" v-for="(ele, index) in operationForm.element" :key="index">
+              <el-col :span="4">
+                <span>{{ele.paramName}}</span>
+              </el-col>
+              <el-col :span="20">
+                <el-row :gutter="10">
+                  <el-col :span="10">
+                    <select-tree placeholder="请选择页面模块" :selectedValue="ele.moduleId"
+                            :selectedLabel="ele.moduleName" :treeData="viewModules" @selectModule="selectModule($event, ele)"/>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-input size="small" v-if="ele.custom" v-model="ele.name" placeholder="请输入元素名称"/>
+                    <el-select size="small" style="width:100%" v-else v-model="ele.id" filterable
+                      :placeholder="ele.description" value-key="item" @change="changeElement($event, ele)">
+                        <el-option v-for="item in ele.selectElements" :key="item.id" :label="item.name" :value="item.id"/>
+                    </el-select>
+                  </el-col>
+                  <el-col :span="2">
+                    <el-switch size="small" v-model="ele.custom" @change="changeCustom($event, ele)"/>
+                  </el-col>
+                </el-row>
+                <el-row v-if="ele.custom" :gutter="10">
+                  <el-col :span="10">
+                    <el-select size="small" style="width:100%" v-model="ele.by" placeholder="请选择定位方式" @change="changeBy(ele)">
+                        <el-option v-for="item in bys" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-input v-if="ele.by==='XPATH'" size="small" v-model="ele.expression" placeholder="请输入元素定位表达式"/>
+                    <el-button v-else size="small" type="text" @click="editExpression(ele)">编辑属性</el-button>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
+          </el-form-item>
+          <el-form-item v-if="operationForm.data.length !== 0" label="操作数据" prop="data">
+            <el-row :gutter="10" v-for="(data, index) in operationForm.data" :key="index">
+              <el-col :span="4">
+                <span>{{data.paramName}}</span>
+              </el-col>
+              <el-col :span="20">
+                <el-select v-if="data.paramName === 'assertion'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in assertions" :key="item.id" :label="item.name" :value="item.id"/>
+                </el-select>
+                <el-select v-else-if="data.paramName === 'continue'" size="small" style="width:100%" v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in continues" :key="item.id" :label="item.name" :value="item.id"/>
+                </el-select>
+                <el-input v-else size="small" v-model="data.value" :placeholder="data.description"/>
+              </el-col>
+            </el-row>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button size="small" @click="editOperationVisible=false">取消</el-button>
+            <el-button size="small" type="primary" @click="saveOperationEdit('operationForm', operationForm)">保存</el-button>
+        </div>
+    </el-dialog>
+    <!-- 添加属性/组合定位 -->
+    <el-dialog title="编辑属性" :visible.sync="editExpressionVisible" width="550px" destroy-on-close>
+        <el-row v-for="(item, index) in expressionForm" :key="index" style="margin-bottom:10px">
+            <el-col :span="8">
+                <el-select size="small" style="width:95%" v-model="item.propName" placeholder="属性名">
+                    <el-option v-for="prop in propList" :key="prop" :label="prop" :value="prop"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="(customElement.by === 'COMP') ? 13 : 16">
+                <el-input size="small" style="width:100%" v-model="item.propValue" placeholder="请输入属性值"/>
+            </el-col>
+            <el-col :span="3" v-if="customElement.by === 'COMP'">
+                <div style="font-size: 24px; margin-top:8px; margin-left:5px; display: flex">
+                    <i class="el-icon-circle-plus lm-success" @click="addProp(index)"></i>
+                    <i v-if="expressionForm.length > 1" class="el-icon-remove lm-error" @click="deleteProp(index)"></i>
+                </div>
+            </el-col>
+        </el-row>
+        <div slot="footer" class="dialog-footer">
+            <el-button size="small" @click="editExpressionVisible=false">取消</el-button>
+            <el-button size="small" type="primary" @click="submitExpression">确定</el-button>
+        </div>
+    </el-dialog>
+    <!-- 用例调试选择引擎和环境 -->
+    <run-form :runForm="runForm" :runVisible="runVisible" :showDevice="true" @closeRun="closeRun" @run="run($event)"/>
+    <!-- 用例执行结果展示 -->
+    <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
+  </div>
+</template>
+
+<script>
+import Sortable from 'sortablejs'
+import {getUUID} from '@/utils/util'
+import PageHeader from '../common/components/pageheader'
+import BaseInfo from './common/case/baseInfo'
+import RunForm from '@/views/common/business/runForm'
+import SelectTree from '@/views/common/business/selectTree'
+import RunResult from './common/case/runResult'
+import {locateProps} from '@/utils/constant'
+
+export default {
+    components:{PageHeader, BaseInfo, RunForm, SelectTree, RunResult},
+    data() {
+        return{
+            caseForm: {
+                id: "",
+                name: "",
+                level: "P0",
+                type: "APP",
+                system: null,
+                environmentIds: [],
+                thirdParty: "",
+                moduleId: "",
+                moduleName: "",
+                commonParam: {
+                  functions: [],
+                  params: [],
+                  startDriver: true,
+                  closeDriver: true,
+                },
+                caseApps: []
+            },
+            viewModules: [],
+            bys: [
+                { label: "属性定位", value: "PROP" },
+                { label: "组合定位", value: "COMP" },
+                { label: "Xpath定位", value: "XPATH" },
+            ],
+            propList: [],
+            operations: [],
+            assertions: [],
+            continues: [{id: true, name: "是"}, {id: false, name:"否"}],
+            operationForm: {
+              id: "",
+              index: -1,
+              operationId: "",
+              operationName: "",
+              element: [],
+              data: []
+            },
+            customElement: {},
+            expressionForm: [],
+            editOperationVisible: false,
+            editExpressionVisible: false,
+            runVisible: false,
+            runForm: {
+                engineId: "",
+                environmentId: []
+            },
+            resultVisable: false,
+            taskId: "",
+            rules: {
+                name: [{ required: true, message: '用例名称不能为空', trigger: 'blur' }],
+                type: [{ required: true, message: '用例类型不能为空', trigger: 'blur' }],
+                moduleId: [{ required: true, message: '用例模块不能为空', trigger: 'blur' }],
+                operationId: [{ required: true, message: '操作名称不能为空', trigger: 'blur' }],
+                element: [{ required: true, message: '操作对象不能为空', trigger: 'blur' }],
+                data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }],
+                caseApps: [{ required: true, message: '请至少添加一条操作步骤', trigger: 'blur' }],
+            }
+        }
+    },
+    created() {
+        this.$root.Bus.$emit('initBread', ["用例中心", "APP用例"]);
+        this.caseForm.system = this.$route.params.system;
+        if(this.caseForm.system === "android"){
+            this.propList = locateProps.android;
+        }else{
+            this.propList = locateProps.apple;
+        }
+        this.getOperations();
+        this.getAssertion();
+        this.getViews();
+        this.getDetail(this.$route.params);
+    },
+    methods: {
+        // 行拖拽
+        rowDrop () {
+            // 此时找到的元素是要拖拽元素的父容器
+            const tbody = document.querySelector('.sort-table tbody');
+            const _this = this;
+            Sortable.create(tbody, {
+                //  指定父元素下可被拖拽的子元素
+                draggable: ".el-table__row",
+                onEnd ({ newIndex, oldIndex }) {
+                    const currRow = _this.caseForm.caseApps.splice(oldIndex, 1)[0];
+                    _this.caseForm.caseApps.splice(newIndex, 0, currRow);
+                    _this.sortCaseApp();
+                }
+            });
+        },
+        // 重新排序
+        sortCaseApp(){
+            for(let i=0; i<this.caseForm.caseApps.length; i++){
+                this.caseForm.caseApps[i].index = i+1;
+            }
+        },
+        getOperationObj(val, opt) {
+          for(let i=0; i<opt.length; i++){
+            if(opt[i].id === val[0]){
+              let operationList = opt[i].operationList;
+              for(let j=0; j< operationList.length; j++){
+                if(operationList[j].id === val[1]){
+                  return operationList[j];
+                }
+              }
+              return null;
+            }
+          }
+          return null;
+        },
+        elementToText(elements){
+          let text = "";
+          for(let i=0;i<elements.length;i++){
+            if(i===0){
+              text = elements[i].paramName+ " : " +elements[i].moduleName+ " / " +elements[i].name;
+            }else{
+              text = text + "<br>" + elements[i].paramName+ " : " +elements[i].moduleName+ " / " +elements[i].name;
+            }
+          }
+          return text;
+        },
+        dataToText(datas){
+          let text = "";
+          for(let i=0;i<datas.length;i++){
+            let newText = '';
+            if(datas[i].paramName === "assertion"){
+              for(let j=0;j<this.assertions.length;j++){
+                if(this.assertions[j].id === datas[i].value){
+                  newText = datas[i].paramName+ " : " + this.assertions[j].name;
+                  break;
+                }
+              }
+            }else{
+              newText = datas[i].paramName+ " : " +datas[i].value;
+            }
+            if(i===0){
+              text = newText;
+            }else{
+              text = text + "<br>" + newText;
+            }
+          }
+          return text;
+        },
+        addCaseApp(index){
+          this.operationForm =  {
+              id: getUUID(),
+              index: index,
+              operationIds: [],
+              operationId: "",
+              operationName: "",
+              element: [],
+              data: []
+          };
+          this.editOperationVisible = true;
+        },
+        editCaseApp(index, row){
+          this.operationForm = {
+            id: row.id,
+            index: index,
+            operationIds: row.operationIds,
+            operationId: row.operationId,
+            operationName: row.operationName,
+            element: row.element,
+            data: row.data
+          };
+          for(let i=0;i<row.element.length;i++){
+            if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
+              continue;
+            }else{
+              this.getControls(row.element[i].moduleId, row.element[i]);
+            }
+          }
+          this.editOperationVisible = true;
+        },
+        copyCaseApp(row){
+          this.operationForm = {
+            id: getUUID(),
+            index: -1,
+            operationIds: row.operationIds,
+            operationId: row.operationId,
+            operationName: row.operationName,
+            element: JSON.parse(JSON.stringify(row.element)),
+            data: JSON.parse(JSON.stringify(row.data))
+          };
+          for(let i=0;i<row.element.length;i++){
+            if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
+              continue;
+            }else{
+              this.getControls(row.element[i].moduleId, row.element[i]);
+            }
+          }
+          this.editOperationVisible = true;
+        },
+        deleteCaseApp(index){
+            this.caseForm.caseApps.splice(index, 1);
+            for(let i=0; i<this.caseForm.caseApps.length; i++){
+                this.caseForm.caseApps[i].index = i+1;
+            }
+        },
+        changeOperation(val){
+          let operation = this.getOperationObj(val, this.operations);
+          this.operationForm.operationId = operation.id;
+          this.operationForm.operationName = operation.name;
+          this.operationForm.element = JSON.parse(JSON.stringify(operation.elementList));
+          let data = JSON.parse(JSON.stringify(operation.dataList));
+          for(let i=0;i<data.length;i++){
+            if(data[i].paramName === 'continue'){
+              data[i].value = false;
+              break;
+            }
+          }
+          this.operationForm.data = data;
+
+        },
+        changeElement(val, element){
+          let item = null;
+          for(let i=0;i<element.selectElements.length;i++){
+            if(element.selectElements[i].id === val){
+              item = element.selectElements[i];
+              break;
+            }
+          }
+          element.id = item.id;
+          element.name = item.name;
+          element.system = item.system;
+          element.by = item.by;
+          element.expression = item.expression;
+        },
+        changeCustom(custom, element){
+          element.custom = custom;
+          element.id = "";
+          element.system = this.caseForm.system;
+          element.name = "";
+          element.by = "XPATH";
+          element.expression = "";
+        },
+        changeBy(ele){
+          // 更改定位方式时 将表达式处理成对应格式
+          if(ele.by === "XPATH"){
+            ele.expression = "";
+          }else{
+            let expressionForm = null;
+            try{
+              expressionForm = JSON.parse(ele.expression);
+            }catch(e){
+              expressionForm = [];
+            }
+            if(expressionForm.length === 0){
+                expressionForm.push({propName:"",propValue:""});
+            }else if(ele.by === "PROP"){ // 大于0时 如果是单属性定位 去掉多余的属性保留第一个
+                expressionForm.splice(1,expressionForm.length-1);
+            }
+            ele.expression = JSON.stringify(expressionForm);
+          }
+        },
+        editExpression(ele){
+          this.expressionForm = JSON.parse(ele.expression);
+          this.customElement = ele;
+          this.editExpressionVisible = true;
+        },
+        submitExpression(){
+          this.customElement.expression = JSON.stringify(this.expressionForm);
+          this.editExpressionVisible = false;
+        },
+        // 新增属性定位
+        addProp(index){
+            this.expressionForm.splice(index+1, 0, {propName:"",propValue:""});
+        },
+        // 删除属性定位
+        deleteProp(index){
+            this.expressionForm.splice(index, 1);
+        },
+        selectModule(data, element){
+            element.moduleId = data.id;
+            element.moduleName = data.label;
+            if(!element.custom){
+              element.id = "";
+              element.name = "";
+              element.system = "";
+              element.by = "";
+              element.expression = "";
+            }
+            this.getControls(data.id, element);
+        },
+        saveOperationEdit(confirm, form){
+          this.$refs[confirm].validate(valid => {
+              if (valid) {
+                form.elementText = this.elementToText(form.element);
+                form.dataText = this.dataToText(form.data);
+                if(form.index === -1){
+                  form.index = this.caseForm.caseApps.length + 1;
+                  this.caseForm.caseApps.push(form);
+                }else{
+                  form.index = form.index + 1;
+                  // this.caseForm.caseApps[form.index-1] = form;
+                  this.$set(this.caseForm.caseApps, form.index-1, form);
+                }
+                this.editOperationVisible = false;
+              }else{
+                  return false;
+              }
+          });
+        },
+        getControls(moduleId, element){
+            let url = '/autotest/control/list/module';
+            let param = {
+                moduleId: moduleId,
+                projectId: this.$store.state.projectId,
+                system: this.caseForm.system
+            };
+            this.$post(url, param, response => {
+                element.selectElements = response.data;
+            });
+        },
+        getAssertion(){
+            let url = '/autotest/system/assertion/list';
+            this.$get(url, response =>{
+                this.assertions = response.data;
+            });
+        },
+        getDetail(param){
+            if (param.caseId){  // 编辑
+                let url = "/autotest/case/detail/" + this.caseForm.type.toLowerCase() + "/" + param.caseId;
+                this.$get(url, response => {
+                    let data = response.data;
+                    if(data.environmentIds){
+                        data.environmentIds = JSON.parse(data.environmentIds);
+                    }
+                    if(data.commonParam){
+                        data.commonParam = JSON.parse(data.commonParam);
+                    }
+                    for(let i=0;i<data.caseApps.length;i++){
+                        let caseApp = data.caseApps[i];
+                        // 处理app
+                        caseApp.operationIds = [caseApp.operationType, caseApp.operationId];
+                        caseApp.element = JSON.parse(caseApp.element);
+                        caseApp.data = JSON.parse(caseApp.data);
+                        caseApp.elementText = this.elementToText(caseApp.element);
+                        caseApp.dataText = this.dataToText(caseApp.data);
+                    }
+                    if(param.type === "copy"){ //复用
+                        data.id = "";
+                    }
+                    this.caseForm = data;
+                });
+            }
+        },
+        getViews(){
+            let url = '/autotest/module/list/view/' + this.$store.state.projectId;
+            this.$get(url, response =>{
+                this.viewModules = response.data;
+            });
+        },
+        getOperations(){
+          let url = '/autotest/operation/group/app/list/' + this.$store.state.projectId + '?system=' +this.caseForm.system;
+            this.$get(url, response =>{
+                this.operations = response.data;
+            });
+        },
+        cancelAdd(){
+            this.$router.push({path: '/caseCenter/caseManage'})
+        },
+        saveAdd(){
+            this.$refs["caseForm"].validate(valid => {
+                if (valid) {
+                    this.caseForm.projectId = this.$store.state.projectId;
+                    for(let i=0; i<this.caseForm.caseApps.length; i++){
+                        this.caseForm.caseApps[i].index = i+1;
+                        for(let j=0; j<this.caseForm.caseApps[i].element.length; j++){
+                          this.caseForm.caseApps[i].element[j].selectElements = [];
+                        }
+                    }
+                    let url = '/autotest/case/save';
+                    this.$post(url, this.caseForm, response =>{
+                        this.$message.success("保存成功");
+                        this.$router.push({path: '/caseCenter/caseManage'});
+                    });
+                }else{
+                    return false;
+                }
+            });
+        },
+        debugCase(){
+            // 用例调试
+            this.runForm.engineId = 'system';
+            this.runForm.environmentId = null;
+            this.runForm.deviceId = null;
+            this.runForm.sourceType = "temp";
+            this.runForm.sourceId = this.caseForm.id;
+            this.runForm.sourceName = this.caseForm.name;
+            this.runForm.taskType = "debug";
+            this.runForm.projectId = this.$store.state.projectId;
+            this.runForm.debugData = this.caseForm;
+            this.runVisible = true;
+        },
+        closeRun(){
+            this.runVisible = false;
+        },
+        run(runForm){
+            let url = '/autotest/run';
+            this.$post(url, runForm, response =>{
+                this.taskId = response.data.id;
+                this.resultVisable = true;
+            });
+
+            this.runVisible = false;
+        },
+        closeResult(){
+            this.resultVisable = false;
+        }
+    }
+}
+</script>
+
+<style scoped>
+
+</style>

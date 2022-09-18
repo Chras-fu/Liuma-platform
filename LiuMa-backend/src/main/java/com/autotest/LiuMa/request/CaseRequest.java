@@ -33,6 +33,8 @@ public class CaseRequest {
 
     private JSONArray environmentIds;
 
+    private String system;
+
     private JSONObject commonParam;
 
     private Long createTime;
@@ -48,4 +50,6 @@ public class CaseRequest {
     private List<CaseApiRequest> caseApis;
 
     private List<CaseWebRequest> caseWebs;
+
+    private List<CaseAppRequest> caseApps;
 }

@@ -1,8 +1,10 @@
 package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.autotest.LiuMa.common.constants.DeviceStatus;
 import com.autotest.LiuMa.common.constants.ReportSourceType;
 import com.autotest.LiuMa.common.constants.ReportStatus;
+import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.request.RunRequest;
@@ -33,7 +35,16 @@ public class RunService {
     @Resource
     private DebugDataMapper debugDataMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
     public Task run(RunRequest runRequest) {
+        if(runRequest.getDeviceId() != null && !runRequest.getDeviceId().equals("")){
+            Device device = deviceMapper.getDeviceById(runRequest.getDeviceId());
+            if(!device.getStatus().equals(DeviceStatus.ONLINE.toString())){
+                throw new LMException("设备非空闲状态 执行失败");
+            }
+        }
         String runName = runRequest.getSourceName() +"-"+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         // 调试执行则存储临时数据
         if(runRequest.getSourceType().equals(ReportSourceType.TEMP.toString())){
@@ -62,6 +73,7 @@ public class RunService {
         report.setName(runName);
         report.setTaskId(task.getId());
         report.setEnvironmentId(runRequest.getEnvironmentId());
+        report.setDeviceId(runRequest.getDeviceId());
         report.setSourceType(runRequest.getSourceType());
         report.setSourceId(runRequest.getSourceId());
         report.setStatus(ReportStatus.PREPARED.toString());

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.NotificationMapper">
+    <insert id="addNotificationData" parameterType="com.autotest.LiuMa.database.domain.Notification">
+    insert into notification (id, project_id, type, name, status, webhook_url, params, create_user, update_user, create_time, update_time) values (#{id}, #{projectId}, #{type}, #{name},#{status}, #{webhookUrl}, #{params}, #{createUser}, #{updateUser}, #{createTime}, #{updateTime})
+</insert>
+    <delete id="deleteNotificationData" parameterType="java.lang.String">
+    delete from notification where id=#{id}
+  </delete>
+    <update id="updateNotificationData" parameterType="com.autotest.LiuMa.database.domain.Notification">
+    update notification set project_id=#{projectId}, type=#{type}, name=#{name},status=#{status},webhook_url=#{webhookUrl}, params=#{params}, update_user=#{updateUser}, update_time=#{updateTime} where id = #{id}
+  </update>
+    <select id="getNotificationData" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">
+    select id, project_id, type, name, status, webhook_url, params, create_user, update_user, create_time, update_time from notification where project_id=#{projectId} and type=#{type}
+  </select>
+
+    <!--<select id="getAllProjectNotification" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">-->
+    <!--select id, project_id, type, name, status, webhook_url, params, create_user, update_user, create_time, update_time from notification where project_id=#{projectId}-->
+  <!--</select>-->
+    <select id="getAllProjectNotification" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">
+    select username, name, type , status, webhook_url, params, create_user, update_user, create_time, update_time from notification inner join user on where project_id=#{projectId}
+  </select>
+
+
+    <select id="getSpecificNotification" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">
+    select type, name, status, webhook_url, params from notification where id=#{notificationId}
+  </select>
+</mapper>

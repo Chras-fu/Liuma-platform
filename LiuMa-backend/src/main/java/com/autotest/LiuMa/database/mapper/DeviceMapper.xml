@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.DeviceMapper">
+  <insert id="addDevice" parameterType="com.autotest.LiuMa.database.domain.Device">
+    insert into device (id, serial, `name`, `system`, brand, model, version, `size`, sources,
+    `owner`, `user`, agent, timeout, create_time, update_time, `status`) values
+    ( #{id}, #{serial}, #{name}, #{system}, #{brand}, #{model}, #{version}, #{size}, #{sources},
+    #{owner}, #{user}, #{agent}, #{timeout}, #{createTime}, #{updateTime}, #{status})
+  </insert>
+  <update id="updateDevice" parameterType="com.autotest.LiuMa.database.domain.Device">
+    update device set
+    <if test="name != null and name != ''">
+      name = #{name},
+    </if>
+    <if test="version != null and version != ''">
+      version = #{version},
+    </if>
+    <if test="agent != null and agent != ''">
+      agent = #{agent},
+    </if>
+    <if test="timeout != null">
+      timeout = #{timeout},
+    </if>
+    `user` = #{user}, sources=#{sources}, `owner`=#{owner}, update_time=#{updateTime}, status=#{status}
+    where serial=#{serial}
+  </update>
+  <update id="updateDeviceByAgent" parameterType="java.lang.String">
+    update device set sources='{}', update_time=REPLACE(unix_timestamp(current_timestamp(3)),'.',''),
+    status='offline', `user`='', timeout=0 where agent=#{agent}
+  </update>
+  <select id="selectTimeoutDevice" resultType="com.autotest.LiuMa.database.domain.Device">
+    select * from device where `status` = 'using' and (update_time+timeout*1000) &lt; REPLACE(unix_timestamp(current_timestamp(3)),'.','')
+  </select>
+  <select id="getDeviceList" resultType="com.autotest.LiuMa.database.domain.Device">
+    select * from device where (`owner` = #{owner} or `owner` = 'system')
+    <if test="condition != null and condition != ''">
+      and `name` like #{condition}
+    </if>
+    <if test="status != null and status != ''">
+      and `status` = #{status}
+    </if>
+    <if test="brand != null and brand.size() > 0">
+      and brand in
+      <foreach collection="brand" open="(" separator="," close=")" item="item" index="index">
+        #{item}
+      </foreach>
+    </if>
+    <if test="android != null and android.size() > 0">
+      and `system` = 'android' and version in
+      <foreach collection="android" open="(" separator="," close=")" item="item" index="index">
+        #{item}
+      </foreach>
+    </if>
+    <if test="apple != null and apple.size() > 0">
+      and `system` = 'apple' and version in
+      <foreach collection="apple" open="(" separator="," close=")" item="item" index="index">
+        #{item}
+      </foreach>
+    </if>
+    <if test="size != null and size.size() > 0">
+      and size in
+      <foreach collection="size" open="(" separator="," close=")" item="item" index="index">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="getDeviceListBySystem" resultType="com.autotest.LiuMa.database.domain.Device">
+    select * from device where (`owner` = #{owner} or `owner` = 'system') and `system` = #{system} and `status` = 'online'
+  </select>
+  <select id="getDeviceFilter" parameterType="java.lang.String" resultType="java.lang.String">
+    select distinct(${field}) from device where (`owner` = #{owner} or `owner` = 'system')
+    <if test="system != null and system != ''">
+      and `system` = #{system}
+    </if>
+  </select>
+  <select id="getDeviceBySerial" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Device">
+    select * from device where serial = #{serial}
+  </select>
+  <select id="getDeviceById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Device">
+    select * from device where id = #{id}
+  </select>
+</mapper>

@@ -19,9 +19,9 @@ import CommonParam from '@/views/baseCenter/commonParam';
 import FuncManage from '@/views/baseCenter/funcManage';
 // 函数编辑
 import FuncEdit from '@/views/baseCenter/funcEdit';
-// 控件管理
+// 操作管理
 import OperationManage from '@/views/baseCenter/operationManage';
-// 控件编辑
+// 操作编辑
 import OperationEdit from '@/views/baseCenter/operationEdit';
 /**
  * 环境中心
@@ -30,6 +30,10 @@ import OperationEdit from '@/views/baseCenter/operationEdit';
 import EnvManage from '@/views/envCenter/envManage';
 // 引擎管理
 import EngineManage from '@/views/envCenter/engineManage';
+// 设备管理
+import DeviceManage from '@/views/envCenter/deviceManage';
+// 设备控制
+import DeviceControl from '@/views/envCenter/deviceControl';
 /**
  * 用例中心
  */
@@ -39,12 +43,16 @@ import InterfaceManage from '@/views/caseCenter/interfaceManage';
 import InterfaceEdit from '@/views/caseCenter/interfaceEdit';
 // 元素管理
 import ElementManage from '@/views/caseCenter/elementManage';
+// 控件管理
+import ControlManage from '@/views/caseCenter/controlManage';
 // 用例管理
 import CaseManage from '@/views/caseCenter/caseManage';
 // API用例
 import ApiCaseEdit from '@/views/caseCenter/apiCaseEdit';
 // WEB用例
 import WebCaseEdit from '@/views/caseCenter/webCaseEdit';
+// APP用例
+import AppCaseEdit from '@/views/caseCenter/appCaseEdit';
 /**
  * 计划管理
  */
@@ -156,23 +164,23 @@ export default new Router({
             }
         },{
             path: '/common/operationManage',
-            name: '控件管理',
+            name: '操作管理',
             component: OperationManage,
             meta: {
                 requirePerm: "NORMAL_MENU",
                 requireAuth: true
             }
         },{
-            path: '/common/operationManage/edit/:operationId',
-            name: '控件编辑',
+            path: '/common/operationManage/:uiType/edit/:operationId',
+            name: '操作编辑',
             component: OperationEdit,
             meta: {
                 requirePerm: "NORMAL_MENU",
                 requireAuth: true
             }
         },{
-            path: '/common/operationManage/add/:operationType',
-            name: '控件新增',
+            path: '/common/operationManage/:uiType/add/:operationType',
+            name: '操作新增',
             component: OperationEdit,
             meta: {
                 requirePerm: "NORMAL_MENU",
@@ -190,6 +198,22 @@ export default new Router({
             path: '/envCenter/engineManage',
             name: '引擎管理',
             component: EngineManage,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/envCenter/deviceManage',
+            name: '设备管理',
+            component: DeviceManage,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/envCenter/deviceControl/:serial',
+            name: '设备控制',
+            component: DeviceControl,
             meta: {
                 requirePerm: "NORMAL_MENU",
                 requireAuth: true
@@ -222,6 +246,14 @@ export default new Router({
             path: '/caseCenter/elementManage',
             name: '元素管理',
             component: ElementManage,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/caseCenter/controlManage',
+            name: '控件管理',
+            component: ControlManage,
             meta: {
                 requirePerm: "NORMAL_MENU",
                 requireAuth: true
@@ -278,6 +310,30 @@ export default new Router({
             path: '/caseCenter/caseManage/webCase/:type/:caseId',
             name: 'WEB用例复用',
             component: WebCaseEdit,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/caseCenter/caseManage/appCase/:system/:type/:caseId',
+            name: 'APP用例编辑',
+            component: AppCaseEdit,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/caseCenter/caseManage/appCase/:system/:type',
+            name: 'APP用例新增',
+            component: AppCaseEdit,
+            meta: {
+                requirePerm: "NORMAL_MENU",
+                requireAuth: true
+            }
+        },{
+            path: '/caseCenter/caseManage/appCase/:system/:type/:caseId',
+            name: 'APP用例复用',
+            component: AppCaseEdit,
             meta: {
                 requirePerm: "NORMAL_MENU",
                 requireAuth: true

@@ -1,10 +1,10 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2755643 */
-  src: url('iconfont.eot?t=1639999069729'); /* IE9 */
-  src: url('iconfont.eot?t=1639999069729#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('iconfont.woff?t=1639999069729') format('woff'),
-       url('iconfont.ttf?t=1639999069729') format('truetype'),
-       url('iconfont.svg?t=1639999069729#iconfont') format('svg');
+  src: url('iconfont.eot?t=1657421726931'); /* IE9 */
+  src: url('iconfont.eot?t=1657421726931#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('iconfont.woff?t=1657421726931') format('woff'),
+       url('iconfont.ttf?t=1657421726931') format('truetype'),
+       url('iconfont.svg?t=1657421726931#iconfont') format('svg');
 }
 
 .iconfont {
@@ -13,6 +13,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-caozuoguanli:before {
+  content: "\e6d7";
+}
+
+.icon-kongjianguanli:before {
+  content: "\e63e";
+}
+
+.icon-shebeiguanli:before {
+  content: "\e8b9";
 }
 
 .icon-wenjianshangchuan:before {
@@ -93,10 +105,6 @@
 
 .icon-zhuye:before {
   content: "\e602";
-}
-
-.icon-kongjianguanli:before {
-  content: "\e636";
 }
 
 .icon-yongliguanli:before {

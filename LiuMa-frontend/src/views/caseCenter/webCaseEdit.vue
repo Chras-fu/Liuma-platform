@@ -106,9 +106,9 @@
         </div>
     </el-dialog>
     <!-- 用例调试选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="true" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
-    <run-result :taskId="taskId" :caseType="caseType" :resultVisable="resultVisable" @closeResult="closeResult"/>
+    <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
 </template>
 
@@ -171,7 +171,6 @@ export default {
                 engineId: "",
                 environmentId: []
             },
-            caseType: "WEB",
             resultVisable: false,
             taskId: "",
             rules: {
@@ -448,7 +447,7 @@ export default {
             });
         },
         getOperations(){
-          let url = '/autotest/operation/group/list/' + this.$store.state.projectId;
+          let url = '/autotest/operation/group/web/list/' + this.$store.state.projectId + "?system=";
             this.$get(url, response =>{
                 this.operations = response.data;
             });

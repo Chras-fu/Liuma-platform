@@ -12,7 +12,7 @@
   </delete>
   <select id="getCaseWebList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CaseWebDTO">
     select cw.id, cw.index, cw.case_id, cw.operation_id, cw.element, cw.data, op.name as operationName, op.type as operationType
-    from case_web cw left join operation op on op.id = cw.operation_id
+    from case_web cw left join operation_${caseType} op on op.id = cw.operation_id
     where cw.case_id = #{caseId} order by cw.index
   </select>
 </mapper>

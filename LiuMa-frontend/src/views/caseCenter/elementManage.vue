@@ -18,7 +18,7 @@
     </el-form>
     <!-- 页面模块 -->
     <el-col :span="4" class="left-tree">
-        <module-tree title="页面模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)" 
+        <module-tree title="页面模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)"
             @removeModule="removeModule(arguments)" @dragNode="dragNode(arguments)"/>
     </el-col>
     <!-- 元素列表 -->
@@ -45,7 +45,7 @@
     <!-- 添加模块弹框 -->
     <module-append title="添加页面模块" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog" @submitModule="submitModule($event)"/>
     <!-- 添加元素弹框 -->
-    <el-dialog title="选择元素类型" :visible.sync="elementVisible" width="40%" destroy-on-close>
+    <el-dialog title="编辑元素" :visible.sync="elementVisible" width="40%" destroy-on-close>
         <el-form label-width="120px" style="padding-right: 30px;" :model="addElementForm" :rules="rules" ref="addElementForm">
             <el-form-item label="元素名称" prop="name">
                 <el-input size="small" style="width:95%" v-model="addElementForm.name" auto-complete="off" placeholder="元素名称"/>
@@ -96,11 +96,6 @@ export default {
                 fatherName: "",
                 data: "",
             },
-            newelementType:"API",
-            elementTypes:[
-                { label: "API", value: "API" },
-                { label: "WEB", value: "WEB" },
-            ],
             byList:[
                 { label: "ID", value: "ID" },
                 { label: "NAME", value: "NAME" },
@@ -124,7 +119,7 @@ export default {
                 page: 1,
                 limit: 10,
                 condition: "",
-                moduleId: "",
+                moduleId: ""
             },
             elementListData: [],
             pageparam: {
@@ -149,12 +144,15 @@ export default {
     methods: {
         // 点击模块
         clickModule(data){
-            this.searchForm.moduleId = data.id;
+          console.log("点击模块");
+          this.searchForm.moduleId = data.id;
             this.getdata(this.searchForm);
         },
         // 添加模块
         appendModule(data) {
-            if (data){
+          console.log("add module");
+
+          if (data){
                 this.moduleForm.parentId = data.id;
                 this.moduleForm.parentName = data.label;
                 this.moduleForm.data = data;
@@ -175,7 +173,7 @@ export default {
                 const children = parent.data.children || parent.data;
                 const index = children.findIndex(d => d.id === data.id);
                 children.splice(index, 1);
-                this.$message.success("模块删除成功")
+                this.$message.success("模块删除成功");
             });
         },
         // 拖拽模块
@@ -186,7 +184,7 @@ export default {
             let moduleForm = dragNode.data;
             moduleForm.parentId = newParent;
             this.$post(url, moduleForm, response =>{
-                this.$message.success("更改成功")
+                this.$message.success("更改成功");
             });
         },
         // 关闭弹框
@@ -284,6 +282,7 @@ export default {
                     this.$post(url, this.addElementForm, response =>{
                         this.$message.success("保存成功");
                         this.elementVisible = false;
+                        this.loading = true;
                         this.getdata(this.searchForm);
                     });
 

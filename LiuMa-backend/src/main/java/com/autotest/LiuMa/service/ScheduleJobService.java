@@ -2,9 +2,11 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.autotest.LiuMa.common.constants.DeviceStatus;
 import com.autotest.LiuMa.common.constants.ReportSourceType;
 import com.autotest.LiuMa.common.constants.ReportStatus;
 import com.autotest.LiuMa.common.constants.TaskType;
+import com.autotest.LiuMa.common.utils.HttpUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.StatisticsDTO;
@@ -44,6 +46,9 @@ public class ScheduleJobService {
     @Resource
     private ProjectMapper projectMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
     public void updateLostHeartbeatEngine(){
         Long minLastHeartbeatTime = System.currentTimeMillis() - 3*60*1000; // 三分钟没有心跳监控则离线
         engineMapper.updateLostHeartbeatEngine(minLastHeartbeatTime);
@@ -57,6 +62,22 @@ public class ScheduleJobService {
             reportMapper.updateReportStatus(ReportStatus.DISCONTINUE.toString(), report.getId());
             taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), report.getTaskId());
             reportMapper.updateReportEndTime(report.getId(), System.currentTimeMillis(), System.currentTimeMillis());
+        }
+    }
+
+    public void updateTimeoutDevice(){
+        List<Device> devices = deviceMapper.selectTimeoutDevice();
+        for (Device device:devices){
+            JSONObject sources = JSONObject.parseObject(device.getSources());
+            device.setStatus(DeviceStatus.COLDING.toString());
+            device.setUpdateTime(System.currentTimeMillis());
+            device.setSources("{}");
+            device.setUser("");
+            device.setTimeout(0);
+            // 调用设备冷却接口
+            String url = sources.getString("url");
+            HttpUtils.post(url+"/cold?udid="+device.getSerial(), null);
+            deviceMapper.updateDevice(device);
         }
     }
 
@@ -86,6 +107,7 @@ public class ScheduleJobService {
             report.setName(runName);
             report.setTaskId(task.getId());
             report.setEnvironmentId(plan.getEnvironmentId());
+            report.setDeviceId(null);
             report.setSourceType(ReportSourceType.PLAN.toString());
             report.setSourceId(plan.getId());
             report.setStatus(ReportStatus.PREPARED.toString());
