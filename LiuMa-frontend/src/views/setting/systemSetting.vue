@@ -3,7 +3,7 @@
  */
 <template>
   <div>
-    <el-tabs v-model="activeName" tab-position="left" @tab-click="handleClick">
+    <el-tabs v-model="activeName" tab-position="left">
       <el-tab-pane label="域名标识" name="domainSign">
         <domain-sign-setting :showOpt="showOpt" :activeName="activeName"></domain-sign-setting>
       </el-tab-pane>
@@ -48,11 +48,7 @@ export default {
           this.activeName = "domainSign";
         });
       },
-      handleClick(tab, event){
-
-      }
     }
-
 }
 </script>
 

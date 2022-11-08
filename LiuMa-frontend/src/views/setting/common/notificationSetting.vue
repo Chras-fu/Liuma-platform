@@ -2,30 +2,29 @@
   <div>
     <el-form :inline="true" :model="searchForm">
       <el-form-item label="">
-        <el-input size="small" v-model="searchForm.condition" prefix-icon="el-icon-search"
-                  placeholder="请输入通知渠道(例: 钉钉)"/>
+        <el-input size="small" v-model="searchForm.condition" prefix-icon="el-icon-search" placeholder="请输入群聊名称"/>
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" @click="search">搜索</el-button>
         <el-button size="small" @click="reset">重置</el-button>
       </el-form-item>
       <el-form-item style="float: right">
-        <el-button size="small" v-if="showOpt" type="primary" icon="el-icon-plus" @click="addNotification">新增通知
-        </el-button>
-        <el-button size="small" @click="mydebug">debug</el-button>
+        <el-button size="small" v-if="showOpt" type="primary" icon="el-icon-plus" @click="addNotification">新增通知</el-button>
       </el-form-item>
     </el-form>
 
-    <el-table size="small" :data="tableData" v-loading="loading">
+    <el-table size="small" :data="notificationData" v-loading="loading">
       <el-table-column prop="index" label="序号" align="center" width="50px"/>
-      <el-table-column prop="projectName" label="项目名称" align="center" width="200px"/>
-<!--      <el-table-column prop="channel" label="渠道名称" min-width="60px"/>-->
-      <el-table-column prop="chatName" label="群聊名称" min-width="180px"/>
-      <el-table-column prop="status" label="状态" min-width="50px"/>
-      <el-table-column prop="createUser" label="创建者" min-width="60px"/>
-      <el-table-column prop="updateUser" label="更新者" min-width="60px"/>
+      <el-table-column prop="name" label="群聊名称"/>
+      <el-table-column prop="type" label="群聊类型"/>
+      <el-table-column prop="status" label="状态">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status==='enable'" type="success">启用</el-tag>
+          <el-tag v-else type="info">禁用</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="createTime" label="创建时间" min-width="65px"/>
-      <el-table-column prop="updateTime" label="更新时间" width="70px"/>
+      <el-table-column prop="updateTime" label="更新时间" width="150px"/>
       <el-table-column fixed="right" align="operation" label="操作" width="100px">
         <template slot-scope="scope">
           <el-button v-if="showOpt" type="text" size="mini" @click="editNotification(scope.row)">编辑</el-button>
@@ -33,53 +32,31 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页组件 -->
+    <Pagination v-bind:child-msg="pageparam" @callFather="callFather"/>
     <!-- 新增通知的弹窗 -->
-    <el-dialog title="新增通知配置" :visible.sync="dialogNotifyVisible" width="600px" destroy-on-close>
+    <el-dialog title="新增通知配置" :visible.sync="notificationVisible" width="600px" destroy-on-close>
       <el-form label-width="100px" style="padding-right: 30px;" :model="notificationForm" :rules="rules" ref="notificationForm">
-        <el-form-item label="项目名称" prop="projectName">
-          <el-select v-model="notificationForm.projectId" placeholder="请选择项目名称">
-            <el-option
-              v-for="item in listUserProjectInfo"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-            </el-option>
+        <el-form-item label="通知渠道" prop="type">
+          <el-select size="small" v-model="notificationForm.type" style="width:95%" placeholder="请选择通知渠道">
+            <el-option v-for="item in notificationOptions" :key="item.value" :label="item.label" :value="item.value"/>
           </el-select>
-
         </el-form-item>
-        <el-form-item label="通知类型" prop="type">
-          <el-select v-model="notificationForm.notifyType" placeholder="请选择通知渠道">
-            <el-option
-              v-for="item in notificationOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-
+        <el-form-item label="群聊名称" prop="name">
+          <el-input size="small" style="width:95%" v-model="notificationForm.name" placeholder="请输入群聊名称"/>
         </el-form-item>
-        <el-form-item label="群聊名称" prop="chatName">
-          <el-input size="small" style="width:95%" v-model="notificationForm.chatName" placeholder="请输入推送消息的群聊名称"/>
-        </el-form-item>
-        <el-form-item label="启用状态" prop="isUseSetting">
-          <el-switch
-            v-model="notificationForm.useStatus"
-            active-color="#13ce66"
-            inactive-color="#ff4949">
-          </el-switch>
+        <el-form-item label="启用状态" prop="status">
+          <el-switch v-model="notificationForm.status" active-value="enable" inactive-value="disable"/>
         </el-form-item>
         <el-form-item label="webhook" prop="webhookUrl">
           <el-input size="small" style="width:95%" v-model="notificationForm.webhookUrl" placeholder="请输入webhook地址"/>
         </el-form-item>
-
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="dialogNotifyVisible=false">取消</el-button>
+        <el-button size="small" @click="notificationVisible=false">取消</el-button>
         <el-button size="small" type="primary" @click="submitNotification">确定</el-button>
       </div>
     </el-dialog>
-
-
   </div>
 </template>
 
@@ -109,16 +86,14 @@
           limit: 10,
           condition: ""
         },
-        dialogNotifyVisible: false,  //控制添加配置弹窗的显示
-        notificationForm: {
-          projectId:"", //用户从下拉框中,选择的项目id
-          notifyType:"",  //通知渠道,如:钉钉,飞书, 企业微信
-          chatName:"", //群聊名称
-          useStatus:true, //是否启用
-          webhookUrl:"" //webhook地址
+        pageparam: {
+          currentPage: 1,
+          pageSize: 10,
+          total: 0
         },
-        tableData: [], //页面table展示的数据
-        isUseSetting:true,
+        notificationVisible: false, 
+        notificationForm: {},
+        notificationData: [],
         notificationOptions: [
           {
             value: "Dingding",
@@ -135,134 +110,122 @@
         ],
         loading: false,
         rules: {
+          type: [{required: true, message: '群聊类型不能为空', trigger: 'blur'}],
           name: [{required: true, message: '群聊名称不能为空', trigger: 'blur'}],
           webhookUrl: [{required: true, message: 'webhook地址不能为空', trigger: 'blur'}]
         },
-        listUserProjectInfo:[], //添加配置dialog中, 用户选择自己拥有项目的数据
-        listUserProjectId:[], //添加配置dialog中, 用户选择自己拥有项目id的数据
-        listUserProjectName:[] //项目名称列表
       }
     },
-    created(){
-      //调用获取用户project的接口
-      this.queryUserProject()
-      this.getAllNotificationSetting()
+    watch: {
+        activeName(){
+          if(this.activeName === "notification"){
+            this.getData(this.searchForm);
+          }
+        }
     },
     methods: {
-      //获取用户project的接口
-      queryUserProject(){
-          //从localStorage中获取userId, 然后根据userId查询该用户拥有的项目
-        let userId = JSON.parse(localStorage.getItem("userInfo"))["id"]
-        // console.log("用户id是: " + userId);
-        let url = "/autotest/project/user/" + userId
-        // console.log("url: "+url);
-        this.$get(url, response => {
-          for (let i = 0; i < response.data.length; i++) {
-            let dictProjectInfo = {}
-            dictProjectInfo["name"] = response.data[i]["name"]
-            dictProjectInfo["id"] = response.data[i]["id"]
-            this.listUserProjectInfo.push(dictProjectInfo)
-
-            //往列表中添加当前用户拥有的所有项目id
-            this.listUserProjectId.push(response.data[i]["id"])
-            this.listUserProjectName.push(response.data[i]["name"])
-          }
+      getData(searchParam){
+        let url = "/autotest/notification/list/" + searchParam.page + '/' + searchParam.limit;;
+        let param = {
+            projectId: this.$store.state.projectId,
+            condition: searchParam.condition
+        };
+        this.$post(url, param, response => {
+            let data = response.data;
+            for(let i =0; i<data.list.length; i++){
+                data.list[i].updateTime = timestampToTime(data.list[i].updateTime);
+                data.list[i].index = (this.pageparam.currentPage-1) * this.pageparam.pageSize + i+1;
+            }
+            this.notificationData = data.list;
+            this.loading = false;
+            // 分页赋值
+            this.pageparam.currentPage = this.searchForm.page;
+            this.pageparam.pageSize = this.searchForm.limit;
+            this.pageparam.total = data.total;
         });
-
       },
-      addNotification() {
-        console.log("add notification");
-        this.dialogNotifyVisible = true;
-      },
+      // 搜索按钮
       search() {
-        console.log("search");
+          this.getData(this.searchForm);
       },
+      // 重置按钮
       reset() {
-        console.log("reset");
+          this.searchForm.condition = "";
+          this.getData(this.searchForm);
       },
-      editNotification() {
-        console.log("editNotification");
+      // 分页插件事件
+      callFather(param) {
+          this.searchForm.page = param.currentPage;
+          this.searchForm.limit = param.pageSize;
+          this.getData(this.searchForm);
+      },
+      addNotification(){
+        this.notificationForm = {
+          type: "Wechat",
+          status: "enable",
+          params: this.setParams()
+        };
+        this.notificationVisible = true;
+      },
+      editNotification(row){
+        this.notificationForm = {
+          id: row.id,
+          name: row.name,
+          type: row.type,
+          status: row.status,
+          params: row.params,
+          webhookUrl: row.webhookUrl,
+          createTime: row.createTime
+        };
+        this.notificationVisible = true;
       },
       deleteNotification() {
-        console.log("deleteNotification");
+        let text = "通知配置删除后 相关计划执行完成后无法通知 确定要删除通知配置吗";
+        let url = "/autotest/notification/delete";
+        this.$confirm(text, '删除提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+        })
+        .then(() => {
+            this.$post(url, {id: row.id}, response => {
+                this.$message.success("删除成功");
+                this.getData(this.searchForm);
+            });
+        })
+        .catch(() => {
+            this.$message.success("取消成功");
+        })
       },
       submitNotification() {
-        console.log("submitNotification");
-        let saveUrl = "/autotest/notice/save"
-        let saveBody = {}
-        saveBody.projectId = this.notificationForm.projectId
-        saveBody.type = this.notificationForm.notifyType
-        saveBody.name = this.notificationForm.chatName
-        saveBody.params = {
-          "msgtype": "markdown",
-          "markdown": {
-            "title": "{noticeTitle}",
-            "text": "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  操作者: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSucc}\n##### •  失败数：{caseFail}\n##### •  测试成功率：{succPercent}\n##### •  测试执行时间: {executeTime}"
-          },
-          "at": "personName" //暂未使用
-        }
-        if(this.notificationForm.useStatus === true ){
-          saveBody.status = "1"
-        }else {
-          saveBody.status = "0"
-        }
-        saveBody.webhookUrl = this.notificationForm.webhookUrl
-        this.$post(saveUrl, saveBody, response =>{
-          console.log("发送添加配置请求");
-          let res = response.data
-          console.log(res);
-        })
-        this.dialogNotifyVisible = false
-
-
-      },
-
-      getAllNotificationSetting(){ //获取当前用户的所有消息通知的配置信息
-        //this.listUserProjectId  当前用户拥有的所有项目id列表
-        console.log("项目id列表: "+ this.listUserProjectId);
-        for (let i = 0; i < this.listUserProjectId.length; i++) {
-          // let bodyData = {"projectId":this.listUserProjectId[i]}
-          let url = "/autotest/notice/query/all/notification?projectId=" + this.listUserProjectId[i]
-
-          this.$get(url, response=>{
-            // console.log("发送all请求");
-            // console.log("response: "+ response.data)
-            // console.log("message: "+ response.message)
-            if (response.message === "成功"){
-              let listNotification = response.data
-              console.log("listNotification: " + listNotification);
-              for (let j = 0; j < listNotification.length; j++) {
-                console.log(listNotification[j]);
-                let everyTableData = {}
-                everyTableData["index"] = j + 1
-                everyTableData["projectName"] = this.listUserProjectName[j]
-                everyTableData["chatName"] = listNotification[j].name
-                everyTableData["status"] = listNotification[j].status
-                everyTableData["createUser"] = listNotification[j].createUser
-                everyTableData["updateUser"] = listNotification[j].updateUser
-                everyTableData["createTime"] = listNotification[j].createTime
-                everyTableData["updateTime"] = listNotification[j].updateTime
-                this.tableData.push(everyTableData)
-
-              }
-
+        this.$refs["notificationForm"].validate(valid => {
+            if (valid) {
+                this.notificationForm.projectId = this.$store.state.projectId;
+                let url = "/autotest/notification/save";
+                this.$post(url, this.notificationForm, response =>{
+                    this.$message.success("保存成功");
+                    this.notificationVisible = false;
+                    this.getData(this.searchForm);
+                });
+            }else{
+                return false;
             }
-
-
-
-          })
-        }
-        console.log("table数据: " + this.tableData)
-
-
-
-
+        });
+      
+        
       },
-
-      mydebug(){
-        // console.log("调试: "+this.notificationForm.useStatus);
-        this.getAllNotificationSetting()
-        console.log("table数据: " + this.tableData)
+      setParams(){
+        let params = {
+          msgtype: "markdown",
+          markdown: {
+            title: "{noticeTitle}",
+            text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  操作者: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSucc}\n##### •  失败数：{caseFail}\n##### •  测试成功率：{succPercent}\n##### •  测试执行时间: {executeTime}"
+          },
+          at: {
+            isAtAll: true
+          }
+        }
+        return JSON.stringify(params);
       }
     }
   }

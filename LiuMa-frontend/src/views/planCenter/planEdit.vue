@@ -12,7 +12,7 @@
                 </el-form-item>
             </el-col>
             <el-col :span="8">
-                <el-form-item label="版本" prop="versionId">
+                <el-form-item label="迭代版本" prop="versionId">
                     <el-select  size="small" style="width: 100%" v-model="planForm.versionId" placeholder="请选择计划版本">
                         <el-option v-for="item in versionList" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>

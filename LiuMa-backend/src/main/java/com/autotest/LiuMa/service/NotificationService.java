@@ -2,10 +2,11 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.autotest.LiuMa.common.constants.NotificationStatus;
 import com.autotest.LiuMa.database.domain.Notification;
+import com.autotest.LiuMa.database.domain.Version;
 import com.autotest.LiuMa.database.mapper.NotificationMapper;
 import com.autotest.LiuMa.request.DefinedReportRequest;
-import com.autotest.LiuMa.request.NotificationRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -15,53 +16,37 @@ import cn.hutool.http.HttpUtil;
 
 @Service
 public class NotificationService {
+
     @Resource
     private NotificationMapper notificationMapper;
 
-    public void saveNotification(NotificationRequest notificationRequest){
-        JSONObject notificationDataObject = (JSONObject) JSON.toJSON(notificationRequest);
-        Notification notification = notificationDataObject.toJavaObject(Notification.class);
-        Object tmp = notification.getId();
-        if (notification.getId()==null ||notification.getId().equals("") ){
+    public void saveNotification(Notification notification){
+        if(notification.getId() == null || notification.getId().equals("")){
+            //新增通知
             notification.setId(UUID.randomUUID().toString());
-            notification.setProjectId(notificationRequest.getProjectId());
-            notification.setType(notificationRequest.getType());
-            notification.setName(notificationRequest.getName());
-            notification.setStatus(notificationRequest.getStatus());
-            notification.setParams(notificationRequest.getParams() + "");
-            notification.setCreateUser(notificationRequest.getUserId());
-            notification.setUpdateUser(notificationRequest.getUserId());
             notification.setCreateTime(System.currentTimeMillis());
             notification.setUpdateTime(System.currentTimeMillis());
-            notificationMapper.addNotificationData(notification);
-        }else{ //修改接口
-            notification.setProjectId(notificationRequest.getProjectId());
-            notification.setType(notificationRequest.getType());
-            notification.setName(notificationRequest.getName());
-            notification.setStatus(notificationRequest.getStatus());
-            notification.setParams(notificationRequest.getParams() + "");
-            notification.setUpdateUser(notificationRequest.getUserId());
+        }else{
+            // 更新通知
             notification.setUpdateTime(System.currentTimeMillis());
-            notificationMapper.updateNotificationData(notification);
+        }
+        notificationMapper.saveNotification(notification);
+        // 更新其他通知为禁用
+        if(notification.getStatus().equals(NotificationStatus.ENABLE.toString())){
+            notificationMapper.updateOtherNotificationStatus(NotificationStatus.DISABLE.toString(),
+                    notification.getId(), notification.getProjectId());
         }
     }
 
     public void deleteNotification(String id){
-        notificationMapper.deleteNotificationData(id);
+        notificationMapper.deleteNotification(id);
     }
 
-
-    public Notification queryNotification(String projectId, String type){
-        return notificationMapper.getNotificationData(projectId, type);
-    }
-
-    public List<Notification> getAllProjectNotification(String projectId){
-        return notificationMapper.getAllProjectNotification(projectId);
-    }
-
-    //获取单条数据
-    public Notification querySpecificNotification(String notificationId){
-        return notificationMapper.getSpecificNotification(notificationId);
+    public List<Notification> getNotificationList(String projectId, String condition) {
+        if(condition != null && !condition.equals("")){
+            condition = "%"+condition+"%";
+        }
+        return notificationMapper.getNotificationList(projectId, condition);
     }
 
     //将对平台的请求封装

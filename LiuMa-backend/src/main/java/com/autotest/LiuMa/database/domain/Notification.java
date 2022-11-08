@@ -16,16 +16,12 @@ public class Notification implements Serializable {
 
     private String webhookUrl;
 
-    private String status;
-
     private String projectId;
-
-    private String createUser;
-
-    private String updateUser;
 
     private Long createTime;
 
     private Long updateTime;
+
+    private String status;
 
 }

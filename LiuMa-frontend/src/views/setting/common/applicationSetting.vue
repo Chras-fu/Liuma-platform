@@ -39,13 +39,13 @@
                 <el-input size="small" style="width:95%" v-model="applicationForm.name" placeholder="请输入应用名称"/>
             </el-form-item>
             <el-form-item label="所属系统" prop="system">
-                <el-select size="small" style="width:95%" :disabled="isEdit" v-model="applicationForm.system" placeholder="所属系统">
+                <el-select size="small" style="width:95%" :disabled="isEdit" v-model="applicationForm.system" placeholder="请选择所属系统">
                     <el-option v-for="item in systems" :key="item.value" :label="item.label" :value="item.value"/>
                 </el-select>
             </el-form-item>
             <el-form-item label="应用ID" prop="appId">
                 <el-input size="small" style="width:95%" v-model="applicationForm.appId" placeholder="请输入应用ID"/>
-                <el-tooltip content="应用ID: 安卓的包名或苹果的bundleId" placement="bottom">
+                <el-tooltip content="应用ID: 安卓的packageName或苹果的bundleId" placement="bottom">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>

@@ -5,8 +5,6 @@ CREATE TABLE `notification` (
   `params` json NOT NULL COMMENT '配置参数',
   `webhook_url` varchar(500) NOT NULL COMMENT '地址url',
   `project_id` varchar(50) NOT NULL COMMENT '所属项目id',
-  `update_user` varchar(50) NOT NULL COMMENT '更新人',
-  `create_user` varchar(50) NOT NULL COMMENT '创建人',
   `create_time` bigint(13) NOT NULL COMMENT '创建时间',
   `update_time` bigint(13) NOT NULL COMMENT '更新时间',
   `status` varchar(20) DEFAULT NULL COMMENT '状态',

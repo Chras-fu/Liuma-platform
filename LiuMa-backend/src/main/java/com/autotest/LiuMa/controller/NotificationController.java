@@ -1,65 +1,39 @@
 package com.autotest.LiuMa.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.autotest.LiuMa.common.utils.PageUtils;
+import com.autotest.LiuMa.common.utils.Pager;
 import com.autotest.LiuMa.database.domain.Notification;
-import com.autotest.LiuMa.dto.NotificationDTO;
-import com.autotest.LiuMa.request.DefinedReportRequest;
-import com.autotest.LiuMa.request.NotificationRequest;
+import com.autotest.LiuMa.request.QueryRequest;
 import com.autotest.LiuMa.service.NotificationService;
-import org.springframework.beans.BeanUtils;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/autotest/notice")
+@RequestMapping("/autotest/notification")
 public class NotificationController {
+
     @Resource
     private NotificationService notificationService;
 
-    @PostMapping("/save")  //add or update
-    public void saveNotificationData(@RequestBody NotificationRequest notificationRequest, HttpServletRequest request){
-        String user = request.getSession().getAttribute("userId").toString();
-        notificationRequest.setUserId(user);
+    @PostMapping("/save")
+    public void saveNotification(@RequestBody Notification notificationRequest){
         notificationService.saveNotification(notificationRequest);
     }
-    @DeleteMapping("/delete")
-    public void deleteNotificationData(String id){
-        notificationService.deleteNotification(id);
+
+    @PostMapping("/delete")
+    public void deleteNotification(@RequestBody Notification notification){
+        notificationService.deleteNotification(notification.getId());
     }
 
-    @GetMapping("/query")
-    public NotificationDTO queryNotificationData(@RequestParam String projectId, @RequestParam String type){
-        NotificationDTO notificationDTO = new NotificationDTO();
-        Notification queryNotification = notificationService.queryNotification(projectId, type);
-        BeanUtils.copyProperties(queryNotification, notificationDTO);
-        return notificationDTO;
-    }
-    //根据projectId查询当前项目所有的配置信息(便于前端查询数据)
-    @GetMapping("/query/all/notification")
-    public List queryProjectData(@RequestParam String projectId){
-        return notificationService.getAllProjectNotification(projectId);
-    }
-
-    @PostMapping("/run")
-    public String noticePlatform(@RequestParam String notificationId, @RequestBody DefinedReportRequest definedReportRequest){
-        System.out.println("definedReportRequest: " + definedReportRequest);
-        Notification notification = notificationService.querySpecificNotification(notificationId);
-        if (notification.getStatus().equals("0")){
-            return "The notification setting is closed";
-        }
-        String platform = notification.getType();
-        String paramObject = notification.getParams();  //配置字段对象
-        String webhookUrl = notification.getWebhookUrl();
-
-        //将钉钉，微信，企业微信的单独封装起来
-         notificationService.noticeFactory(platform, webhookUrl, paramObject, definedReportRequest);
-         return platform + " send success";
+    @PostMapping("/list/{goPage}/{pageSize}")
+    public Pager<List<Notification>> getNotificationPageList(@PathVariable int goPage, @PathVariable int pageSize,
+                                                   @RequestBody QueryRequest request) {
+        Page<Object> page = PageHelper.startPage(goPage, pageSize, true);
+        return PageUtils.setPageInfo(page, notificationService.getNotificationList(request.getProjectId(), request.getCondition()));
     }
 
 }

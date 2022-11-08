@@ -8,15 +8,13 @@ import java.util.List;
 
 @Mapper
 public interface NotificationMapper {
-    void addNotificationData(Notification notification);
-    void deleteNotificationData(String id);
-    void updateNotificationData(Notification notification);
-    Notification getNotificationData(@Param("projectId") String projectId, @Param("type") String type);
 
-    //获取project的所有配置
-    List<Notification> getAllProjectNotification(@Param("projectId") String projectId);
+    void saveNotification(Notification notification);
 
-    //获取单条规则
-    Notification getSpecificNotification(String notificationId);
+    void deleteNotification(String id);
+
+    void updateOtherNotificationStatus(String status, String id, String projectId);
+
+    List<Notification> getNotificationList(String projectId, String condition);
 
 }
