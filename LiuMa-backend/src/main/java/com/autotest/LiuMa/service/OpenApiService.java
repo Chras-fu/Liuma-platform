@@ -221,14 +221,14 @@ public class OpenApiService {
                 if(notification.getStatus().equals(NotificationStatus.DISABLE.toString())){
                     return; // 通知禁用不通知
                 }
-
                 notificationService.sendNotification(notification, task);   // 发送通知
+//                // 邮件推送
+//                User user = userMapper.getUserInfo(task.getCreateUser());
+//                String title = "测试任务执行完成通知";
+//                String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
+//                        + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
+//                EmailUtils.sendMail(user.getEmail(), title, content, accessKey, accessSecret, runnerSenderAddress, runnerSenderName);
             }
-            User user = userMapper.getUserInfo(task.getCreateUser());
-            String title = "测试任务执行完成通知";
-            String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
-                    + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
-            EmailUtils.sendMail(user.getEmail(), title, content, accessKey, accessSecret, runnerSenderAddress, runnerSenderName);
         }else {
             Report report = reportMapper.getReportDetail(task.getReportId());
             if (report.getSourceType().equals(ReportSourceType.TEMP.toString())){

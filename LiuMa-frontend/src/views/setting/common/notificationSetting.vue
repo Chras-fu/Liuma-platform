@@ -166,7 +166,6 @@
         this.notificationForm = {
           type: "Wechat",
           status: "enable",
-          params: this.setParams()
         };
         this.notificationVisible = true;
       },
@@ -176,13 +175,12 @@
           name: row.name,
           type: row.type,
           status: row.status,
-          params: row.params,
           webhookUrl: row.webhookUrl,
           createTime: row.createTime
         };
         this.notificationVisible = true;
       },
-      deleteNotification() {
+      deleteNotification(row) {
         let text = "通知配置删除后 相关计划执行完成后无法通知 确定要删除通知配置吗";
         let url = "/autotest/notification/delete";
         this.$confirm(text, '删除提示', {
@@ -204,6 +202,7 @@
         this.$refs["notificationForm"].validate(valid => {
             if (valid) {
                 this.notificationForm.projectId = this.$store.state.projectId;
+                this.notificationForm.params = this.setParams(this.notificationForm.type);
                 let url = "/autotest/notification/save";
                 this.$post(url, this.notificationForm, response =>{
                     this.$message.success("保存成功");
@@ -215,16 +214,39 @@
             }
         });
       },
-      setParams(){
-        let params = {
-          msgtype: "markdown",
-          markdown: {
-            title: "流马测试计划执行结果通知",
-            text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
-          },
-          at: {
-            isAtAll: true
-          }
+      setParams(val){
+        let params;
+        switch (val){
+          case 'Dingding':
+            params = {
+              msgtype: "markdown",
+              markdown: {
+                title: "流马测试计划执行结果通知",
+                text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
+              },
+              at: {
+                isAtAll: true
+              }
+            }
+            break;
+          case 'Feishu':
+            params = {
+              msg_type: "text",
+              content: {
+                text: "流马测试计划执行结果通知\n{reportTitle}\n •  任务类型：{taskType}\n •  执行人: {user}\n •  总用例数: {caseNum}\n •  成功数: {caseSuccess}\n •  失败数：{caseFail}\n •  错误数：{caseError}\n • 测试成功率：{successPercent}\n •  测试执行时长: {executeTime}"
+              }
+            }
+            break;
+          case 'Wechat':
+            params = {
+              msgtype: "markdown",
+              markdown: {
+                content: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
+              }
+            }
+            break;
+          default:
+            params = {};
         }
         return JSON.stringify(params);
       },

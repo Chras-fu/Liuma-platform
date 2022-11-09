@@ -8,6 +8,7 @@
         update_time = #{updateTime},
         name = #{name},
         `type` = #{type},
+        `params` = #{params},
         webhook_url = #{webhookUrl},
         `status` = #{status}
     </insert>
