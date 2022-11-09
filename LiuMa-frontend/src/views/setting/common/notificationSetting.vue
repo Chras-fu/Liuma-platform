@@ -16,14 +16,17 @@
     <el-table size="small" :data="notificationData" v-loading="loading">
       <el-table-column prop="index" label="序号" align="center" width="50px"/>
       <el-table-column prop="name" label="群聊名称"/>
-      <el-table-column prop="type" label="群聊类型"/>
-      <el-table-column prop="status" label="状态">
+      <el-table-column prop="type" label="群聊类型">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.status==='enable'" type="success">启用</el-tag>
-          <el-tag v-else type="info">禁用</el-tag>
+          {{getType(scope.row.type)}}
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" min-width="65px"/>
+      <el-table-column prop="status" label="状态">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status==='enable'" size="small" type="success">启用</el-tag>
+          <el-tag v-else size="small" type="info">禁用</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="updateTime" label="更新时间" width="150px"/>
       <el-table-column fixed="right" align="operation" label="操作" width="100px">
         <template slot-scope="scope">
@@ -96,16 +99,16 @@
         notificationData: [],
         notificationOptions: [
           {
+            value: "Wechat",
+            label: "企业微信"
+          },
+          {
             value: "Dingding",
             label: "钉钉"
           },
           {
             value: "Feishu",
             label: "飞书"
-          },
-          {
-            value: "Wechat",
-            label: "企业微信"
           }
         ],
         loading: false,
@@ -211,21 +214,31 @@
                 return false;
             }
         });
-      
-        
       },
       setParams(){
         let params = {
           msgtype: "markdown",
           markdown: {
-            title: "{noticeTitle}",
-            text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  操作者: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSucc}\n##### •  失败数：{caseFail}\n##### •  测试成功率：{succPercent}\n##### •  测试执行时间: {executeTime}"
+            title: "流马测试计划执行结果通知",
+            text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
           },
           at: {
             isAtAll: true
           }
         }
         return JSON.stringify(params);
+      },
+      getType(val){
+        switch (val){
+          case 'Dingding':
+            return "钉钉";
+          case 'Feishu':
+            return "飞书";
+          case 'Wechat':
+            return "企业微信";
+          default:
+            return 
+        }
       }
     }
   }

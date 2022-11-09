@@ -29,6 +29,11 @@ public class NotificationController {
         notificationService.deleteNotification(notification.getId());
     }
 
+    @GetMapping("/list/{projectId}")
+    public List<Notification> getNotificationList(@PathVariable String projectId) {
+        return notificationService.getNotificationList(projectId, null);
+    }
+
     @PostMapping("/list/{goPage}/{pageSize}")
     public Pager<List<Notification>> getNotificationPageList(@PathVariable int goPage, @PathVariable int pageSize,
                                                    @RequestBody QueryRequest request) {

@@ -4,11 +4,9 @@ import com.autotest.LiuMa.common.constants.PlanFrequency;
 import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.domain.Plan;
 import com.autotest.LiuMa.database.domain.PlanCollection;
+import com.autotest.LiuMa.database.domain.PlanNotice;
 import com.autotest.LiuMa.database.domain.PlanSchedule;
-import com.autotest.LiuMa.database.mapper.CollectionCaseMapper;
-import com.autotest.LiuMa.database.mapper.PlanCollectionMapper;
-import com.autotest.LiuMa.database.mapper.PlanMapper;
-import com.autotest.LiuMa.database.mapper.PlanScheduleMapper;
+import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.PlanCollectionDTO;
 import com.autotest.LiuMa.dto.PlanDTO;
 import com.autotest.LiuMa.request.QueryRequest;
@@ -37,6 +35,9 @@ public class PlanService {
 
     @Resource
     private CollectionCaseMapper collectionCaseMapper;
+
+    @Resource
+    private PlanNoticeMapper planNoticeMapper;
 
     public void savePlan(PlanDTO planDTO) {
         // 先处理计划集合
@@ -95,9 +96,19 @@ public class PlanService {
         }
     }
 
+    public void savePlanNotice(PlanNotice planNotice){
+        if(planNotice.getId() == null || planNotice.getId().equals("")){
+            planNotice.setId(UUID.randomUUID().toString());
+            planNoticeMapper.addPlanNotice(planNotice);
+        }else {
+            planNoticeMapper.updatePlanNotice(planNotice);
+        }
+    }
+
     public void deletePlan(Plan plan) {
         planCollectionMapper.deletePlanCollection(plan.getId());
         planScheduleMapper.deletePlanSchedule(plan.getId());
+        planNoticeMapper.deletePlanNotice(plan.getId());
         planMapper.deletePlan(plan.getId());
     }
 
@@ -107,6 +118,10 @@ public class PlanService {
         planDTO.setPlanCollections(planCollectionDTOS);
 
         return planDTO;
+    }
+
+    public PlanNotice getPlanNotice(String planId) {
+        return planNoticeMapper.getPlanNotice(planId);
     }
 
     public List<PlanDTO> getPlanList(QueryRequest request){

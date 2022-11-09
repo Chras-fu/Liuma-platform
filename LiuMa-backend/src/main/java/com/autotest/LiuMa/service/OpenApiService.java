@@ -10,6 +10,7 @@ import com.autotest.LiuMa.common.utils.JwtUtils;
 import com.autotest.LiuMa.common.utils.UploadUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
+import com.autotest.LiuMa.dto.ReportDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
 import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.EngineRequest;
@@ -69,7 +70,13 @@ public class OpenApiService {
     private PlanMapper planMapper;
 
     @Resource
+    private PlanNoticeMapper planNoticeMapper;
+
+    @Resource
     private TestFileMapper testFileMapper;
+
+    @Resource
+    private DebugDataMapper debugDataMapper;
 
     @Resource
     private CaseJsonCreateService caseJsonCreateService;
@@ -78,7 +85,8 @@ public class OpenApiService {
     private ReportUpdateService reportUpdateService;
 
     @Resource
-    private DebugDataMapper debugDataMapper;
+    private NotificationService notificationService;
+
 
     public String applyEngineToken(EngineRequest request) {
         Engine engine = engineMapper.getEngineById(request.getEngineCode());
@@ -200,6 +208,22 @@ public class OpenApiService {
             String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId()+".zip";
             FileUtils.deleteFile(taskZipPath);
 
+            if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
+                // 计划执行需要走群消息通知
+                PlanNotice planNotice = planNoticeMapper.getPlanNotice(task.getSourceId());
+                if(planNotice == null){
+                    return; //没有配置不通知
+                }
+                if(planNotice.getCondition().equals("F") && reportStatus.equals(ReportStatus.SUCCESS.toString())){
+                    return; // 仅失败通知且结果成功不通知
+                }
+                Notification notification = notificationService.getNotificationById(planNotice.getNotificationId());
+                if(notification.getStatus().equals(NotificationStatus.DISABLE.toString())){
+                    return; // 通知禁用不通知
+                }
+
+                notificationService.sendNotification(notification, task);   // 发送通知
+            }
             User user = userMapper.getUserInfo(task.getCreateUser());
             String title = "测试任务执行完成通知";
             String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
@@ -212,7 +236,6 @@ public class OpenApiService {
                 debugDataMapper.deleteDebugData(report.getSourceId());
             }
         }
-
     }
 
     public void uploadScreenshot(EngineRequest request) {

@@ -1,12 +1,11 @@
 package com.autotest.LiuMa.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.common.constants.NotificationStatus;
+import com.autotest.LiuMa.common.constants.TaskType;
 import com.autotest.LiuMa.database.domain.Notification;
-import com.autotest.LiuMa.database.domain.Version;
-import com.autotest.LiuMa.database.mapper.NotificationMapper;
-import com.autotest.LiuMa.request.DefinedReportRequest;
+import com.autotest.LiuMa.database.domain.User;
+import com.autotest.LiuMa.database.mapper.*;
+import com.autotest.LiuMa.dto.ReportDTO;
+import com.autotest.LiuMa.dto.TaskDTO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,6 +19,12 @@ public class NotificationService {
     @Resource
     private NotificationMapper notificationMapper;
 
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private ReportMapper reportMapper;
+
     public void saveNotification(Notification notification){
         if(notification.getId() == null || notification.getId().equals("")){
             //新增通知
@@ -31,15 +36,14 @@ public class NotificationService {
             notification.setUpdateTime(System.currentTimeMillis());
         }
         notificationMapper.saveNotification(notification);
-        // 更新其他通知为禁用
-        if(notification.getStatus().equals(NotificationStatus.ENABLE.toString())){
-            notificationMapper.updateOtherNotificationStatus(NotificationStatus.DISABLE.toString(),
-                    notification.getId(), notification.getProjectId());
-        }
     }
 
     public void deleteNotification(String id){
         notificationMapper.deleteNotification(id);
+    }
+
+    public Notification getNotificationById(String id){
+        return notificationMapper.getNotificationById(id);
     }
 
     public List<Notification> getNotificationList(String projectId, String condition) {
@@ -49,62 +53,28 @@ public class NotificationService {
         return notificationMapper.getNotificationList(projectId, condition);
     }
 
-    //将对平台的请求封装
-    public void noticeFactory(String platfrom, String webhookUrl, String paramObject, DefinedReportRequest definedReportRequest){
-        switch (platfrom){
-            case "Dingding":
-                System.out.println("Dingding: case");
-                noticeDingding(webhookUrl,  paramObject, definedReportRequest);
-                break;
-            case "Feishu":
-                System.out.println("Feishu: case");
-                noticeFeishu(webhookUrl,paramObject, definedReportRequest);
-                break;
-            case "Wechat":
-                System.out.println("Wechat: case");
-                noticeWechat(webhookUrl, paramObject, definedReportRequest);
-                break;
+    public void sendNotification(Notification notification, TaskDTO task){
+        String taskType = null;
+        if(task.getType().equals(TaskType.RUN.toString())){
+            taskType = "手工执行";
+        }else {
+            taskType = "定时任务";
         }
-    }
-
-    //钉钉
-    private void noticeDingding(String webhookUrl, String paramObject, DefinedReportRequest definedReportRequest) {
-        String actualConfigData = replaceConfig(paramObject, definedReportRequest);
-        System.out.println("dingding actualConfigData: " + actualConfigData);
-        String dingdingResult = HttpUtil.post(webhookUrl, actualConfigData);
-        System.out.println("dingding result: " + dingdingResult);
-        System.out.println("dingding send data already");;
-    }
-
-    //飞书
-    private void noticeFeishu(String webhookUrl, String paramObject, DefinedReportRequest definedReportRequest) {
-        String actualConfigData = replaceConfig(paramObject, definedReportRequest);
-        System.out.println("feishu actualConfigData: " + actualConfigData);
-        String feishuResult = HttpUtil.post(webhookUrl, actualConfigData);
-        System.out.println("feishu result: " + feishuResult);
-        System.out.println("feishu send data already");
-    }
-
-    //企业微信
-    private void noticeWechat(String webhookUrl, String paramObject, DefinedReportRequest definedReportRequest) {
-        String actualConfigData = replaceConfig(paramObject, definedReportRequest);
-        System.out.println("Wechat actualConfigData: " + actualConfigData);
-        String feishuResult = HttpUtil.post(webhookUrl, actualConfigData);
-        System.out.println("Wechat result: " + feishuResult);
-        System.out.println("Wechat send data already");
-    }
-    //替换指定数据的封装
-    private String replaceConfig(String paramObject, DefinedReportRequest definedReportRequest){
-        return paramObject.
-                replace("{reportTitle}",definedReportRequest.getReportTitle() ).
-                replace("{taskDesc}",definedReportRequest.getTaskDesc() ).
-                replace("{taskType}", definedReportRequest.getTaskType()).
-                replace("{user}", definedReportRequest.getUser()).
-                replace("{caseNum}", definedReportRequest.getCaseNum()).
-                replace("{caseSucc}", definedReportRequest.getCaseSucc()).
-                replace("{caseFail}", definedReportRequest.getCaseFail()).
-                replace("{succPercent}", definedReportRequest.getSuccPercent()).
-                replace("{executeTime}", definedReportRequest.getExecuteTime());
+        ReportDTO report = reportMapper.getReportDetail(task.getReportId());
+        User user = userMapper.getUserInfo(task.getCreateUser());
+        Long during = (report.getEndTime() - report.getStartTime()) / 1000;
+        String params = notification.getParams().
+                replace("{reportTitle}", report.getName()).
+                replace("{taskType}", taskType).
+                replace("{user}", user.getAccount()).
+                replace("{caseNum}", report.getTotal().toString()).
+                replace("{caseSuccess}", report.getPassCount().toString()).
+                replace("{caseFail}", report.getFailCount().toString()).
+                replace("{caseError}", report.getErrorCount().toString()).
+                replace("{successPercent}", report.getPassRate()).
+                replace("{executeTime}", during +"S");
+        // 发送
+        HttpUtil.post(notification.getWebhookUrl(), params);
     }
 
 }

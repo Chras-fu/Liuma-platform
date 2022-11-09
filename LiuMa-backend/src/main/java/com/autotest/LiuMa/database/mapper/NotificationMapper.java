@@ -13,7 +13,7 @@ public interface NotificationMapper {
 
     void deleteNotification(String id);
 
-    void updateOtherNotificationStatus(String status, String id, String projectId);
+    Notification getNotificationById(String id);
 
     List<Notification> getNotificationList(String projectId, String condition);
 
