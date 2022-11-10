@@ -1,7 +1,6 @@
 package com.autotest.LiuMa.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+
 import com.autotest.LiuMa.service.ApiImportService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +41,9 @@ public class ApiImportController {
                 }
                 reader.close();
                 bb.close();
-                System.out.println(stringBuilder.toString());
-                JSONObject jsonObject = JSON.parseObject(stringBuilder.toString());
-                if (apiImportService.verifyApi(jsonObject, platformType)){
-                    return apiImportService.saveImportApi(jsonObject, platformType, assistMap) + "";
+                System.out.println(stringBuilder);
+                if (apiImportService.verifyApi(stringBuilder.toString(), platformType)){
+                    return apiImportService.saveImportApi(stringBuilder.toString(), platformType, assistMap) + "";
                 }
                 else{
                     return "import api error";
