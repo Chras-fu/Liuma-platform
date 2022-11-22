@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.*;
 import com.autotest.LiuMa.common.exception.EngineVerifyException;
 import com.autotest.LiuMa.common.exception.LMException;
-import com.autotest.LiuMa.common.utils.EmailUtils;
-import com.autotest.LiuMa.common.utils.FileUtils;
-import com.autotest.LiuMa.common.utils.JwtUtils;
-import com.autotest.LiuMa.common.utils.UploadUtils;
+import com.autotest.LiuMa.common.utils.*;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.ReportDTO;
@@ -30,6 +27,12 @@ public class OpenApiService {
     @Value("${task.file.path}")
     public String TASK_FILE_PATH;
 
+    @Value("${report.screenshot.path }")
+    private String imagePath;  // 本地存储路径
+
+    @Value("${cloud.storage.on-off}")
+    private String cloudStorage;  // 云存储开关
+
     @Value("${qiniu.cloud.ak}")
     private String ak;   // 七牛云ak
 
@@ -41,18 +44,6 @@ public class OpenApiService {
 
     @Value("${qiniu.cloud.uploadUrl}")
     private String uploadUrl;   // 七牛云上传域名
-
-    @Value("${aliyun.email.accessKey}")
-    private String accessKey;    // 阿里云邮件key
-
-    @Value("${aliyun.email.accessSecret}")
-    private String accessSecret;     // 阿里云邮件secret
-
-    @Value("${aliyun.email.runnerSenderAddress}")
-    private String runnerSenderAddress;  // 发送人邮箱地址
-
-    @Value("${aliyun.email.runnerSenderName}")
-    private String runnerSenderName;
 
     @Resource
     private UserMapper userMapper;
@@ -222,12 +213,6 @@ public class OpenApiService {
                     return; // 通知禁用不通知
                 }
                 notificationService.sendNotification(notification, task);   // 发送通知
-//                // 邮件推送
-//                User user = userMapper.getUserInfo(task.getCreateUser());
-//                String title = "测试任务执行完成通知";
-//                String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
-//                        + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
-//                EmailUtils.sendMail(user.getEmail(), title, content, accessKey, accessSecret, runnerSenderAddress, runnerSenderName);
             }
         }else {
             Report report = reportMapper.getReportDetail(task.getReportId());
@@ -240,7 +225,13 @@ public class OpenApiService {
 
     public void uploadScreenshot(EngineRequest request) {
         try{
-            UploadUtils.uploadImageB64(request.getFileName(), request.getBase64String(), uploadUrl, imageBucket, ak, sk);
+            if(cloudStorage.equals("on")){
+                UploadUtils.uploadImageB64(request.getFileName(), request.getBase64String(), uploadUrl, imageBucket, ak, sk);
+            }else {
+                String fileName = request.getFileName();
+                String path = imagePath + "/" + fileName.split("-")[0] + "/" + fileName.split("-")[1];
+                ImageUtils.convertBase64ToImage(request.getBase64String(), path);
+            }
         } catch (Exception exception) {
             throw new LMException("截图文件上传失败");
         }
@@ -249,6 +240,11 @@ public class OpenApiService {
     public ResponseEntity<byte[]> downTestFile(String fileId) {
         TestFile testFile = testFileMapper.getTestFile(fileId);
         return FileUtils.downloadFile(testFile.getFilePath());
+    }
+
+    public ResponseEntity<byte[]> previewImage(String date, String fileId) {
+        String path = imagePath + "/" + date + "/" + fileId;
+        return FileUtils.previewImage(path);
     }
 
     public ResponseEntity<byte[]> downTaskFile(String taskId) {

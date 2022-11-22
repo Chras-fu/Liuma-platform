@@ -77,17 +77,6 @@
 			<artifactId>pagehelper</artifactId>
 			<version>5.0.3</version>
 		</dependency>
-		<!--	阿里云邮件	-->
-		<dependency>
-			<groupId>com.aliyun</groupId>
-			<artifactId>aliyun-java-sdk-core</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aliyun</groupId>
-			<artifactId>aliyun-java-sdk-dm</artifactId>
-			<version>3.1.0</version>
-		</dependency>
 		<!--	七牛云存储	-->
 		<dependency>
 			<groupId>com.qiniu</groupId>

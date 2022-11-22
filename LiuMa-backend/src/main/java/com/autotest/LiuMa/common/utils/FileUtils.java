@@ -111,4 +111,15 @@ public class FileUtils {
                 .body(fileByte);
     }
 
+    public static ResponseEntity<byte[]> previewImage(String path) {
+        File file = new File(path);
+        byte[] fileByte= FileUtils.fileToByte(file);
+        if(fileByte == null){
+            return null;
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(fileByte);
+    }
+
 }

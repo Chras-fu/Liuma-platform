@@ -59,4 +59,9 @@ public class OpenApiController {
     public ResponseEntity<byte[]> downloadTestFile(@PathVariable String fileId) {
         return openApiService.downTestFile(fileId);
     }
+
+    @GetMapping("/screenshot/{date}/{imageId}")
+    public ResponseEntity<byte[]> previewImage(@PathVariable String date, @PathVariable String imageId) {
+        return openApiService.previewImage(date, imageId);
+    }
 }

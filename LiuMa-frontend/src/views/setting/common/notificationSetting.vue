@@ -222,7 +222,7 @@
               msgtype: "markdown",
               markdown: {
                 title: "流马测试计划执行结果通知",
-                text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
+                text: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### •  测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
               },
               at: {
                 isAtAll: true
@@ -233,7 +233,7 @@
             params = {
               msg_type: "text",
               content: {
-                text: "流马测试计划执行结果通知\n{reportTitle}\n •  任务类型：{taskType}\n •  执行人: {user}\n •  总用例数: {caseNum}\n •  成功数: {caseSuccess}\n •  失败数：{caseFail}\n •  错误数：{caseError}\n • 测试成功率：{successPercent}\n •  测试执行时长: {executeTime}"
+                text: "{reportTitle}\n •  任务类型：{taskType}\n •  执行人: {user}\n •  总用例数: {caseNum}\n •  成功数: {caseSuccess}\n •  失败数：{caseFail}\n •  错误数：{caseError}\n •  测试成功率：{successPercent}\n •  测试执行时长: {executeTime}"
               }
             }
             break;
@@ -241,7 +241,7 @@
             params = {
               msgtype: "markdown",
               markdown: {
-                content: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### • 测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
+                content: "#### {reportTitle}\n##### •  任务类型：{taskType}\n##### •  执行人: {user}\n##### •  总用例数: {caseNum}\n##### •  成功数: {caseSuccess}\n##### •  失败数：{caseFail}\n##### •  错误数：{caseError}\n##### •  测试成功率：{successPercent}\n##### •  测试执行时长: {executeTime}"
               }
             }
             break;

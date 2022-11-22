@@ -24,6 +24,9 @@ public class ReportUpdateService {
     @Value("${qiniu.cloud.downloadUrl}")
     private String downloadUrl;  // 七牛云加速域名
 
+    @Value("${cloud.storage.on-off}")
+    private String cloudStorage;  // 云存储开关
+
     @Resource
     private ReportMapper reportMapper;
 
@@ -116,7 +119,13 @@ public class ReportUpdateService {
                     reportCollectionCaseWeb.setExecLog(transactionResult.getLog());
                     List<String> screenshot = new ArrayList<>();
                     for(String screenshotId:transactionResult.getScreenShotList()){
-                        String url = downloadUrl + "/" + screenshotId + ".png";
+                        String url;
+                        if(cloudStorage.equals("on")){
+                            url = downloadUrl + "/" + screenshotId + ".png";
+                        }else {
+                            url = "/openapi/screenshot/" + screenshotId.split("-")[0] +
+                                    "/" + screenshotId.split("-")[1] + ".png";
+                        }
                         screenshot.add(url);
                     }
                     reportCollectionCaseWeb.setScreenshot(JSONArray.toJSONString(screenshot));

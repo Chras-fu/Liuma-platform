@@ -23,8 +23,8 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String path = request.getServletPath();
         if (path.matches(Constant.LOGIN_PATH) || path.matches(Constant.ENGINE_TOKEN_PATH)
-                || path.matches(Constant.REGISTER_PATH) || path.matches(Constant.REGISTER_CODE_PATH)) {
-            // 平台登录注册接口 引擎获取token接口 测试文件下载接口 不用拦截
+                || path.matches(Constant.REGISTER_PATH) || path.matches(Constant.SCREENSHOT_PATH)) {
+            // 平台登录注册接口 引擎获取token接口 测试截图预览 不用拦截
             return true;
         } else if (path.matches(Constant.ENGINE_PATH)){
             // 引擎拦截验证
