@@ -40,20 +40,13 @@ public class PlanService {
     private PlanNoticeMapper planNoticeMapper;
 
     public void savePlan(PlanDTO planDTO) {
-        // 先处理计划集合
-        List<PlanCollection> planCollections = new ArrayList<>();
-        for(PlanCollectionDTO planCollectionDTO: planDTO.getPlanCollections()){
-            if(planDTO.getEnvironmentId() == null || planDTO.getEnvironmentId().equals("")){ // 如果环境未选 则判断每个集合是否都没有API用例和WEB用例
+        if(planDTO.getEnvironmentId() == null || planDTO.getEnvironmentId().equals("")){ // 如果环境未选 则判断每个集合是否都没有API用例和WEB用例
+            for(PlanCollectionDTO planCollectionDTO: planDTO.getPlanCollections()){
                 List<String> caseTypes = collectionCaseMapper.getCollectionCaseTypes(planCollectionDTO.getCollectionId());
                 if(caseTypes.contains("API") || caseTypes.contains("WEB")){
                     throw new LMException("所选集合中存在API或WEB用例 环境不能为空");
                 }
             }
-            PlanCollection planCollection = new PlanCollection();
-            planCollection.setId(UUID.randomUUID().toString());
-            planCollection.setPlanId(planDTO.getId());
-            planCollection.setCollectionId(planCollectionDTO.getCollectionId());
-            planCollections.add(planCollection);
         }
         if(planDTO.getId().equals("") || planDTO.getId() == null){ // 新增计划
             planDTO.setId(UUID.randomUUID().toString());
@@ -89,6 +82,14 @@ public class PlanService {
                 planScheduleMapper.updatePlanSchedule(planSchedule);
             }
             planMapper.updatePlan(planDTO);
+        }
+        List<PlanCollection> planCollections = new ArrayList<>();
+        for(PlanCollectionDTO planCollectionDTO: planDTO.getPlanCollections()){
+            PlanCollection planCollection = new PlanCollection();
+            planCollection.setId(UUID.randomUUID().toString());
+            planCollection.setPlanId(planDTO.getId());
+            planCollection.setCollectionId(planCollectionDTO.getCollectionId());
+            planCollections.add(planCollection);
         }
         planCollectionMapper.deletePlanCollection(planDTO.getId());  //先删除全部计划集合
         if(planCollections.size() > 0) {
