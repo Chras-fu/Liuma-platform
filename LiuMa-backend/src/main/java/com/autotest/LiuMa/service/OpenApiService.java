@@ -26,12 +26,12 @@ public class OpenApiService {
 
     @Value("${task.file.path}")
     public String TASK_FILE_PATH;
-
-    @Value("${report.screenshot.path }")
-    private String imagePath;  // 本地存储路径
-
+    
     @Value("${cloud.storage.on-off}")
     private String cloudStorage;  // 云存储开关
+
+    @Value("${report.screenshot.path}")
+    private String imagePath;  // 本地存储路径
 
     @Value("${qiniu.cloud.ak}")
     private String ak;   // 七牛云ak
