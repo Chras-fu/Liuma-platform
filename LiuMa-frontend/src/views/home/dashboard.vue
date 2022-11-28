@@ -142,7 +142,7 @@ export default {
       let url = "/autotest/dashboard/get/" + this.$store.state.projectId;
       this.$get(url, response => {
         let data = response.data;
-        if(data){
+        if(data.apiCaseTotal !== undefined){
           this.statisticsData.apiCaseTotal = data.apiCaseTotal;
           this.statisticsData.apiCaseNewWeek = data.apiCaseNewWeek;
           this.statisticsData.webCaseTotal = data.webCaseTotal;
