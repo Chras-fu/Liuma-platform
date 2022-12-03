@@ -15,6 +15,9 @@ public class ImageUtils {
         image = ImageIO.read(new ByteArrayInputStream(imageByte));
         bis.close();
         File outputfile = new File(path);
+        if (!outputfile.getParentFile().exists()) { // 如果父目录不存在，创建父目录
+            outputfile.getParentFile().mkdirs();
+        }
         ImageIO.write(image, "png", outputfile);
     }
 }

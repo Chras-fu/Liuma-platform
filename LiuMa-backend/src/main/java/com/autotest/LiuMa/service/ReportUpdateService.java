@@ -123,8 +123,8 @@ public class ReportUpdateService {
                         if(cloudStorage.equals("on")){
                             url = downloadUrl + "/" + screenshotId + ".png";
                         }else {
-                            url = "/openapi/screenshot/" + screenshotId.split("-")[0] +
-                                    "/" + screenshotId.split("-")[1] + ".png";
+                            url = "/openapi/screenshot/" + screenshotId.split("_")[0] +
+                                    "/" + screenshotId.split("_")[1] + ".png";
                         }
                         screenshot.add(url);
                     }

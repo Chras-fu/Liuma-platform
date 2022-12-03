@@ -229,7 +229,7 @@ public class OpenApiService {
                 UploadUtils.uploadImageB64(request.getFileName(), request.getBase64String(), uploadUrl, imageBucket, ak, sk);
             }else {
                 String fileName = request.getFileName();
-                String path = imagePath + "/" + fileName.split("-")[0] + "/" + fileName.split("-")[1];
+                String path = imagePath + "/" + fileName.split("_")[0] + "/" + fileName.split("_")[1];
                 ImageUtils.convertBase64ToImage(request.getBase64String(), path);
             }
         } catch (Exception exception) {
