@@ -33,31 +33,39 @@ public class DashboardService {
         caseAddData.put("yMaxRight", 0);
         caseAddData.put("apiCaseNew", new JSONArray());
         caseAddData.put("webCaseNew", new JSONArray());
+        caseAddData.put("appCaseNew", new JSONArray());
         caseAddData.put("apiCaseSum", new JSONArray());
         caseAddData.put("webCaseSum", new JSONArray());
+        caseAddData.put("appCaseSum", new JSONArray());
         JSONObject caseRunData = new JSONObject();
         caseRunData.put("xAxis", new JSONArray());
         caseRunData.put("yMaxLeft", 0);
         caseRunData.put("apiCaseRun", new JSONArray());
         caseRunData.put("webCaseRun", new JSONArray());
+        caseRunData.put("appCaseRun", new JSONArray());
         caseRunData.put("apiCasePassRate", new JSONArray());
         caseRunData.put("webCasePassRate", new JSONArray());
+        caseRunData.put("appCasePassRate", new JSONArray());
         for (int i=dailyStatisticsList.size();i>0;i--){
             DailyStatistics dailyStatistics = dailyStatisticsList.get(i-1);
             caseAddData.getJSONArray("xAxis").add(dailyStatistics.getStatDate());
             caseAddData.getJSONArray("apiCaseNew").add(dailyStatistics.getApiCaseNew());
             caseAddData.getJSONArray("webCaseNew").add(dailyStatistics.getWebCaseNew());
+            caseAddData.getJSONArray("appCaseNew").add(dailyStatistics.getAppCaseNew());
             caseAddData.getJSONArray("apiCaseSum").add(dailyStatistics.getApiCaseSum());
             caseAddData.getJSONArray("webCaseSum").add(dailyStatistics.getWebCaseSum());
-            caseAddData.put("yMaxLeft", this.getMax(caseAddData.getInteger("yMaxLeft"), dailyStatistics.getApiCaseNew(), dailyStatistics.getWebCaseNew()));
-            caseAddData.put("yMaxRight", this.getMax(caseAddData.getInteger("yMaxRight"), dailyStatistics.getApiCaseSum(), dailyStatistics.getWebCaseSum()));
+            caseAddData.getJSONArray("appCaseSum").add(dailyStatistics.getAppCaseSum());
+            caseAddData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseNew(), dailyStatistics.getWebCaseNew(), dailyStatistics.getAppCaseNew()));
+            caseAddData.put("yMaxRight", this.getMax(dailyStatistics.getApiCaseSum(), dailyStatistics.getWebCaseSum(), dailyStatistics.getAppCaseSum()));
 
             caseRunData.getJSONArray("xAxis").add(dailyStatistics.getStatDate());
             caseRunData.getJSONArray("apiCaseRun").add(dailyStatistics.getApiCaseRun());
             caseRunData.getJSONArray("webCaseRun").add(dailyStatistics.getWebCaseRun());
+            caseRunData.getJSONArray("appCaseRun").add(dailyStatistics.getAppCaseRun());
             caseRunData.getJSONArray("apiCasePassRate").add(dailyStatistics.getApiCasePassRate());
             caseRunData.getJSONArray("webCasePassRate").add(dailyStatistics.getWebCasePassRate());
-            caseRunData.put("yMaxLeft", this.getMax(caseRunData.getInteger("yMaxLeft"), dailyStatistics.getApiCaseRun(), dailyStatistics.getWebCaseRun()));
+            caseRunData.getJSONArray("appCasePassRate").add(dailyStatistics.getAppCasePassRate());
+            caseRunData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseRun(), dailyStatistics.getWebCaseRun(), dailyStatistics.getAppCaseRun()));
         }
         data.put("caseAddData", caseAddData);
         data.put("caseRunData", caseRunData);
@@ -67,8 +75,8 @@ public class DashboardService {
             data.put("apiCaseNewWeek", sumStatistics.getApiCaseNewWeek());
             data.put("webCaseTotal", sumStatistics.getWebCaseTotal());
             data.put("webCaseNewWeek", sumStatistics.getWebCaseNewWeek());
-            data.put("planRunTotal", sumStatistics.getPlanRunTotal());
-            data.put("planRunToday", sumStatistics.getPlanRunToday());
+            data.put("appCaseTotal", sumStatistics.getAppCaseTotal());
+            data.put("appCaseNewWeek", sumStatistics.getAppCaseNewWeek());
             data.put("caseRunTotal", sumStatistics.getCaseRunTotal());
             data.put("caseRunToday", sumStatistics.getCaseRunToday());
             data.put("planRunWeekTop", JSONObject.parseObject(sumStatistics.getPlanRunWeekTop()));

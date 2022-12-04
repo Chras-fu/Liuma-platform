@@ -2,38 +2,43 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.StatisticsMapper">
   <insert id="updateDailyData" parameterType="com.autotest.LiuMa.database.domain.DailyStatistics">
-    insert into `daily_statistics` (id, stat_date, project_id, api_case_new, web_case_new, api_case_sum,
-    web_case_sum, api_case_run, web_case_run, api_case_pass_rate, web_case_pass_rate)
+    insert into `daily_statistics` (id, stat_date, project_id, api_case_new, web_case_new, app_case_new, api_case_sum,
+    web_case_sum, app_case_sum, api_case_run, web_case_run, app_case_run, api_case_pass_rate, web_case_pass_rate, app_case_pass_rate)
     values
     <foreach collection="list" item="item" separator="," index="index">
-      (#{item.id}, #{item.statDate}, #{item.projectId}, #{item.apiCaseNew}, #{item.webCaseNew}, #{item.apiCaseSum},
-      #{item.webCaseSum}, #{item.apiCaseRun}, #{item.webCaseRun}, #{item.apiCasePassRate}, #{item.webCasePassRate})
+      (#{item.id}, #{item.statDate}, #{item.projectId}, #{item.apiCaseNew}, #{item.webCaseNew}, #{item.appCaseNew},
+      #{item.apiCaseSum}, #{item.webCaseSum}, #{item.appCaseSum}, #{item.apiCaseRun}, #{item.webCaseRun},
+      #{item.appCaseRun}, #{item.apiCasePassRate}, #{item.webCasePassRate}, #{item.appCasePassRate})
     </foreach>
     ON DUPLICATE KEY UPDATE
     api_case_new = VALUES(api_case_new),
     web_case_new = VALUES(web_case_new),
+    app_case_new = VALUES(app_case_new),
     api_case_sum = VALUES(api_case_sum),
     web_case_sum = VALUES(web_case_sum),
+    app_case_sum = VALUES(app_case_sum),
     api_case_run = VALUES(api_case_run),
     web_case_run = VALUES(web_case_run),
+    app_case_run = VALUES(app_case_run),
     api_case_pass_rate = VALUES(api_case_pass_rate),
-    web_case_pass_rate = VALUES(web_case_pass_rate)
+    web_case_pass_rate = VALUES(web_case_pass_rate),
+    app_case_pass_rate = VALUES(app_case_pass_rate)
   </insert>
   <insert id="updateSumData" parameterType="com.autotest.LiuMa.database.domain.SumStatistics">
     insert into `sum_statistics` (id, project_id, api_case_total, api_case_new_week, web_case_total, web_case_new_week,
-    plan_run_total, plan_run_today, case_run_total, case_run_today, plan_run_week_top, case_fail_week_top)
+    app_case_total, app_case_new_week, case_run_total, case_run_today, plan_run_week_top, case_fail_week_top)
     values
     <foreach collection="list" item="item" separator="," index="index">
       (#{item.id}, #{item.projectId}, #{item.apiCaseTotal}, #{item.apiCaseNewWeek}, #{item.webCaseTotal}, #{item.webCaseNewWeek},
-      #{item.planRunTotal}, #{item.planRunToday}, #{item.caseRunTotal}, #{item.caseRunToday}, #{item.planRunWeekTop}, #{item.caseFailWeekTop})
+      #{item.appCaseTotal}, #{item.appCaseNewWeek}, #{item.caseRunTotal}, #{item.caseRunToday}, #{item.planRunWeekTop}, #{item.caseFailWeekTop})
     </foreach>
     ON DUPLICATE KEY UPDATE
     api_case_total = VALUES(api_case_total),
     api_case_new_week = VALUES(api_case_new_week),
     web_case_total = VALUES(web_case_total),
     web_case_new_week = VALUES(web_case_new_week),
-    plan_run_total = VALUES(plan_run_total),
-    plan_run_today = VALUES(plan_run_today),
+    app_case_total = VALUES(app_case_total),
+    app_case_new_week = VALUES(app_case_new_week),
     case_run_total = VALUES(case_run_total),
     case_run_today = VALUES(case_run_today),
     plan_run_week_top = VALUES(plan_run_week_top),
@@ -86,16 +91,6 @@
     where r.create_time &gt; UNIX_TIMESTAMP(CAST(SYSDATE()AS DATE))*1000 and r.source_type != 'temp'
     and c.status != 'Trash'
     group by r.project_id
-  </select>
-  <select id="getPlanRunCountByProject" resultType="com.autotest.LiuMa.dto.StatisticsDTO">
-    select project_id, count(id) as `count` from `report`
-    where source_type = 'plan'
-    group by project_id
-  </select>
-  <select id="getPlanTodayRunCountByProject" resultType="com.autotest.LiuMa.dto.StatisticsDTO">
-    select project_id, count(id) as `count` from `report`
-    where create_time &gt; UNIX_TIMESTAMP(CAST(SYSDATE()AS DATE))*1000 and source_type = 'plan'
-    group by project_id
   </select>
   <select id="getPlanRunTopByProject" resultType="com.autotest.LiuMa.dto.StatisticsDTO">
     select r.project_id, p.id, p.name, count(r.id) as `count`, sum(r.`status`='success') as `pass`,
