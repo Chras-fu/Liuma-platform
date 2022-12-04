@@ -4,14 +4,16 @@
 <template>
   <div>
       <android-remote v-if="device.system==='android'" :device="device"/>
+      <apple-remote v-if="device.system==='apple'" :device="device"/>
   </div>
 </template>
 
 <script>
 import AndroidRemote from './device/androidRemote'
+import AppleRemote from './device/appleRemote'
 export default {
     components: {
-        AndroidRemote
+        AndroidRemote, AppleRemote
     },
     data() {
         return{

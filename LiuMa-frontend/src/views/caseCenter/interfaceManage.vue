@@ -19,39 +19,6 @@
             <el-button size="small" type="primary" icon="el-icon-plus" @click="addApi">新增接口</el-button>
         </el-form-item>
     </el-form>
-
-<!--    上传文件的弹窗-->
-    <el-dialog title="上传文件" :visible.sync="uploadFileVisible" width="600px" destroy-on-close>
-      <el-form label-width="120px" style="padding-right: 30px;" :model="uploadFileForm" :rules="rules" ref="uploadFileForm">
-
-        <el-form-item label="文件来源" prop="apiSource">
-          <el-radio-group v-model="uploadFileForm.apiSource">
-            <el-radio label="1">postman</el-radio>
-            <el-radio label="2">swagger</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="选择模块" prop="moduleId">
-          <select-tree placeholder="请选择导入后的模块" :selectedValue="uploadFileForm.moduleId"
-                       :selectedLabel="uploadFileForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
-        </el-form-item>
-
-
-        <el-form-item label="选择文件" prop="fileList">
-          <el-upload class="upload-demo" :file-list="uploadFileForm.fileList" :before-upload="beforeUpload" :http-request="uploadFile"
-                     :on-remove="removeFile" :on-exceed="handleExceed" drag action :limit="1" ref="upload">
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传单个文件，且不超过50M</div>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="uploadFileVisible=false">取消</el-button>
-        <el-button size="small" type="primary" @click="submitFileForm('uploadFileForm', uploadFileForm)">上传</el-button>
-      </div>
-    </el-dialog>
-
     <!-- 接口模块 -->
     <el-col :span="4" class="left-tree">
         <module-tree title="接口模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)"
@@ -78,6 +45,33 @@
     </el-col>
     <!-- 添加模块弹窗 -->
     <module-append :title="title" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog" @submitModule="submitModule($event)"/>
+    <!--上传文件的弹窗-->
+    <el-dialog title="上传文件" :visible.sync="uploadFileVisible" width="600px" destroy-on-close>
+      <el-form label-width="120px" style="padding-right: 30px;" :model="uploadFileForm" :rules="rules" ref="uploadFileForm">
+        <el-form-item label="文件来源" prop="apiSource">
+          <el-radio-group v-model="uploadFileForm.apiSource">
+            <el-radio label="1">postman</el-radio>
+            <el-radio label="2">swagger</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="选择模块" prop="moduleId">
+          <select-tree style="width:90%" placeholder="请选择导入后的模块" :selectedValue="uploadFileForm.moduleId"
+                       :selectedLabel="uploadFileForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
+        </el-form-item>
+        <el-form-item label="选择文件" prop="fileList">
+          <el-upload class="upload-demo" :file-list="uploadFileForm.fileList" :before-upload="beforeUpload" :http-request="uploadFile"
+                     :on-remove="removeFile" :on-exceed="handleExceed" drag action :limit="1" ref="upload">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传单个文件，且不超过50M</div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="uploadFileVisible=false">取消</el-button>
+        <el-button size="small" type="primary" @click="submitFileForm('uploadFileForm', uploadFileForm)">上传</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 

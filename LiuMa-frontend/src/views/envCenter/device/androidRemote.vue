@@ -4,7 +4,7 @@
 <template>
     <div>
         <el-row :gutter="10">
-            <el-col :span="6" min-width="400px">
+            <el-col :xl="4" :lg="6" min-width="400px">
                 <div class="screen-header">
                     <span>
                         {{device.serial}}
@@ -28,7 +28,7 @@
                     <el-button size="mini" type="text" @click="runKeyevent('BACK')"></el-button>
                 </div>
             </el-col>
-            <el-col :span="18">
+            <el-col :xl="18" :lg="20">
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="常用功能" name="common">
                         <div class="card-columns" ref="commonContainer">
@@ -129,8 +129,7 @@ export default {
             activeName: 'common',
             rotation: 0,
             websockets: {
-              screen: null,
-              touchpad: null,
+              remote: null,
               winput: null,
             },
             whatsinput: {
@@ -152,7 +151,25 @@ export default {
             scheme: 'ws',
         }
     },
-    created() {
+    mounted: function () {
+        // 开启投屏
+        this.mirrorDisplay()
+
+        // 开启操作
+        this.syncTouchpad()
+
+        // 唤醒屏幕
+        this.runKeyevent("WAKEUP")
+
+        // 加载whatsinput输入法
+        this.loadWhatsinput()
+
+        // 当设备不使用时自动退出
+        console.log("Refresh:", this.idleTimeout / 2 * 1000)
+        this.closeWindowWhenReleased(5000)
+
+        // Disable WhatsInputMethod to prevent influence UIAutomation
+        this.fixInputMethod(true)
     },
     methods: {
         uploadApk(option) {
@@ -337,32 +354,23 @@ export default {
                 },
                 debug: false
             });
-            var ws = new WebSocket(this.deviceServerUrl.replace(/^https?/, this.scheme) + '/scrcpy/screen');
-            this.websockets.screen = ws;
+            var ws = new WebSocket(this.deviceServerUrl.replace(/^https?/, this.scheme) + '/scrcpy/remote');
+            this.websockets.remote = ws;
             ws.binaryType = 'arraybuffer';
             ws.onopen = (ev) => {};
             ws.onmessage = (ev) => {
-                if(typeof(event.data) === "string"){
-                this.$message({
-                    showClose: true,
-                    message: event.data,
-                    type: 'error',
-                });
-                ws.close()
-                }else{
                 jmu.feed({
-                    video: new Uint8Array(event.data)
+                    video: new Uint8Array(ev.data)
                 });
-                } 
             };
             ws.onclose = (ev) => {
                 if (this.websockets.screen === ws) {
-                this.websockets.screen = null;
-                this.$message({
-                    showClose: true,
-                    message: '设备屏幕同步中断',
-                    type: 'error',
-                });
+                    this.websockets.screen = null;
+                    this.$message({
+                        showClose: true,
+                        message: '设备屏幕同步中断',
+                        type: 'error',
+                    });
                 }
             };
             ws.onerror = function (ev) {
@@ -371,290 +379,234 @@ export default {
         },
         syncTouchpad() {
             let element = document.getElementById('screen-player');
-            let ws = new WebSocket(this.address.replace(/^https?/, this.scheme) + '/scrcpy/touch?udid='+ this.serial);
+            let ws = this.websockets.remote;
 
             let screen = {
                 bounds: {}
             }
 
-            this.websockets.touchpad = ws
-
-            ws.onopen = (ret) => {
-                
-            }
-            ws.onmessage = (message) => {
-                
-            }
-            ws.onclose = () => {
-                if (this.websockets.touchpad === ws) {
-                    this.websockets.touchpad = null;
-                }
-                element.removeEventListener('mousedown', mouseDownListener);
-                element.removeEventListener('mousewheel', mouseWheelListener);
-            }
-
             function calculateBounds() {
-            var el = element;
-            screen.bounds.w = el.offsetWidth
-            screen.bounds.h = el.offsetHeight
-            screen.bounds.x = 0
-            screen.bounds.y = 0
+                var el = element;
+                screen.bounds.w = el.offsetWidth
+                screen.bounds.h = el.offsetHeight
+                screen.bounds.x = 0
+                screen.bounds.y = 0
 
-            while (el.offsetParent) {
-                screen.bounds.x += el.offsetLeft
-                screen.bounds.y += el.offsetTop
-                el = el.offsetParent
-            }
+                while (el.offsetParent) {
+                    screen.bounds.x += el.offsetLeft
+                    screen.bounds.y += el.offsetTop
+                    el = el.offsetParent
+                }
             }
 
             function coords(boundingW, boundingH, relX, relY, rotation) {
-            var w, h, x, y;
+                var w, h, x, y;
 
-            switch (rotation) {
-                case 0:
-                w = boundingW
-                h = boundingH
-                x = relX
-                y = relY
-                break
-                case 90:
-                w = boundingH
-                h = boundingW
-                x = boundingH - relY
-                y = relX
-                break
-                case 180:
-                w = boundingW
-                h = boundingH
-                x = boundingW - relX
-                y = boundingH - relY
-                break
-                case 270:
-                w = boundingH
-                h = boundingW
-                x = relY
-                y = boundingW - relX
-                break
-            }
-
-            return {
-                xP: x / w,
-                yP: y / h,
-            }
-            }
-
-            let touchDown = (index, x, y, pressure) => {
-            let scaled = coords(screen.bounds.w, screen.bounds.h, x, y, this.rotation);
-            ws.send(JSON.stringify({
-                operation: 'd',
-                index: index,
-                pressure: pressure,
-                xP: scaled.xP,
-                yP: scaled.yP,
-            }))
-            }
-
-            let touchMove = (index, x, y, pressure) => {
-            let scaled = coords(screen.bounds.w, screen.bounds.h, x, y, this.rotation);
-            ws.send(JSON.stringify({
-                operation: 'm',
-                index: index,
-                pressure: pressure,
-                xP: scaled.xP,
-                yP: scaled.yP,
-            }))
-            }
-
-            function touchUp(index, x, y, pressure) {
-                let scaled = coords(screen.bounds.w, screen.bounds.h, x, y, this.rotation);
-                ws.send(JSON.stringify({
-                operation: 'u',
-                index: index,
-                pressure: pressure,
-                xP: scaled.xP,
-                yP: scaled.yP,
-                }));
-            }
-
-            function touchWait(millseconds) {
-                ws.send(JSON.stringify({
-                    operation: 'w',
-                    milliseconds: millseconds,
-                }));
-            }
-
-            function touchReset() {
-                ws.send(JSON.stringify({
-                    operation: "r",
-                }))
-            }
-
-            function touchCommit() {
-                ws.send(JSON.stringify({ operation: 'c' }))
-            }
-
-            let mouseDownListener = (event) => {
-                var e = event;
-                if (e.originalEvent) {
-                    e = e.originalEvent
-                }
-                e.preventDefault()
-
-                // activate whatsinput
-                this.$refs.whatsinput.focus()
-
-                // Middle click equals HOME
-                if (e.which === 2) {
-                    this.runKeyevent("HOME")
-                    return
-                }
-                // Right click equals BACK
-                if (e.which === 3) {
-                    this.runKeyevent("BACK")
-                    return
+                switch (rotation) {
+                    case 0:
+                    w = boundingW
+                    h = boundingH
+                    x = relX
+                    y = relY
+                    break
+                    case 90:
+                    w = boundingH
+                    h = boundingW
+                    x = boundingH - relY
+                    y = relX
+                    break
+                    case 180:
+                    w = boundingW
+                    h = boundingH
+                    x = boundingW - relX
+                    y = boundingH - relY
+                    break
+                    case 270:
+                    w = boundingH
+                    h = boundingW
+                    x = relY
+                    y = boundingW - relX
+                    break
                 }
 
-                fakePinch = e.altKey
-                calculateBounds()
-
-                var x = e.pageX - screen.bounds.x
-                var y = e.pageY - screen.bounds.y
-                var pressure = 0.5
-                // activeFinger(0, e.pageX, e.pageY, pressure);
-
-                touchDown(0, x, y, pressure);
-                touchCommit();
-
-                // element.removeEventListener('mousemove', mouseHoverListener);
-                element.addEventListener('mousemove', mouseMoveListener);
-                document.addEventListener('mouseup', mouseUpListener);
-            }
-
-            let mouseMoveListener = (event) => {
-                var e = event
-                if (e.originalEvent) {
-                    e = e.originalEvent
+                return {
+                    xP: x / w,
+                    yP: y / h,
                 }
-                // Skip secondary click
-                if (e.which === 3) {
-                    return
+            }
+
+            // 2.touch事件
+            function inject_touch_event(pix_data, action){
+                msg = {
+                msg_type: 2,
+                action: action,
+                x: pix_data[0],
+                y: pix_data[1],
                 }
-                e.preventDefault()
-
-                var pressure = 0.5
-                activeFinger(0, e.pageX, e.pageY, pressure);
-                var x = e.pageX - screen.bounds.x
-                var y = e.pageY - screen.bounds.y
-
-                touchMove(0, x, y, pressure);
-                
-                touchCommit();
+                ws.send(JSON.stringify(msg))
             }
 
-            function mouseUpListener(event) {
-                var e = event
-                if (e.originalEvent) {
-                    e = e.originalEvent
+            // 3.scroll事件
+            function inject_scroll_event(pix_data){
+                msg = {
+                msg_type: 3,
+                x: pix_data[0],
+                y: pix_data[1],
+                distance_x: pix_data[2],
+                distance_y: pix_data[3],
                 }
-                // Skip secondary click
-                if (e.which === 3) {
-                    return
+                ws.send(JSON.stringify(msg))
+            }
+
+            // 30.swipe
+            function swipe(pix_data, delay=0, unit=13){
+                delay = parseFloat(delay.toFixed(2))
+                if (delay <= 3 && delay >=0){
+                msg = {
+                    msg_type: 30,
+                    x: pix_data[0],
+                    y: pix_data[1],
+                    end_x: pix_data[2],
+                    end_y: pix_data[3],
+                    unit: unit,
+                    delay: delay,
                 }
-                e.preventDefault()
-                var pressure = 0.5
-                activeFinger(0, e.pageX, e.pageY, pressure);
-                var x = e.pageX - screen.bounds.x
-                var y = e.pageY - screen.bounds.y
-                touchUp(0, x, y, pressure);
-                touchCommit()
-                stopMousing()
+                ws.send(JSON.stringify(msg))
+                }
             }
 
-            function stopMousing() {
-                element.removeEventListener('mousemove', mouseMoveListener);
-                document.removeEventListener('mouseup', mouseUpListener);
-                deactiveFinger(0);
-            }
-
-            function activeFinger(index, x, y, pressure) {
-                var scale = 0.5 + pressure
-            }
-
-            function deactiveFinger(index) {
-                    if(this.screenMode === "minicap"){
-                        $(".finger-" + index).removeClass("active")
+            // 节流函数
+            function throttle(fn,during) {
+                let t = null
+                return function(e){
+                    if(!t){
+                        t = setTimeout(()=>{
+                            fn.call(this,e)
+                            t = null
+                        },during)
                     }
+                }
             }
 
-            function preventHandler(event) {
-                event.preventDefault()
+            // 获取鼠标在元素内的坐标
+            function get_pointer_position(event, ele){
+                x = event.clientX - ele.offsetLeft + window.scrollX;
+                x = parseInt(x);
+                x = Math.min(x, ele.width);
+                x = Math.max(x, 0);
+                y = event.clientY - ele.offsetTop + window.scrollY;
+                y = parseInt(y);
+                y = Math.min(y, ele.height);
+                y = Math.max(y, 0);
+                return [x, y]
             }
 
-            let wheel = {
-                count: 0,
-                key: null,
-                mouseY: null,
-            };
-
-            function mouseWheelListener(event) {
-                let e = event;
-                if (e.originalEvent) {
-                    e = e.originalEvent;
-                }
-
-                calculateBounds()
-                let x = e.pageX - screen.bounds.x;
-                let y = e.pageY - screen.bounds.y;
-                let pressure = 0.5;
-
-                if (wheel.key === null) { // mouse down
-                    wheel.mouseY = y;
-                    touchDown(1, x, y, pressure);
-                    touchCommit();
-                } else {
-                    clearTimeout(wheel.key);
-                }
-
-                // 从 wheel.mouseY --> targetY 分10步移动完
-                wheel.count += 1;
-                const stepCount = 10; // 10 steps
-                const direction = e.deltaY > 0 ? -1 : 1;
-                const offsetY = wheel.count * direction * 0.2 * screen.bounds.h;
-                const targetY = Math.max(0, Math.min(y + offsetY, screen.bounds.h));
-
-                let mouseY = wheel.mouseY;
-                const stepY = (targetY - mouseY) / stepCount;
-                for (let i = 0; i < stepCount; i += 1) {
-                    mouseY += stepY;
-                    touchWait(10); // 间隔10ms
-                    touchMove(1, x, mouseY, pressure)
-                    touchCommit();
-                }
-                wheel.mouseY = targetY; // 记录当前点的位置
-
-                wheel.key = setTimeout(() => { // wheel stopped do mouse up
-                    touchUp();
-                    touchCommit();
-                    wheel.key = null;
-                    wheel.count = 0;
-                }, 100)
-                }
-
-                /* bind listeners */
-                element.addEventListener('mousedown', mouseDownListener);
-                element.addEventListener('mousewheel', mouseWheelListener);
-        },
-        fitCanvas(canvas) {
-            if (canvas.width > canvas.height) {
-                // 横屏显示，宽高相等
-                this.canvasStyle.maxHeight = canvas.parentElement.clientHeight + "px";
-                this.canvasStyle.height = "auto";
-                this.canvasStyle.width = canvas.parentElement.clientHeight + "px";
-            } else {
-                this.canvasStyle.maxHeight = "unset";
-                this.canvasStyle.height = canvas.parentElement.clientHeight + "px";
-                this.canvasStyle.width = "auto";
+            // canvas鼠标移动事件处理函数
+            function canvas_mouse_move(event) {
+                pix_data = get_pointer_position(event, this)
+                inject_touch_event(pix_data, 2)
             }
+
+            // touch事件
+            function add_canvas_touch_event(ele){
+                // 在window对象记录touch开始
+                window.touch_start = null
+                // 节流的mouse_move
+                efficient_canvas_mouse_move = throttle(canvas_mouse_move, 30);
+                // 1.mousedown
+                ele.addEventListener('mousedown', function (event) {
+                    if(event.buttons == 1){
+                    window.touch_start = true
+                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
+                    pix_data = get_pointer_position(event, this)
+                    inject_touch_event(pix_data, 0)
+                    this.addEventListener('mousemove', efficient_canvas_mouse_move)
+                    }
+                })
+                // 2.mouseup
+                ele.addEventListener('mouseup', function (event) {
+                    if (window.touch_start){
+                    window.touch_start = false
+                    pix_data = get_pointer_position(event, this)
+                    inject_touch_event(pix_data, 1)
+                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
+                    }
+                })
+                // 3.mouseout
+                ele.addEventListener('mouseout', function (event) {
+                    if (window.touch_start){
+                    window.touch_start = false
+                    pix_data = get_pointer_position(event, this)
+                    inject_touch_event(pix_data, 1)
+                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
+                    }
+                })
+            }
+
+            // swipe事件
+            function add_canvas_swipe_event(ele){
+                window.swipe_start = null
+                window.swipe_start_pix_data = null
+                // 1.mousedown
+                ele.addEventListener('mousedown', function (event) {
+                    if(event.buttons == 4){
+                    window.swipe_start = Date.now()
+                    window.swipe_start_pix_data = get_pointer_position(event, this)
+                    }
+                })
+                // 2.mouseup
+                ele.addEventListener('mouseup', function (event) {
+                    if (window.swipe_start){
+                    swipe_end = Date.now()
+                    delay = (swipe_end - window.swipe_start)/1000
+                    window.swipe_start = null
+                    swipe_end_pix_data = get_pointer_position(event, this)
+                    pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data)
+                    window.swipe_start_pix_data = null
+                    swipe(pix_data, delay)
+                    }
+                })
+                // 3.mouseout
+                ele.addEventListener('mouseout', function (event) {
+                    if (window.swipe_start){
+                    swipe_end = Date.now()
+                    delay = (swipe_end - window.swipe_start)/1000
+                    window.swipe_start = null
+                    swipe_end_pix_data = get_pointer_position(event, this)
+                    pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data)
+                    window.swipe_start_pix_data = null
+                    swipe(pix_data, delay)
+                    }
+                })
+            }
+
+            // 处理canvas mouse scroll
+            function canvas_mouse_scroll(event) {
+                pix_data = get_pointer_position(event, this)
+                if (event.deltaX >0){
+                distance_x = -5
+                } else{
+                distance_x = 5
+                }
+                pix_data[2] = distance_x
+                if (event.deltaY >0){
+                distance_y = -5
+                } else{
+                distance_y = 5
+                }
+                pix_data[3] = distance_y
+                inject_scroll_event(pix_data)
+            }
+
+            // scroll事件
+            function add_canvas_scroll_event(ele){
+                efficient_canvas_mouse_scroll = throttle(canvas_mouse_scroll, 100);
+                ele.addEventListener("wheel", efficient_canvas_mouse_scroll)
+            }
+
+            add_canvas_touch_event(element);
+            add_canvas_swipe_event(element);
+            add_canvas_scroll_event(element);
         },
         closeWindowWhenReleased(interval) {
             setTimeout(() => {

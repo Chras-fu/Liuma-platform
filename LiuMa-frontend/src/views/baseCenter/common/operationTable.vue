@@ -12,7 +12,7 @@
                 <span v-if="scope.row.from==='custom'">用户定义操作</span>
             </template>
         </el-table-column>
-        <el-table-column v-if="uiType==='app'" prop="system" label="操作类型"/>
+        <el-table-column v-if="uiType==='app'" prop="system" label="操作系统"/>
         <el-table-column prop="description" label="操作说明" min-width="200px"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="updateTime" label="更新时间" width="150px"/>
