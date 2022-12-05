@@ -359,9 +359,18 @@ export default {
             ws.binaryType = 'arraybuffer';
             ws.onopen = (ev) => {};
             ws.onmessage = (ev) => {
-                jmu.feed({
-                    video: new Uint8Array(ev.data)
-                });
+                if(typeof(event.data) === "string"){
+                  this.$message({
+                    showClose: true,
+                    message: event.data,
+                    type: 'error',
+                  });
+                  ws.close()
+                }else{
+                  jmu.feed({
+                    video: new Uint8Array(event.data)
+                  });
+                } 
             };
             ws.onclose = (ev) => {
                 if (this.websockets.screen === ws) {
@@ -381,61 +390,7 @@ export default {
             let element = document.getElementById('screen-player');
             let ws = this.websockets.remote;
 
-            let screen = {
-                bounds: {}
-            }
-
-            function calculateBounds() {
-                var el = element;
-                screen.bounds.w = el.offsetWidth
-                screen.bounds.h = el.offsetHeight
-                screen.bounds.x = 0
-                screen.bounds.y = 0
-
-                while (el.offsetParent) {
-                    screen.bounds.x += el.offsetLeft
-                    screen.bounds.y += el.offsetTop
-                    el = el.offsetParent
-                }
-            }
-
-            function coords(boundingW, boundingH, relX, relY, rotation) {
-                var w, h, x, y;
-
-                switch (rotation) {
-                    case 0:
-                    w = boundingW
-                    h = boundingH
-                    x = relX
-                    y = relY
-                    break
-                    case 90:
-                    w = boundingH
-                    h = boundingW
-                    x = boundingH - relY
-                    y = relX
-                    break
-                    case 180:
-                    w = boundingW
-                    h = boundingH
-                    x = boundingW - relX
-                    y = boundingH - relY
-                    break
-                    case 270:
-                    w = boundingH
-                    h = boundingW
-                    x = relY
-                    y = boundingW - relX
-                    break
-                }
-
-                return {
-                    xP: x / w,
-                    yP: y / h,
-                }
-            }
-
-            // 2.touch事件
+            // touch事件
             function inject_touch_event(pix_data, action){
                 msg = {
                 msg_type: 2,
@@ -446,7 +401,7 @@ export default {
                 ws.send(JSON.stringify(msg))
             }
 
-            // 3.scroll事件
+            // scroll事件
             function inject_scroll_event(pix_data){
                 msg = {
                 msg_type: 3,
@@ -458,7 +413,7 @@ export default {
                 ws.send(JSON.stringify(msg))
             }
 
-            // 30.swipe
+            // swipe
             function swipe(pix_data, delay=0, unit=13){
                 delay = parseFloat(delay.toFixed(2))
                 if (delay <= 3 && delay >=0){
@@ -490,15 +445,15 @@ export default {
 
             // 获取鼠标在元素内的坐标
             function get_pointer_position(event, ele){
-                x = event.clientX - ele.offsetLeft + window.scrollX;
+                x = event.layerX;
                 x = parseInt(x);
-                x = Math.min(x, ele.width);
+                x = Math.min(x, ele.offsetWidth);
                 x = Math.max(x, 0);
-                y = event.clientY - ele.offsetTop + window.scrollY;
+                y = event.layerY;
                 y = parseInt(y);
-                y = Math.min(y, ele.height);
+                y = Math.min(y, ele.offsetHeight);
                 y = Math.max(y, 0);
-                return [x, y]
+                return [x/ele.offsetWidth, y/ele.offsetHeight]
             }
 
             // canvas鼠标移动事件处理函数
@@ -584,15 +539,15 @@ export default {
             function canvas_mouse_scroll(event) {
                 pix_data = get_pointer_position(event, this)
                 if (event.deltaX >0){
-                distance_x = -5
+                distance_x = -1
                 } else{
-                distance_x = 5
+                distance_x = 1
                 }
                 pix_data[2] = distance_x
                 if (event.deltaY >0){
-                distance_y = -5
+                distance_y = -1
                 } else{
-                distance_y = 5
+                distance_y = 1
                 }
                 pix_data[3] = distance_y
                 inject_scroll_event(pix_data)
