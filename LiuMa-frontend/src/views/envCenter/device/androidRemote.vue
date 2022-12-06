@@ -1,19 +1,16 @@
 /**
 * 安卓远程控制
-*/ 
+*/
 <template>
     <div>
         <el-row :gutter="10">
-            <el-col :xl="4" :lg="6" min-width="400px">
+            <el-col :xs="8" :md="6" :xl="4">
                 <div class="screen-header">
-                    <span>
-                        {{device.serial}}
-                    </span>
-                    <span @click="hotfix" class="cursor-pointer">
-                        <i title="hotfix" class="fas fa-hammer"></i>
-                    </span>
-                    <div style="float:right">
-                        <el-button type="danger" size="small" @click="stopUsing" >停用</el-button>
+                    <div style="float:left; margin: 10px 5px">
+                        <span style="margin-left:5px;margin-top:11px">{{device.serial}}</span>
+                    </div>
+                    <div style="float:right; margin: 4px 5px">
+                        <el-button type="danger" size="mini" @click="stopUsing" >停用</el-button>
                     </div>
                 </div>
                 <div class="screen-body">
@@ -22,13 +19,12 @@
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
                 </div>
                 <div class="screen-footer">
-                    <el-button size="mini" type="text" @click="runKeyevent('APP_SWITCH')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('MENU')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('HOME')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('BACK')"></el-button>
+                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('MENU')" icon="el-icon-menu"></el-button>
+                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('HOME')" icon="el-icon-s-home"></el-button>
+                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('BACK')" icon="el-icon-caret-left"></el-button>
                 </div>
             </el-col>
-            <el-col :xl="18" :lg="20">
+            <el-col :xs="16" :md="18" :xl="20">
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="常用功能" name="common">
                         <div class="card-columns" ref="commonContainer">
@@ -42,28 +38,28 @@
                                     </span>
                                 </div>
                                 <div class="card-body">
-                                    <el-input size="small" :autosize="{ minRows: 4}" type="textarea" 
+                                    <el-input size="small" :autosize="{ minRows: 3}" type="textarea"
                                         :disabled="whatsinput.disabled" clearable placeholder="请输入..." v-model="whatsinput.text"
                                         @keydown.tab.exact.prevent="sendInputKey('tab')" @keydown.enter.exact.prevent="sendInputKey('enter')"/>
-                                
+
                                     <span style="text-align: right; font-size: 0.74em; color: gray;">
                                         <code>Shift+Enter</code> to start a new line, <code>Enter</code> to
                                         send</span>
                                 </div>
                             </div>
-                
+
                             <div class="card">
                                 <div class="card-header">常用地址</div>
                                 <div class="card-body">
                                     <dl>
-                                        <dt>ATX-AGENT地址</dt>
+                                        <dt>ATX-AGENT地址: </dt>
                                         <dd><code v-text="deviceUrl"></code></dd>
-                                        <dt>ADB远程连接</dt>
+                                        <dt>ADB远程连接: </dt>
                                         <dd><code v-text="remoteConnectAddr"></code></dd>
                                     </dl>
                                 </div>
                             </div>
-                
+
                             <div class="card">
                                 <div class="card-header">当前应用</div>
                                 <div class="card-body">
@@ -110,7 +106,10 @@
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="控件元素" name="control">
-                        
+
+                    </el-tab-pane>
+                    <el-tab-pane label="测试用例" name="testcase">
+
                     </el-tab-pane>
                 </el-tabs>
             </el-col>
@@ -127,7 +126,6 @@ export default {
     data() {
         return{
             activeName: 'common',
-            rotation: 0,
             websockets: {
               remote: null,
               winput: null,
@@ -147,8 +145,7 @@ export default {
               packageName: "",
               message: "",
               launch: true,
-            },
-            scheme: 'ws',
+            }
         }
     },
     mounted: function () {
@@ -165,7 +162,6 @@ export default {
         this.loadWhatsinput()
 
         // 当设备不使用时自动退出
-        console.log("Refresh:", this.idleTimeout / 2 * 1000)
         this.closeWindowWhenReleased(5000)
 
         // Disable WhatsInputMethod to prevent influence UIAutomation
@@ -299,18 +295,6 @@ export default {
             code: "" + code,
             }))
         },
-        hotfix() {
-            $.ajax({
-            method: "get",
-            url: this.deviceUrl + "/info/rotation"
-            }).done(ret => {
-            this.$notify({
-                message: "Rotation updated",
-                position: 'bottom-left',
-                duration: 1000,
-            })
-            })
-        },
         stopUsing() {
             $.ajax({
             method: "delete",
@@ -338,7 +322,7 @@ export default {
         },
         handleTabClick(tab, event) {
             if (tab.name == "control") {
-            
+
             }
         },
         mirrorDisplay() {
@@ -354,7 +338,7 @@ export default {
                 },
                 debug: false
             });
-            var ws = new WebSocket(this.deviceServerUrl.replace(/^https?/, this.scheme) + '/scrcpy/remote');
+            var ws = new WebSocket(this.deviceServerUrl + '/scrcpy/screen');
             this.websockets.remote = ws;
             ws.binaryType = 'arraybuffer';
             ws.onopen = (ev) => {};
@@ -370,7 +354,7 @@ export default {
                   jmu.feed({
                     video: new Uint8Array(event.data)
                   });
-                } 
+                }
             };
             ws.onclose = (ev) => {
                 if (this.websockets.screen === ws) {
@@ -611,25 +595,19 @@ export default {
             return this.device.sources.url;
         },
         deviceUrl() {
-            // return "http://" + this.device.sources.atxAgentAddress;
-        },
-        remoteTerminal() {
-            return "http://" + this.deviceUrl + "/term";
+            return "http://" + this.device.sources.atxAgentAddress;
         },
         screenshotUrl() {
             return  this.deviceUrl + "/screenshot/0";
         },
         remoteConnectAddr() {
-            // return "adb connect " + this.device.sources.remoteConnectAddress;
+            return "adb connect " + this.device.sources.remoteConnectAddress;
         },
         whatsInputUrl() {
-            // return this.scheme + "://" + this.device.sources.whatsInputAddress;
-        },
-        displayLinked() {
-            return this.websockets.screen !== null;
+            return "ws://" + this.device.sources.whatsInputAddress;
         },
         deviceServerUrl() {
-            // return "http://" + this.device.sources.deviceServerAddress;
+            return "http://" + this.device.sources.deviceServerAddress;
         }
     }
 
@@ -637,19 +615,19 @@ export default {
 </script>
 <style scoped>
 .screen-header{
-    height: 38px;
+    height: 36px;
     position: relative;
     border:1px solid rgb(219, 219, 219);
 }
 
 .screen-body{
-    height: auto;
+    min-height: 575px;
     background-color: gray;
     border:1px solid rgb(219, 219, 219);
 }
 
 .screen-footer{
-    height: 38px;
+    height: 32px;
     position: relative;
     border:1px solid rgb(219, 219, 219);
 }
@@ -658,15 +636,10 @@ export default {
     cursor: pointer;
 }
 
-.screen {
-    position: relative;
-    background-color: gray;
-}
-
 .scrcpy-fg {
     z-index: 20;
     max-width: 100%;
-    height: 700px;
+    height: auto;
 }
 
 .card-columns {
@@ -703,7 +676,7 @@ export default {
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
 }
 
 dt {
@@ -715,7 +688,7 @@ dd {
     margin-bottom: 0.5rem;
     margin-left: 0;
     display: block;
-    margin-inline-start: 40px;
+    margin-inline-start: 10px;
 }
 
 dl {
