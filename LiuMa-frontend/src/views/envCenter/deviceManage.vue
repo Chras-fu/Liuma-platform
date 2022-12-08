@@ -48,17 +48,24 @@
                         <div class="device-box-info">
                             <div class="box-header">
                                 <span style="float: left;">
-                                    <i v-if="device.status==='offline'" class="el-icon-warning-outline lm-fail"> 已离线</i>
-                                    <i v-if="device.status==='online'" class="el-icon-video-play lm-success"> 空闲中</i>
-                                    <i v-if="device.status==='using'" class="el-icon-video-pause lm-error"> 使用中</i>
-                                    <i v-if="device.status==='testing'" class="el-icon-video-pause lm-error"> 测试中</i>
-                                    <i v-if="device.status==='colding'" class="lm-loading"><i class="el-icon-loading"/> 冷却中</i>
+                                    <i v-if="device.status==='offline'" class="el-icon-warning-outline tpw-warning"> 已离线</i>
+                                    <i v-if="device.status==='online'" class="el-icon-video-play tpw-success"> 空闲中</i>
+                                    <i v-if="device.status==='using'" class="el-icon-video-pause tpw-error"> 占用中</i>
+                                    <i v-if="device.status==='testing'" class="el-icon-video-pause tpw-error"> 测试中</i>
+                                    <i v-if="device.status==='colding'" class="tpw-loading"><i class="el-icon-loading"/> 冷却中</i>
                                 </span>
                                 <el-button style="float: right" size="mini" v-if="device.status==='online'" type="primary" @click="useDevice(device)">立即使用</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user===currentUser" type="danger" @click="releaseDevice(device)">停用</el-button>
+                                <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user!==currentUser" type="info" disabled><i class="el-icon-s-custom"> {{device.user}}</i></el-button>
+                                <el-button style="float: right" size="mini" v-if="device.status==='testing'" type="primary" @click="viewDevice(device)">查看</el-button>
                             </div>
                             <div class="box-body">
-                                <span style="font-weight:bold;font-size:16px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;">{{device.name}}</span>
+                                <div style="display: flex">
+                                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:15px">
+                                        <span style="font-weight:bold;font-size:16px;">{{device.name}}</span>
+                                    </div>
+                                    <i class="el-icon-edit-outline" style="font-size:12px;margin-left:-12px;margin-top:6px" @click="editDevice(device)"/>
+                                </div>
                                 <div style="display:flex; margin-top: 30px">
                                     <img class="box-img" :src="device.img" alt=""/>
                                     <div>
@@ -74,10 +81,22 @@
                 </div>
             </div>
         </div>
+        <el-dialog title="编辑设备名称" :visible.sync="deviceVisible" width="600px" :append-to-body="true" destroy-on-close @closed="deviceVisible=false">
+            <el-form label-width="120px" style="padding-right: 30px;" :model="deviceForm" :rules="rules" ref="deviceForm">
+              <el-form-item label="设备名" prop="name">
+                <el-input size="small" style="width: 90%" v-model="deviceForm.name" auto-complete="off" placeholder="请输入设备名"/>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button size="small" @click="deviceVisible=false">取消</el-button>
+                <el-button size="small" type="primary" class="title" @click="submitForm('deviceForm', deviceForm)">保存</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
+let elementResizeDetectorMaker = require('element-resize-detector');
 export default {
   data() {
     return {
@@ -93,13 +112,24 @@ export default {
       },
       statusList: [
         {id: 'online', name: '空闲中'},
-        {id: 'using', name: '使用中'},
+        {id: 'using', name: '占用中'},
         {id: 'testing', name: "测试中"},
         {id: 'colding', name: '冷却中'},
         {id: 'offline', name: '已离线'}
       ],
       filterData: [],
       devicesData: [],
+      devicesCount: 0,
+      deviceForm: {
+        name: '',
+        serial: ''
+      },
+      deviceVisible: false,
+      rules: {
+        name: [{ required: true, message: '设备名称不能为空', trigger: 'blur' }]
+      },
+      boxWidth: 250,
+      rowSize: 5,
       keys: {
         'brand': '品牌',
         'android': 'Android系统',
@@ -109,11 +139,24 @@ export default {
       currentUser: ''
     }
   },
+  mounted() {
+    let erd = elementResizeDetectorMaker();
+    let that = this;
+    erd.listenTo(document.getElementsByClassName('device-list'), function(element) {
+      that.getWidth();
+    });
+    this.getWidth();
+    this.getData();
+  },
+  watch: {
+    boxWidth: function (n, o) {
+      this.getData();
+    }
+  },
   created() {
     this.$root.Bus.$emit('initBread', ["环境中心", "设备管理"]);
     this.currentUser = this.$store.state.userInfo.id;
     this.getFilter();
-    this.getData();
   },
   methods: {
     // 获取过滤条件
@@ -153,12 +196,19 @@ export default {
       this.$post(url, this.searchForm, response => {
         let devicesData = [];
         let data = response.data;
-        for (let i = 0; i < data.length / 5; i++) {
-          let rowData = data.slice(5 * i, 5 * (i + 1));
+        for (let i = 0; i < data.length / this.rowSize; i++) {
+          let rowData = data.slice(this.rowSize * i, this.rowSize * (i + 1));
           devicesData.push(rowData);
         }
+        this.devicesCount = data.length;
         this.devicesData = devicesData;
       });
+    },
+    // 获取屏幕宽度
+    getWidth() {
+      let screenWidth = document.getElementsByClassName('device-list')[0].clientWidth + 20;
+      this.rowSize = parseInt(screenWidth / 250);
+      this.boxWidth = parseInt(screenWidth / this.rowSize);
     },
     // 搜索按钮
     search() {
@@ -235,6 +285,32 @@ export default {
       this.$post(url, null, response => {
         this.getData();
       });
+    },
+    // 查看设备
+    viewDevice(device) {
+      window.open("/#/envCenter/deviceControl/" + device.serial);
+    },
+    editDevice(device) {
+      this.deviceForm.serial = device.serial;
+      this.deviceForm.name = device.name;
+      this.deviceVisible = true;
+    },
+    submitForm(confirm, form) {
+      this.$refs[confirm].validate(valid => {
+        if (valid) {
+          let url = '/autotest/device/update';
+          let data = {
+            serial: form.serial,
+            name: form.name
+          };
+          this.result = this.$request.post(url, {apiServer: 'cloudphone', data: data}).then(response => {
+            this.$message.success('保存成功');
+            this.deviceVisible = false;
+            // 更新列表
+            this.getData();
+          });
+        }
+      });
     }
   }
 };
@@ -242,7 +318,7 @@ export default {
 
 <style scoped>
 .device-list{
-    min-width: 1350px;
+    min-width: 300px;
 }
 .el-table--scrollable-x .el-table__body-wrapper {
     overflow-x: hidden;
@@ -273,7 +349,6 @@ export default {
     margin: 0px -10px;
 }
 .device-box{
-    width: 20%;
     padding: 10px;
 }
 .device-box-border{
