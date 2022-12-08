@@ -1,5 +1,5 @@
 /**
-* 安卓远程控制
+* 苹果远程控制
 */ 
 <template>
     <div>
@@ -9,23 +9,17 @@
                     <span>
                         {{device.serial}}
                     </span>
-                    <span @click="hotfix" class="cursor-pointer">
-                        <i title="hotfix" class="fas fa-hammer"></i>
-                    </span>
                     <div style="float:right">
                         <el-button type="danger" size="small" @click="stopUsing" >停用</el-button>
                     </div>
                 </div>
                 <div class="screen-body">
-                    <video id="screen-player" class="scrcpy-fg" muted autoplay></video>
+                    <canvas ref="bgCanvas" class="canvas-bg" v-bind:style="canvasStyle"></canvas>
                     <span class="finger finger-0" style="transform: translate3d(200px, 100px, 0px)"></span>
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
                 </div>
                 <div class="screen-footer">
-                    <el-button size="mini" type="text" @click="runKeyevent('APP_SWITCH')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('MENU')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('HOME')"></el-button>
-                    <el-button size="mini" type="text" @click="runKeyevent('BACK')"></el-button>
+                    <el-button size="mini" type="text" style="width:100%" @click="pressHome" icon="el-icon-s-home"></el-button>
                 </div>
             </el-col>
             <el-col :span="18">
@@ -34,69 +28,58 @@
                         <div class="card-columns" ref="commonContainer">
                             <div class="card">
                                 <div class="card-header">
-                                    输入框
-                                    <span style="float:right">
-                                        <el-tooltip effect="dark" content="修复输入法" placement="top-start">
-                                            <i @click="fixInputMethod"> 修复输入法</i>
-                                        </el-tooltip>
-                                    </span>
+                                    常用操作
+                                    <span style="font-size: 0.7em; padding-top: 5px; color: gray">注: iOS的弹窗不能通过屏幕点击来选择</span>
                                 </div>
                                 <div class="card-body">
-                                    <el-input size="small" :autosize="{ minRows: 4}" type="textarea" 
-                                        :disabled="whatsinput.disabled" clearable placeholder="请输入..." v-model="whatsinput.text"
-                                        @keydown.tab.exact.prevent="sendInputKey('tab')" @keydown.enter.exact.prevent="sendInputKey('enter')"/>
-                                
-                                    <span style="text-align: right; font-size: 0.74em; color: gray;">
-                                        <code>Shift+Enter</code> to start a new line, <code>Enter</code> to
-                                        send</span>
+                                    <el-button size="small" @click="hotfix">修复旋转</el-button>
+                                    <el-button size="small" :loading="alert.loading" @click="chooseAlertButtons">选择弹框按钮</el-button>
+                                    <el-dialog title="弹窗选择" :visible.sync="alert.visible">
+                                        <span style="padding: 5px" v-for="(v, index) in alert.buttons" :key="index">
+                                            <el-button round size="small" @click="alertAccept(v); alert.visible=false">{{!v}}</el-button>
+                                        </span>
+                                    </el-dialog>
                                 </div>
                             </div>
                 
                             <div class="card">
-                                <div class="card-header">常用地址</div>
+                                <div class="card-header">常用信息</div>
                                 <div class="card-body">
                                     <dl>
-                                        <dt>ATX-AGENT地址</dt>
-                                        <dd><code v-text="deviceUrl"></code></dd>
-                                        <dt>ADB远程连接</dt>
-                                        <dd><code v-text="remoteConnectAddr"></code></dd>
+                                        <dt>Display</dt>
+                                        <dd><code>{{!display.width}}x{{!display.height}}</code></dd>
+                                        <dt>SessionID</dt>
+                                        <dd><code v-text="session.id"></code></dd>
+                                        <dt>FPS/Frames</dt>
+                                        <dd>
+                                        <code v-text="display.fps"></code>
+                                        /
+                                        <small><code v-text="session.frameCount"></code></small>
+                                        </dd>
+                                        <dt>WDA URL</dt>
+                                        <dd>
+                                        <code v-text="sources.wdaUrl"></code>
+                                        <i :data-clipboard-text="sources.wdaUrl" class="far fa-copy clipboard-copy cursor-pointer"></i>
+                                        </dd>
                                     </dl>
-                                </div>
-                            </div>
-                
-                            <div class="card">
-                                <div class="card-header">当前应用</div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <el-input v-model="topApp.packageName" size="small" placeholder="PackageName"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <el-input v-model="topApp.activity" size="small" placeholder="Activity"/>
-                                    </div>
-                                    <el-button type="primary" size="small" @click="refreshTopApp">刷新</el-button>
-                                    <el-button type="primary" size="small" :disabled="!topApp.packageName" @click='runShell("am force-stop "+topApp.packageName)'> Kill </el-button>
                                 </div>
                             </div>
 
                             <div class="card">
                                 <div class="card-header">应用安装</div>
                                 <div class="card-body">
-                                    <el-upload  ref="upload" class="upload-demo" drag action :http-request="uploadApk" multiple>
+                                    <el-upload ref="upload" accept=".ipa" drag action :http-request="uploadIPA">
                                         <i class="el-icon-upload"></i>
                                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                        <div class="el-upload__tip" slot="tip">暂时只支持apk的上传</div>
+                                        <div class="el-upload__tip" slot="tip">只能上传ipa文件，且不超过2G</div>
                                     </el-upload>
                                     <div class="form-group" style="margin-top: 20px">
                                         <span>URL</span>
-                                        <el-input style="margin-top:5px" size="small" placeholder="http://..." v-model="app.installUrl"/>
+                                        <el-input style="margin-top:5px" size="small" placeholder="http://..." v-model="app.url"/>
                                     </div>
-                                    <div>
-                                        <el-checkbox v-model="app.launch">安装完成后启动应用</el-checkbox>
-                                    </div>
-                                    <el-button style="margin-top:5px" type="primary" size="small" @click="appInstall" :disabled="!app.finished || !app.installUrl">安裝</el-button>
+                                    <el-button style="margin-top:5px" type="primary" size="small" @click="appInstall" :disabled="!app.finished || !app.url">安裝</el-button>
                                     <p>
                                         <pre v-show="!!app.message" v-text="app.message"></pre>
-                                        <small><code v-text="app.packageName"></code></small>
                                     </p>
                                 </div>
                             </div>
@@ -104,12 +87,15 @@
                             <div class="card">
                                 <div class="card-header">截图下载</div>
                                 <div class="card-body">
-                                    <a :href="screenshotUrl+'?download=screenshot.jpg'" download>下载截图</a>
+                                    <a @click="screenshot">下载截图</a>
                                 </div>
                             </div>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="控件元素" name="control">
+                        
+                    </el-tab-pane>
+                    <el-tab-pane label="测试用例" name="testcase">
                         
                     </el-tab-pane>
                 </el-tabs>
@@ -118,9 +104,8 @@
     </div>
 </template>
 <script>
-const JMuxer = require('jmuxer');
 export default {
-    name: 'AndroidRemote',
+    name: 'AppleRemote',
     props:{
         device: Object,
     },
@@ -346,15 +331,6 @@ export default {
                 .fail(function (ret) {
                     console.log(ret)
                     alert("设备可能被释放了，Press F12 to debug")
-                    // let content = '设备' + this.idleTimeout + "秒内没有操作，设备自动释放，点击刷新重新占用该设备"
-                    // this.$alert(content, '设备超时提示', {
-                    //   confirmButtonText: '刷新',
-                    //   type: 'warning'
-                    // }).then(() => {
-                    //   location.reload()
-                    // }).catch(() => {
-                    //   window.close()
-                    // })
                 })
             }
             }, interval)
@@ -731,8 +707,7 @@ export default {
             return this.display.ws !== null
         },
         displayWSUrl() {
-            let scheme = location.protocol === 'https' ? 'wss' : 'ws';
-            let url = this.source.wdaUrl.replace(/^https?:\/\//, scheme + "://") + "/screen"
+            let url = this.source.wdaUrl.replace(/^https?:\/\//, "ws://") + "/screen"
             return url
         }
     },
@@ -741,19 +716,19 @@ export default {
 </script>
 <style scoped>
 .screen-header{
-    height: 38px;
+    height: 36px;
     position: relative;
     border:1px solid rgb(219, 219, 219);
 }
 
 .screen-body{
-    height: auto;
+    min-height: 575px;
     background-color: gray;
     border:1px solid rgb(219, 219, 219);
 }
 
 .screen-footer{
-    height: 38px;
+    height: 32px;
     position: relative;
     border:1px solid rgb(219, 219, 219);
 }
@@ -762,15 +737,27 @@ export default {
     cursor: pointer;
 }
 
-.screen {
-    position: relative;
-    background-color: gray;
-}
-
-.scrcpy-fg {
+.canvas-bg {
     z-index: 20;
     max-width: 100%;
-    height: 700px;
+    height: auto;
+}
+
+.finger {
+    position: absolute;
+    border-style: solid;
+    border-radius: 50%;
+    border-color: white;
+    border-width: 1mm;
+    width: 6mm;
+    height: 6mm;
+    top: -3mm;
+    left: -3mm;
+    opacity: 0.7;
+    pointer-events: none;
+    background: red;
+    z-index: 200;
+    display: none;
 }
 
 .card-columns {
@@ -807,7 +794,7 @@ export default {
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
 }
 
 dt {
@@ -819,7 +806,7 @@ dd {
     margin-bottom: 0.5rem;
     margin-left: 0;
     display: block;
-    margin-inline-start: 40px;
+    margin-inline-start: 10px;
 }
 
 dl {
