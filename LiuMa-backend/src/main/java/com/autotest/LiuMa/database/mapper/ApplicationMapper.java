@@ -10,6 +10,8 @@ public interface ApplicationMapper {
 
     Application getApplicationByName(String projectId, String name);
 
+    Application getApplicationById(String id);
+
     void saveApplication(Application application);
 
     void deleteApplication(String id);
