@@ -80,6 +80,12 @@ public class CaseJsonCreateService {
     @Resource
     private ControlMapper controlMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
+    @Resource
+    private ApplicationMapper applicationMapper;
+
     public String getDownloadUrl(TaskDTO task, List<TaskTestCollectionResponse> testCollectionList){
         String taskFilePath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId();
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId();
@@ -124,12 +130,12 @@ public class CaseJsonCreateService {
             TestCaseWebResponse testCase = this.getWebTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
             return JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
         }else { // app用例
-            TestCaseAppResponse testCase = this.getAppTestCaseJson(task.getEnvironmentId(),task.getSourceType(), taskTestCase);
+            TestCaseAppResponse testCase = this.getAppTestCaseJson(task.getDeviceId(),task.getSourceType(), taskTestCase);
             return JSONObject.parseObject(JSONObject.toJSONString(testCase, SerializerFeature.WriteMapNullValue), Feature.OrderedField);
         }
     }
 
-    public TestCaseAppResponse getAppTestCaseJson(String environmentId, String SourceType, TaskTestCaseResponse taskTestCase){
+    public TestCaseAppResponse getAppTestCaseJson(String deviceId, String SourceType, TaskTestCaseResponse taskTestCase){
         // 拼装App用例
         TestCaseAppResponse testCaseApp = new TestCaseAppResponse();
         if(SourceType.equals(ReportSourceType.TEMP.toString())) {
@@ -142,9 +148,18 @@ public class CaseJsonCreateService {
             testCaseApp.setFunctions(this.getCaseFunctions(caseRequest.getCommonParam().getJSONArray("functions")));
             // 组装用例公参
             testCaseApp.setParams(this.getCaseParams(caseRequest.getCommonParam().getJSONArray("params")));
-            // 组装浏览器开关配置
-            testCaseApp.setStartDriver(caseRequest.getCommonParam().getBoolean("startDriver"));
-            testCaseApp.setCloseDriver(caseRequest.getCommonParam().getBoolean("closeDriver"));
+            // 组装应用信息
+            Application application = applicationMapper.getApplicationById(caseRequest.getCommonParam().getString("appId"));
+            testCaseApp.setAppId(application.getAppId());
+            testCaseApp.setActivity(caseRequest.getCommonParam().getString("activity"));
+            // 组装设备信息
+            Device device = deviceMapper.getDeviceById(deviceId);
+            testCaseApp.setDeviceSystem(device.getSystem());
+            if(device.getSystem().equals("android")) {
+                testCaseApp.setDeviceUrl(JSONObject.parseObject(device.getSources()).getString("atxAgentAddress"));
+            }else {
+                testCaseApp.setDeviceUrl(JSONObject.parseObject(device.getSources()).getString("wdaUrl"));
+            }
             // 组装操作
             List<CaseAppRequest> caseApps = caseRequest.getCaseApps();
             List<TestCaseAppDataResponse> optList = new ArrayList<>();
@@ -152,6 +167,7 @@ public class CaseJsonCreateService {
                 TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
                 Operation operation = operationMapper.getOperationDetail(caseAppRequest.getOperationId(), caseRequest.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
+                optData.setOperationSystem(operation.getSystem());
                 optData.setOperationId(caseAppRequest.getOperationId());
                 if(operation.getFrom().equals("custom")){
                     optData.setOperationName("自定义");
@@ -162,7 +178,7 @@ public class CaseJsonCreateService {
                 }
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getAppElement(caseAppRequest.getElement()));
-                optData.setOperationData(this.getAppData(caseAppRequest.getData(), environmentId));
+                optData.setOperationData(this.getAppData(caseAppRequest.getData()));
                 optList.add(optData);
             }
             testCaseApp.setOptList(optList);
@@ -176,9 +192,18 @@ public class CaseJsonCreateService {
             testCaseApp.setFunctions(this.getCaseFunctions(commonParam.getJSONArray("functions")));
             // 组装用例公参
             testCaseApp.setParams(this.getCaseParams(commonParam.getJSONArray("params")));
-            // 组装浏览器开关配置
-            testCaseApp.setStartDriver(commonParam.getBoolean("startDriver"));
-            testCaseApp.setCloseDriver(commonParam.getBoolean("closeDriver"));
+            // 组装应用信息
+            Application application = applicationMapper.getApplicationById(commonParam.getString("appId"));
+            testCaseApp.setAppId(application.getAppId());
+            testCaseApp.setActivity(commonParam.getString("activity"));
+            // 组装设备信息
+            Device device = deviceMapper.getDeviceById(deviceId);
+            testCaseApp.setDeviceSystem(device.getSystem());
+            if(device.getSystem().equals("android")) {
+                testCaseApp.setDeviceUrl(JSONObject.parseObject(device.getSources()).getString("atxAgentAddress"));
+            }else {
+                testCaseApp.setDeviceUrl(JSONObject.parseObject(device.getSources()).getString("wdaUrl"));
+            }
             // 组装操作
             List<CaseAppDTO> caseApps = caseAppMapper.getCaseAppList(taskTestCase.getCaseId(), taskTestCase.getCaseType());
             List<TestCaseAppDataResponse> optList = new ArrayList<>();
@@ -186,6 +211,7 @@ public class CaseJsonCreateService {
                 TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
                 Operation operation = operationMapper.getOperationDetail(caseAppDTO.getOperationId(), caseDTO.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
+                optData.setOperationSystem(operation.getSystem());
                 optData.setOperationId(caseAppDTO.getOperationId());
                 if(operation.getFrom().equals("custom")){
                     optData.setOperationName("自定义");
@@ -196,7 +222,7 @@ public class CaseJsonCreateService {
                 }
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getAppElement(JSONArray.parseArray(caseAppDTO.getElement())));
-                optData.setOperationData(this.getAppData(JSONArray.parseArray(caseAppDTO.getData()), environmentId));
+                optData.setOperationData(this.getAppData(JSONArray.parseArray(caseAppDTO.getData())));
                 optList.add(optData);
             }
             testCaseApp.setOptList(optList);
@@ -389,7 +415,7 @@ public class CaseJsonCreateService {
         return elementObj;
     }
 
-    public JSONObject getAppData(JSONArray dataList, String environmentId){
+    public JSONObject getAppData(JSONArray dataList){
         JSONObject dataObj = new JSONObject();
         if(dataList == null){
             return dataObj;
