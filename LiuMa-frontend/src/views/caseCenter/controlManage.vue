@@ -37,7 +37,6 @@
             <el-table-column prop="by" label="定位方式">
                 <template slot-scope="scope">
                     <span v-if="scope.row.by ==='PROP'">属性定位</span>
-                    <span v-if="scope.row.by ==='COMP'">组合定位</span>
                     <span v-if="scope.row.by ==='XPATH'">Xpath定位</span>
                 </template>
             </el-table-column>
@@ -74,17 +73,17 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="表达式" prop="expression">
-                <div v-if="addControlForm.by !== 'XPATH'" style="width:95%">
+                <div v-if="addControlForm.by === 'PROP'" style="width:95%">
                     <el-row v-for="(item, index) in addControlForm.expressionList" :key="index">
                         <el-col :span="6">
                             <el-select size="small" style="width:95%" v-model="item.propName" placeholder="属性名">
                                 <el-option v-for="prop in propList" :key="prop" :label="prop" :value="prop"></el-option>
                             </el-select>
                         </el-col>
-                        <el-col :span="(addControlForm.by === 'COMP') ? 15 : 18">
+                        <el-col :span="15">
                             <el-input size="small" style="width:100%" v-model="item.propValue" placeholder="请输入属性值"/>
                         </el-col>
-                        <el-col :span="3" v-if="addControlForm.by === 'COMP'">
+                        <el-col :span="3">
                             <div style="font-size: 24px; margin-top:8px; margin-left:5px; display: flex">
                                 <i class="el-icon-circle-plus lm-success" @click="addProp(index)"></i>
                                 <i v-if="addControlForm.expressionList.length > 1" class="el-icon-remove lm-error" @click="deleteProp(index)"></i>
@@ -92,7 +91,7 @@
                         </el-col>
                     </el-row>
                 </div>
-                <el-input v-else size="small" style="width:95%" v-model="addControlForm.expression" placeholder="Xpath表达式"/>
+                <el-input v-else size="small" style="width:95%" v-model="addControlForm.expression" placeholder="请输入元素定位表达式"/>
             </el-form-item>
             <el-form-item label="所属页面" prop="moduleId">
                 <select-tree style="width:95%;" placeholder="所属页面" :selectedValue="addControlForm.moduleId" :selectedLabel="addControlForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
@@ -137,11 +136,7 @@ export default {
                 { label: "安卓", value: "android" },
                 { label: "苹果", value: "apple" },
             ],
-            byList:[
-                { label: "属性定位", value: "PROP" },
-                { label: "组合定位", value: "COMP" },
-                { label: "Xpath定位", value: "XPATH" },
-            ],
+            byList:[],
             propList: [],
             addControlForm: {
                 id:"",
@@ -332,7 +327,7 @@ export default {
         // 提交控件
         submitControl() {
             // 请求接口
-            if(this.addControlForm.by !== "XPATH"){
+            if(this.addControlForm.by === "PROP"){
                 let re = true;
                 for(let i=0;i<this.addControlForm.expressionList.length;i++){
                     let expression = this.addControlForm.expressionList[i];
@@ -369,7 +364,7 @@ export default {
             this.addControlForm.system = row.system;
             this.addControlForm.by = row.by;
             this.addControlForm.expression = row.expression;
-            if(row.by !== "XPATH"){
+            if(row.by === "PROP"){
                 this.addControlForm.expressionList = JSON.parse(row.expression);
             }
             this.addControlForm.moduleId = row.moduleId;
@@ -397,11 +392,9 @@ export default {
         },
         // 更改定位方式
         changeBy(val){
-            if(val !== "XPATH"){
+            if(val === "PROP"){
                 if(this.addControlForm.expressionList.length === 0){
                     this.addControlForm.expressionList.push({propName:"",propValue:""});
-                }else if(val === "PROP"){
-                    this.addControlForm.expressionList.splice(1,this.addControlForm.expressionList.length-1);
                 }
             }
         },
@@ -418,8 +411,18 @@ export default {
         'addControlForm.system'(newVal, oldVal){
             if(newVal === "android"){
                 this.propList = locateProps.android;
+                this.byList = [
+                    { label: "Xpath定位", value: "XPATH" },
+                    { label: "属性定位", value: "PROP" }
+                ];
             }else{
                 this.propList = locateProps.apple;
+                this.byList = [
+                    { label: "Xpath定位", value: "XPATH" },
+                    { label: "属性定位", value: "PROP" },
+                    { label: "Predicate定位", value: "PRED" },
+                    { label: "ClassChain定位", value: "CLASS" }
+                ]
             }
         }
     }
