@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "echarts": "^5.2.0-rc.2",
+    "element-resize-detector": "^1.2.4",
     "element-ui": "^2.3.2",
     "http-proxy-middleware": "^0.18.0",
     "jmuxer": "^2.0.5",
