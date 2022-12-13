@@ -23,7 +23,7 @@
                     <el-select style="width: 90%" v-model="collectionForm.deviceId" clearable placeholder="请选择执行设备">
                         <el-option v-for="item in deviceList" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
-                    <el-tooltip style="width:5%" vcontent="当前集合包含APP测试时 执行设备必选" placement="bottom">
+                    <el-tooltip style="width:5%" content="当前集合包含APP测试时 执行设备必选" placement="bottom">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
                 </el-form-item>
