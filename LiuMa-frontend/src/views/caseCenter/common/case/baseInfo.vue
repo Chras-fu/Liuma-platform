@@ -97,7 +97,7 @@
                 </el-form-item>
             </el-col>
         </el-row>
-        <el-row :gutter="40" v-if="caseForm.type !== 'API'">
+        <el-row :gutter="40" v-if="caseForm.type === 'WEB'">
             <el-col :span="12">
                 <el-form-item label="启动Driver">
                     <el-switch size="small" v-model="caseForm.commonParam.startDriver" active-text="用例开始前重启浏览器"/>
@@ -109,7 +109,20 @@
                 </el-form-item>
             </el-col>
         </el-row>
-        
+        <el-row :gutter="40" v-if="caseForm.type === 'APP'">
+            <el-col :span="12">
+                <el-form-item label="被测应用" prop="application">
+                    <el-select size="small" style="width: 100%" v-model="caseForm.commonParam.appId" placeholder="被测应用">
+                        <el-option v-for="item in applications" :key="item.id" :label="item.name" :value="item.id"/>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col :span="12" v-if="caseForm.system === 'android'">
+                <el-form-item label="启动视图">
+                    <el-input  size="small" style="width: 100%" v-model="caseForm.commonParam.activity" placeholder="指定app启动视图 例: com.demo.activity"/>
+                </el-form-item>
+            </el-col>
+        </el-row>
     </div>
 </template>
 <script>
@@ -133,13 +146,17 @@ export default {
         environments: [],
         systems: ["android", "apple"],
         functionList: [],
-        paramList: []
+        paramList: [],
+        applications: [],
       }
     },
     created() {
         this.getModule();
         if(this.caseForm.type !== "APP"){
             this.getEnvironment();
+        }
+        if(this.caseForm.type === "APP"){
+            this.getApplication();
         }
         this.getFunction();
         this.getParam();
@@ -183,6 +200,12 @@ export default {
             let url = "/autotest/environment/all/" + this.$store.state.projectId;
             this.$get(url, response =>{
                 this.environments = response.data;
+            });
+        },
+        getApplication(){
+            let url = '/autotest/application/list/' + this.$store.state.projectId;
+            this.$get(url, response =>{
+                this.applications = response.data;
             });
         },
         selectModule(data){
