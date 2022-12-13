@@ -19,8 +19,8 @@
     order by t.create_time
   </select>
   <select id="getToRunTask" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
-    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type, r.source_id, r.environment_id, r.id as reportId from task t
-    left join report r on r.task_id = t.id
+    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type, r.source_id, r.environment_id, r.device_id, r.id as reportId
+    from task t left join report r on r.task_id = t.id
     where t.engine_id = #{engineId} and t.status = 'prepared'
     order by
     <if test="engineId =='system'">
