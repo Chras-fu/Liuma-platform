@@ -25,6 +25,9 @@
   <select id="getApplicationByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
     select * from `application` where project_id = #{projectId} and name = #{name}
   </select>
+  <select id="getApplicationById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
+    select * from `application` where id = #{id}
+  </select>
   <select id="getApplicationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
     select * from `application` where project_id = #{projectId}
     <if test="condition != null and condition != ''">
