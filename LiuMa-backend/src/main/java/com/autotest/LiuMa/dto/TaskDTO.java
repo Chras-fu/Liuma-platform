@@ -18,4 +18,6 @@ public class TaskDTO extends Task {
 
     private String environmentId;
 
+    private String deviceId;
+
 }
