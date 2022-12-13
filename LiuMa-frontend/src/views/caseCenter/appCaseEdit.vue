@@ -70,12 +70,12 @@
                 <el-row v-if="ele.custom" :gutter="10">
                   <el-col :span="10">
                     <el-select size="small" style="width:100%" v-model="ele.by" placeholder="请选择定位方式" @change="changeBy(ele)">
-                        <el-option v-for="item in bys" :key="item.value" :label="item.label" :value="item.value"/>
+                        <el-option v-for="item in byList" :key="item.value" :label="item.label" :value="item.value"/>
                     </el-select>
                   </el-col>
                   <el-col :span="12">
-                    <el-input v-if="ele.by==='XPATH'" size="small" v-model="ele.expression" placeholder="请输入元素定位表达式"/>
-                    <el-button v-else size="small" type="text" @click="editExpression(ele)">编辑属性</el-button>
+                    <el-button v-if="ele.by==='PROP'" size="small" type="text" @click="editExpression(ele)">编辑属性</el-button>
+                    <el-input v-else size="small" v-model="ele.expression" placeholder="请输入元素定位表达式"/>
                   </el-col>
                 </el-row>
               </el-col>
@@ -103,7 +103,7 @@
             <el-button size="small" type="primary" @click="saveOperationEdit('operationForm', operationForm)">保存</el-button>
         </div>
     </el-dialog>
-    <!-- 添加属性/组合定位 -->
+    <!-- 添加属性定位 -->
     <el-dialog title="编辑属性" :visible.sync="editExpressionVisible" width="550px" destroy-on-close>
         <el-row v-for="(item, index) in expressionForm" :key="index" style="margin-bottom:10px">
             <el-col :span="8">
@@ -111,10 +111,10 @@
                     <el-option v-for="prop in propList" :key="prop" :label="prop" :value="prop"></el-option>
                 </el-select>
             </el-col>
-            <el-col :span="(customElement.by === 'COMP') ? 13 : 16">
+            <el-col :span="13">
                 <el-input size="small" style="width:100%" v-model="item.propValue" placeholder="请输入属性值"/>
             </el-col>
-            <el-col :span="3" v-if="customElement.by === 'COMP'">
+            <el-col :span="3">
                 <div style="font-size: 24px; margin-top:8px; margin-left:5px; display: flex">
                     <i class="el-icon-circle-plus lm-success" @click="addProp(index)"></i>
                     <i v-if="expressionForm.length > 1" class="el-icon-remove lm-error" @click="deleteProp(index)"></i>
@@ -160,17 +160,13 @@ export default {
                 commonParam: {
                   functions: [],
                   params: [],
-                  startDriver: true,
-                  closeDriver: true,
+                  appId: null,
+                  activity: null,
                 },
                 caseApps: []
             },
             viewModules: [],
-            bys: [
-                { label: "属性定位", value: "PROP" },
-                { label: "组合定位", value: "COMP" },
-                { label: "Xpath定位", value: "XPATH" },
-            ],
+            byList: [],
             propList: [],
             operations: [],
             assertions: [],
@@ -202,6 +198,7 @@ export default {
                 element: [{ required: true, message: '操作对象不能为空', trigger: 'blur' }],
                 data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }],
                 caseApps: [{ required: true, message: '请至少添加一条操作步骤', trigger: 'blur' }],
+                application: [{ required: true, message: '被测应用不能为空', trigger: 'blur' }],
             }
         }
     },
@@ -210,8 +207,18 @@ export default {
         this.caseForm.system = this.$route.params.system;
         if(this.caseForm.system === "android"){
             this.propList = locateProps.android;
+            this.byList = [
+                { label: "Xpath定位", value: "XPATH" },
+                { label: "属性定位", value: "PROP" }
+            ];
         }else{
             this.propList = locateProps.apple;
+            this.byList = [
+                { label: "Xpath定位", value: "XPATH" },
+                { label: "属性定位", value: "PROP" },
+                { label: "Predicate定位", value: "PRED" },
+                { label: "ClassChain定位", value: "CLASS" }
+            ]
         }
         this.getOperations();
         this.getAssertion();
@@ -382,9 +389,7 @@ export default {
         },
         changeBy(ele){
           // 更改定位方式时 将表达式处理成对应格式
-          if(ele.by === "XPATH"){
-            ele.expression = "";
-          }else{
+          if(ele.by === "PROP"){
             let expressionForm = null;
             try{
               expressionForm = JSON.parse(ele.expression);
@@ -393,20 +398,34 @@ export default {
             }
             if(expressionForm.length === 0){
                 expressionForm.push({propName:"",propValue:""});
-            }else if(ele.by === "PROP"){ // 大于0时 如果是单属性定位 去掉多余的属性保留第一个
-                expressionForm.splice(1,expressionForm.length-1);
             }
             ele.expression = JSON.stringify(expressionForm);
+          }else{
+            ele.expression = "";
           }
         },
         editExpression(ele){
-          this.expressionForm = JSON.parse(ele.expression);
+          this.expressionForm.length = 0;
+          this.expressionForm.push(...JSON.parse(ele.expression));
           this.customElement = ele;
           this.editExpressionVisible = true;
         },
         submitExpression(){
-          this.customElement.expression = JSON.stringify(this.expressionForm);
-          this.editExpressionVisible = false;
+          let re = true;
+          for(let i=0;i<this.expressionForm.length;i++){
+            let expression = this.expressionForm[i];
+            if(expression.propName === "" || expression.propValue === ""){
+              re = false;
+              break;
+            }
+          }
+          if(re){
+            this.customElement.expression = JSON.stringify(this.expressionForm);
+            this.editExpressionVisible = false;
+          }else{
+            this.$message.warning("属性值或属性名不能为空");
+          }
+          
         },
         // 新增属性定位
         addProp(index){
@@ -527,6 +546,10 @@ export default {
             });
         },
         debugCase(){
+            if(!this.caseForm.commonParam.application){
+                this.$message.warning("被测应用为空 无法调试");
+                return;
+            }
             // 用例调试
             this.runForm.engineId = 'system';
             this.runForm.environmentId = null;
