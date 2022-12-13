@@ -31,7 +31,7 @@
         <operation-table :operationData="operationData" :loading="loading" :pageparam="pageparam" :uiType="searchForm.uiType"
           @callFather="callFather($event)" @deleteOperation="deleteOperation($event)" />
       </el-tab-pane>
-      <el-tab-pane label="页面操作" name="page">
+      <el-tab-pane :label="pageName" :name="pageValue">
         <operation-table :operationData="operationData" :loading="loading" :pageparam="pageparam" :uiType="searchForm.uiType"
           @callFather="callFather($event)" @deleteOperation="deleteOperation($event)" />
       </el-tab-pane>
@@ -82,7 +82,9 @@ export default {
         total: 0
       },
       sysName: "浏览器操作",
-      sysValue: "browser"
+      sysValue: "browser",
+      pageName: "网页操作",
+      pageValue: "page"
     }
   },
   created() {
@@ -102,9 +104,13 @@ export default {
       if(val === "web"){
         this.sysName = "浏览器操作";
         this.sysValue = "browser";
+        this.pageName = "网页操作";
+        this.pageValue = "page";
       }else{
         this.sysName = "系统操作";
         this.sysValue = "system";
+        this.pageName = "视图操作";
+        this.pageValue = "view";
       }
       this.activeName = this.sysValue;
       this.searchForm.system = "";
