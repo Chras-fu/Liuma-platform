@@ -87,6 +87,15 @@
                 <span>{{data.paramName}}</span>
               </el-col>
               <el-col :span="20">
+                <el-select v-if="data.paramName === 'direction'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in directions" :key="item.id" :label="item.name" :value="item.id"/>
+                </el-select>
+                <el-select v-if="data.paramName === 'keycode'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in keycodes" :key="item.id" :label="item.name" :value="item.id"/>
+                </el-select>
+                <el-select v-if="data.paramName === 'attribute'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in attributes" :key="item" :label="item" :value="item"/>
+                </el-select>
                 <el-select v-if="data.paramName === 'assertion'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in assertions" :key="item.id" :label="item.name" :value="item.id"/>
                 </el-select>
@@ -141,7 +150,7 @@ import BaseInfo from './common/case/baseInfo'
 import RunForm from '@/views/common/business/runForm'
 import SelectTree from '@/views/common/business/selectTree'
 import RunResult from './common/case/runResult'
-import {locateProps} from '@/utils/constant'
+import {locateBys, locateProps, systemKeys, elementProps} from '@/utils/constant'
 
 export default {
     components:{PageHeader, BaseInfo, RunForm, SelectTree, RunResult},
@@ -169,6 +178,14 @@ export default {
             byList: [],
             propList: [],
             operations: [],
+            keycodes: [],
+            attributes: [],
+            directions: [
+              {id: "up", name: "向上"},
+              {id: "down", name: "向下"},
+              {id: "left", name: "向左"},
+              {id: "right", name: "向右"},
+            ],
             assertions: [],
             continues: [{id: true, name: "是"}, {id: false, name:"否"}],
             operationForm: {
@@ -207,18 +224,14 @@ export default {
         this.caseForm.system = this.$route.params.system;
         if(this.caseForm.system === "android"){
             this.propList = locateProps.android;
-            this.byList = [
-                { label: "Xpath定位", value: "XPATH" },
-                { label: "属性定位", value: "PROP" }
-            ];
+            this.byList = locateBys.android;
+            this.keycodes = systemKeys.android;
+            this.attributes = elementProps.android;
         }else{
             this.propList = locateProps.apple;
-            this.byList = [
-                { label: "Xpath定位", value: "XPATH" },
-                { label: "属性定位", value: "PROP" },
-                { label: "Predicate定位", value: "PRED" },
-                { label: "ClassChain定位", value: "CLASS" }
-            ]
+            this.byList = locateBys.apple;
+            this.keycodes = systemKeys.apple;
+            this.attributes = elementProps.apple;
         }
         this.getOperations();
         this.getAssertion();

@@ -12,7 +12,13 @@
                 <span v-if="scope.row.from==='custom'">用户定义操作</span>
             </template>
         </el-table-column>
-        <el-table-column v-if="uiType==='app'" prop="system" label="操作系统"/>
+        <el-table-column v-if="uiType==='app'" label="操作系统">
+            <template slot-scope="scope">
+                <span v-if="scope.row.system==='android'">安卓</span>
+                <span v-if="scope.row.system==='apple'">苹果</span>
+                <span v-if="scope.row.system==='common'">通用</span>
+            </template>
+        </el-table-column>
         <el-table-column prop="description" label="操作说明" min-width="200px"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="updateTime" label="更新时间" width="150px"/>

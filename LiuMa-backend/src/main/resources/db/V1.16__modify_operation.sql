@@ -2,7 +2,7 @@ ALTER TABLE `operation` RENAME TO `operation_web`;
 
 CREATE TABLE `operation_app` (
     `id`       VARCHAR(50) NOT NULL COMMENT '操作id',
-	`name`	   VARCHAR(20) NOT NULL COMMENT '操作名',
+	`name`	   VARCHAR(50) NOT NULL COMMENT '操作名',
 	`type`	   VARCHAR(20) NOT NULL COMMENT '操作分类',
     `from`     VARCHAR(20) NOT NULL COMMENT '操作来源',
     `system`   VARCHAR(20) NOT NULL COMMENT '所属系统',

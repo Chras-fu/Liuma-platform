@@ -25,7 +25,7 @@
             <el-col v-if="operationForm.uiType!=='web'" :span="4">
                 <el-form-item label="操作系统" prop="system">
                     <el-select size="small" :disabled="!isAdd" style="width: 100%" v-model="operationForm.system">
-                        <el-option v-for="item in systems" :key="item" :label="item" :value="item"/>
+                        <el-option v-for="item in systems" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
                 </el-form-item>
             </el-col>
@@ -103,117 +103,121 @@ export default {
     components: { CodeEdit, PageHeader },
     data() {
         return{
-          dataTypes: ["String", "Int", "Float", "Boolean", "JSONObject", "JSONArray", "Other"],
-          systems: ["android", "apple"],
-          operationTypes: [
-              {id: "browser", name: "浏览器操作"},
-              {id: "system", name: "系统操作"},
-              {id: "page", name: "页面操作"},
-              {id: "relation", name: "关联"},
-              {id: "assertion", name: "断言"},
-              {id: "condition", name: "条件"},
-              {id: "scenario", name: "场景"},
-          ],
-          operationForm: {
-            id: "",
-            name: "",
-            type: "",
-            from: "custom",
-            system: "android",
-            element: [],
-            data: [],
-            code: "",
-            uiType: "",
-            description: "",
-            createUser: ""
-          },
-          rules: {
-              name: [{ required: true, message: '操作名称不能为空', trigger: 'blur' }],
-              type: [{ required: true, message: '操作类型不能为空', trigger: 'blur' }],
-              system: [{ required: true, message: '操作系统不能为空', trigger: 'blur' }],
-              description: [{ required: true, message: '操作说明不能为空', trigger: 'blur' }]
-          },
-          currentUser: "",
-          isAdd: true,
-          text: "代码内可直接使用定义的元素和数据名 关联/断言/条件提取值必须以sys_return(result)形式返回"
-        }
+            dataTypes: ["String", "Int", "Float", "Number", "Boolean", "JSONObject", "JSONArray", "Other"],
+            systems: [
+                {id: "android", name: "安卓"},
+                {id: "apple", name: "苹果"}
+            ],
+            operationTypes: [
+                {id: "browser", name: "浏览器操作"},
+                {id: "system", name: "系统操作"},
+                {id: "page", name: "页面操作"},
+                {id: "relation", name: "关联"},
+                {id: "assertion", name: "断言"},
+                {id: "condition", name: "条件"},
+                {id: "scenario", name: "场景"},
+            ],
+            operationForm: {
+                id: "",
+                name: "",
+                type: "",
+                from: "custom",
+                system: "android",
+                element: [],
+                data: [],
+                code: "",
+                uiType: "",
+                description: "",
+                createUser: ""
+            },
+            rules: {
+                name: [{ required: true, message: '操作名称不能为空', trigger: 'blur' }],
+                type: [{ required: true, message: '操作类型不能为空', trigger: 'blur' }],
+                system: [{ required: true, message: '操作系统不能为空', trigger: 'blur' }],
+                description: [{ required: true, message: '操作说明不能为空', trigger: 'blur' }]
+            },
+            currentUser: "",
+            isAdd: true,
+            text: "代码内可直接使用定义的元素和数据名 关联/断言/条件提取值必须以sys_return(result)形式返回"
+            }
     },
     created(){
-      this.$root.Bus.$emit('initBread', ["公共组件", "操作管理", "操作编辑"]);
-      this.currentUser = this.$store.state.userInfo.id;
-      this.operationForm.uiType = this.$route.params.uiType;
-      this.getDetail(this.$route.params);
+        this.$root.Bus.$emit('initBread', ["公共组件", "操作管理", "操作编辑"]);
+        this.currentUser = this.$store.state.userInfo.id;
+        this.operationForm.uiType = this.$route.params.uiType;
+        this.getDetail(this.$route.params);
     },
     methods: {
-      getDetail(param){
-        if (param.operationId){ 
-            this.isAdd = false;
-            let url = '/autotest/operation/detail/' + param.uiType + '/' + param.operationId;
-            this.$get(url, response =>{
-                let data = response.data;
-                data.element = JSON.parse(data.element);
-                data.data = JSON.parse(data.data);
-                this.operationForm = data;
-            });
-        }else{
-            this.operationForm.type = param.operationType;
-            if(param.operationType == "assertion"){
-                this.operationForm.data = [
-                    {paramName:"assertion", type:"String", description: "断言方法"},
-                    {paramName:"expect", type:"String", description: "预期值"}
-                ];
-            }else if(param.operationType == "condition"){
-                this.operationForm.data = [
-                    {paramName:"assertion", type:"String", description: "判断方法"},
-                    {paramName:"expect", type:"String", description: "预期值"},
-                    {paramName:"true", type:"Int", description: "执行行数m 条件为真执行接下来[0, m)行"},
-                    {paramName:"false", type:"Int", description: "执行行数n 条件为假执行接下来[m, m+n)行"},
-                ];
-            }else if(param.operationType == "relation"){
-                this.operationForm.data = [
-                    {paramName:"save_name", type:"String", description: "保存参数名称"}
-                ];
+        getDetail(param){
+            if (param.operationId){ 
+                this.isAdd = false;
+                this.systems.push({id: "common", name: "通用"});
+                let url = '/autotest/operation/detail/' + param.uiType + '/' + param.operationId;
+                this.$get(url, response =>{
+                    let data = response.data;
+                    data.element = JSON.parse(data.element);
+                    data.data = JSON.parse(data.data);
+                    this.operationForm = data;
+                });
+            }else{
+                this.operationForm.type = param.operationType;
+                if(param.operationType == "assertion"){
+                    this.operationForm.data = [
+                        {paramName:"assertion", type:"String", description: "断言方法"},
+                        {paramName:"expect", type:"String", description: "预期值"}
+                    ];
+                }else if(param.operationType == "condition"){
+                    this.operationForm.data = [
+                        {paramName:"assertion", type:"String", description: "判断方法"},
+                        {paramName:"expect", type:"String", description: "预期值"},
+                        {paramName:"true", type:"Int", description: "执行行数m 条件为真执行接下来[0, m)行"},
+                        {paramName:"false", type:"Int", description: "执行行数n 条件为假执行接下来[m, m+n)行"},
+                    ];
+                }else if(param.operationType == "relation"){
+                    this.operationForm.data = [
+                        {paramName:"save_name", type:"String", description: "保存参数名称"}
+                    ];
+                }
             }
-        }
-      },
-      cancelAdd(){
-          this.$router.push({path: '/common/operationManage'})
-      },
-      saveAdd(){
-          this.$refs["operationForm"].validate(valid => {
-              if (valid) {
-                  let operationForm = JSON.parse(JSON.stringify(this.operationForm));
-                  operationForm.projectId = this.$store.state.projectId;
-                  operationForm.element = JSON.stringify(operationForm.element);
-                  operationForm.data = JSON.stringify(operationForm.data);
-                  let url = '/autotest/operation/save';
-                  this.$post(url, operationForm, response =>{
-                      this.$message.success("保存成功");
-                      this.$router.push({path: '/common/operationManage'});
-                  });
-              }else{
-                  return false;
-              }
-          });
-      },
-      addData(){
-          this.operationForm.data.push({paramName:"", type:"String", description: ""});
-      },
-      removeData(index){
-          this.operationForm.data.splice(index, 1);
-      },
-      deleteAllData(){
-          this.operationForm.data.splice(0, this.operationForm.data.length);
-      },
-      addElement(){
-          this.operationForm.element.push({paramName:"", description: ""});
-      },
-      removeElement(index){
-          this.operationForm.element.splice(index, 1);
-      },
-      deleteAllElement(){
-          this.operationForm.element.splice(0, this.operationForm.element.length);
-      },
+        },
+        cancelAdd(){
+            this.$router.push({path: '/common/operationManage'})
+        },
+        saveAdd(){
+            this.$refs["operationForm"].validate(valid => {
+                if (valid) {
+                    let operationForm = JSON.parse(JSON.stringify(this.operationForm));
+                    operationForm.projectId = this.$store.state.projectId;
+                    operationForm.element = JSON.stringify(operationForm.element);
+                    operationForm.data = JSON.stringify(operationForm.data);
+                    let url = '/autotest/operation/save';
+                    this.$post(url, operationForm, response =>{
+                        this.$message.success("保存成功");
+                        this.$router.push({path: '/common/operationManage'});
+                    });
+                }else{
+                    return false;
+                }
+            });
+        },
+        addData(){
+            this.operationForm.data.push({paramName:"", type:"String", description: ""});
+        },
+        removeData(index){
+            this.operationForm.data.splice(index, 1);
+        },
+        deleteAllData(){
+            this.operationForm.data.splice(0, this.operationForm.data.length);
+        },
+        addElement(){
+            this.operationForm.element.push({paramName:"", description: ""});
+        },
+        removeElement(index){
+            this.operationForm.element.splice(index, 1);
+        },
+        deleteAllElement(){
+            this.operationForm.element.splice(0, this.operationForm.element.length);
+        },
     }
     
 }

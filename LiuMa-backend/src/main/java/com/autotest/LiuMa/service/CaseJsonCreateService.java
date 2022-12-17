@@ -167,7 +167,7 @@ public class CaseJsonCreateService {
                 TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
                 Operation operation = operationMapper.getOperationDetail(caseAppRequest.getOperationId(), caseRequest.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
-                optData.setOperationSystem(operation.getSystem());
+                optData.setOperationSystem(caseRequest.getSystem());
                 optData.setOperationId(caseAppRequest.getOperationId());
                 if(operation.getFrom().equals("custom")){
                     optData.setOperationName("自定义");
@@ -211,7 +211,7 @@ public class CaseJsonCreateService {
                 TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
                 Operation operation = operationMapper.getOperationDetail(caseAppDTO.getOperationId(), caseDTO.getType().toLowerCase(Locale.ROOT));
                 optData.setOperationType(operation.getType());
-                optData.setOperationSystem(operation.getSystem());
+                optData.setOperationSystem(caseDTO.getSystem());
                 optData.setOperationId(caseAppDTO.getOperationId());
                 if(operation.getFrom().equals("custom")){
                     optData.setOperationName("自定义");

@@ -30,7 +30,7 @@
   <select id="getGroupOperationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.OperationDTO">
     select * from `operation_${uiType}` where (project_id = #{projectId} or project_id = 'system') and `type` = #{operationType}
     <if test="uiType == 'app'">
-      and `system` = #{system}
+      and (`system` = #{system} or `system` = 'common')
     </if>
   </select>
   <select id="getOperationList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.OperationDTO">

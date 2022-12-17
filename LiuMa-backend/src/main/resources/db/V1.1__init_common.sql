@@ -56,7 +56,7 @@ CREATE TABLE `function` (
 
 CREATE TABLE `operation` (
     `id`       VARCHAR(50) NOT NULL COMMENT '操作id',
-	`name`	   VARCHAR(20) NOT NULL COMMENT '操作名',
+	`name`	   VARCHAR(50) NOT NULL COMMENT '操作名',
 	`type`	   VARCHAR(20) NOT NULL COMMENT '操作分类',
     `from`     VARCHAR(20) NOT NULL COMMENT '操作来源',
     `element` json DEFAULT NULL COMMENT '元素定义',

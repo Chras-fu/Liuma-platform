@@ -114,7 +114,7 @@ import ModuleTree from './common/module/moduleTree'
 import ModuleAppend from './common/module/moduleAppend'
 import SelectTree from '../common/business/selectTree'
 import {timestampToTime} from '@/utils/util'
-import {locateProps} from '@/utils/constant'
+import {locateBys, locateProps} from '@/utils/constant'
 
 export default {
     // 注册组件
@@ -411,18 +411,10 @@ export default {
         'addControlForm.system'(newVal, oldVal){
             if(newVal === "android"){
                 this.propList = locateProps.android;
-                this.byList = [
-                    { label: "Xpath定位", value: "XPATH" },
-                    { label: "属性定位", value: "PROP" }
-                ];
+                this.byList = locateBys.android;
             }else{
                 this.propList = locateProps.apple;
-                this.byList = [
-                    { label: "Xpath定位", value: "XPATH" },
-                    { label: "属性定位", value: "PROP" },
-                    { label: "Predicate定位", value: "PRED" },
-                    { label: "ClassChain定位", value: "CLASS" }
-                ]
+                this.byList = locateBys.apple;
             }
         }
     }
