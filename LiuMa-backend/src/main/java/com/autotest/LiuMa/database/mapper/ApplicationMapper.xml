@@ -33,6 +33,9 @@
     <if test="condition != null and condition != ''">
       and name like #{condition}
     </if>
+    <if test="system != null and system != ''">
+      and `system` = #{system}
+    </if>
     order by create_time desc
   </select>
 </mapper>

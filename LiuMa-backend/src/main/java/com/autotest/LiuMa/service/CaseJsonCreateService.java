@@ -427,6 +427,16 @@ public class CaseJsonCreateService {
             dataValue.put("value", data.getString("value"));
             dataObj.put(data.getString("paramName"), dataValue);
         }
+        if(dataObj.containsKey("appId")){
+            String appValue = dataObj.getJSONObject("appId").getString("value");
+            if(appValue != null && !appValue.equals("")){
+                // 根据域名标识来获取域名
+                Application application = applicationMapper.getApplicationById(appValue);
+                if(application != null) {
+                    dataObj.getJSONObject("appId").put("value", application.getAppId());
+                }
+            }
+        }
         return dataObj;
     }
 

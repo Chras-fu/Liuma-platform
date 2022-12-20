@@ -16,5 +16,5 @@ public interface ApplicationMapper {
 
     void deleteApplication(String id);
 
-    List<Application> getApplicationList(String projectId, String condition);
+    List<Application> getApplicationList(String projectId, String condition, String system);
 }

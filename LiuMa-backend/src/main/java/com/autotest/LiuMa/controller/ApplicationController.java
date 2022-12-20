@@ -30,15 +30,15 @@ public class ApplicationController {
         applicationService.deleteApplication(application.getId());
     }
 
-    @GetMapping("/list/{projectId}")
-    public List<Application> getApplicationList(@PathVariable String projectId) {
-        return applicationService.getApplicationList(projectId, null);
+    @GetMapping("/list/{system}/{projectId}")
+    public List<Application> getApplicationList(@PathVariable String system, @PathVariable String projectId) {
+        return applicationService.getApplicationList(projectId, null, system);
     }
 
     @PostMapping("/list/{goPage}/{pageSize}")
     public Pager<List<Application>> getApplicationPageList(@PathVariable int goPage, @PathVariable int pageSize,
                                                       @RequestBody QueryRequest request) {
         Page<Object> page = PageHelper.startPage(goPage, pageSize, true);
-        return PageUtils.setPageInfo(page, applicationService.getApplicationList(request.getProjectId(), request.getCondition()));
+        return PageUtils.setPageInfo(page, applicationService.getApplicationList(request.getProjectId(), request.getCondition(), null));
     }
 }

@@ -39,11 +39,11 @@ public class ApplicationService {
         applicationMapper.deleteApplication(id);
     }
 
-    public List<Application> getApplicationList(String projectId, String condition) {
+    public List<Application> getApplicationList(String projectId, String condition, String system) {
         if(condition != null && !condition.equals("")){
             condition = "%"+condition+"%";
         }
-        return applicationMapper.getApplicationList(projectId, condition);
+        return applicationMapper.getApplicationList(projectId, condition, system);
     }
 
 }

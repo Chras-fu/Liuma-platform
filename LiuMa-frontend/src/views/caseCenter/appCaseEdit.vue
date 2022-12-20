@@ -5,7 +5,7 @@
   <div>
     <page-header title="用例编辑" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
     <el-form ref="caseForm" :rules="rules" :model="caseForm" label-width="90px">
-      <base-info :caseForm="caseForm"/>
+      <base-info :caseForm="caseForm" :applications="applications"/>
       <p class="tip">操作步骤</p>
       <el-form-item style="margin-left:-80px;" prop="caseApps"/>
       <el-table :data="caseForm.caseApps" row-key="id" class="sort-table" size="small">
@@ -87,16 +87,19 @@
                 <span>{{data.paramName}}</span>
               </el-col>
               <el-col :span="20">
-                <el-select v-if="data.paramName === 'direction'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                <el-select v-if="data.paramName === 'appId'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                    <el-option v-for="item in applications" :key="item.id" :label="item.name" :value="item.id"/>
+                </el-select>
+                <el-select v-else-if="data.paramName === 'direction'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in directions" :key="item.id" :label="item.name" :value="item.id"/>
                 </el-select>
-                <el-select v-if="data.paramName === 'keycode'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                <el-select v-else-if="data.paramName === 'keycode'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in keycodes" :key="item.id" :label="item.name" :value="item.id"/>
                 </el-select>
-                <el-select v-if="data.paramName === 'attribute'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                <el-select v-else-if="data.paramName === 'attribute'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in attributes" :key="item" :label="item" :value="item"/>
                 </el-select>
-                <el-select v-if="data.paramName === 'assertion'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
+                <el-select v-else-if="data.paramName === 'assertion'" size="small" style="width:100%" filterable v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in assertions" :key="item.id" :label="item.name" :value="item.id"/>
                 </el-select>
                 <el-select v-else-if="data.paramName === 'continue'" size="small" style="width:100%" v-model="data.value" :placeholder="data.description">
@@ -178,6 +181,7 @@ export default {
             byList: [],
             propList: [],
             operations: [],
+            applications: [],
             keycodes: [],
             attributes: [],
             directions: [
@@ -233,6 +237,7 @@ export default {
             this.keycodes = systemKeys.apple;
             this.attributes = elementProps.apple;
         }
+        this.getApplication();
         this.getOperations();
         this.getAssertion();
         this.getViews();
@@ -530,9 +535,15 @@ export default {
             });
         },
         getOperations(){
-          let url = '/autotest/operation/group/app/list/' + this.$store.state.projectId + '?system=' +this.caseForm.system;
+            let url = '/autotest/operation/group/app/list/' + this.$store.state.projectId + '?system=' +this.caseForm.system;
             this.$get(url, response =>{
                 this.operations = response.data;
+            });
+        },
+        getApplication(){
+            let url = '/autotest/application/list/' + this.caseForm.system + "/" + this.$store.state.projectId;
+            this.$get(url, response =>{
+                this.applications = response.data;
             });
         },
         cancelAdd(){

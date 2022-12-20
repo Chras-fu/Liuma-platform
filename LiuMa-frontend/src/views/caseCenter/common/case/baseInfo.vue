@@ -135,6 +135,10 @@ export default {
     },
   props:{
     caseForm: Object,
+    applications: {
+        type: Array,
+        default: []
+    }
   },
   data() {
       return{
@@ -147,16 +151,12 @@ export default {
         systems: ["android", "apple"],
         functionList: [],
         paramList: [],
-        applications: [],
       }
     },
     created() {
         this.getModule();
         if(this.caseForm.type !== "APP"){
             this.getEnvironment();
-        }
-        if(this.caseForm.type === "APP"){
-            this.getApplication();
         }
         this.getFunction();
         this.getParam();
@@ -200,12 +200,6 @@ export default {
             let url = "/autotest/environment/all/" + this.$store.state.projectId;
             this.$get(url, response =>{
                 this.environments = response.data;
-            });
-        },
-        getApplication(){
-            let url = '/autotest/application/list/' + this.$store.state.projectId;
-            this.$get(url, response =>{
-                this.applications = response.data;
             });
         },
         selectModule(data){
