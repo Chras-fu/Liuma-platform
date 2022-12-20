@@ -219,7 +219,7 @@ export default {
                 element: [{ required: true, message: '操作对象不能为空', trigger: 'blur' }],
                 data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }],
                 caseApps: [{ required: true, message: '请至少添加一条操作步骤', trigger: 'blur' }],
-                application: [{ required: true, message: '被测应用不能为空', trigger: 'blur' }],
+                'commonParam.appId': [{ required: true, message: '被测应用不能为空', trigger: 'blur' }],
             }
         }
     },
@@ -301,7 +301,15 @@ export default {
                   break;
                 }
               }
-            }else{
+            }else if(datas[i].paramName === "appId"){
+              for(let j=0;j<this.applications.length;j++){
+                if(this.applications[j].id === datas[i].value){
+                  newText = datas[i].paramName+ " : " + this.applications[j].name;
+                  break;
+                }
+              }
+            }
+            else{
               newText = datas[i].paramName+ " : " +datas[i].value;
             }
             if(i===0){

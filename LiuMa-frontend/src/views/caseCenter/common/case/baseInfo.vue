@@ -111,7 +111,7 @@
         </el-row>
         <el-row :gutter="40" v-if="caseForm.type === 'APP'">
             <el-col :span="12">
-                <el-form-item label="被测应用" prop="application">
+                <el-form-item label="被测应用" prop="commonParam.appId">
                     <el-select size="small" style="width: 100%" v-model="caseForm.commonParam.appId" placeholder="被测应用">
                         <el-option v-for="item in applications" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
