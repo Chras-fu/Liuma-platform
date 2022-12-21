@@ -1,4 +1,10 @@
 ALTER TABLE `case_api` ADD `description` varchar(200) DEFAULT NULL after `api_id`;
+ALTER TABLE `case_web` ADD `description` varchar(200) DEFAULT NULL after `operation_id`;
+ALTER TABLE `case_app` ADD `description` varchar(200) DEFAULT NULL after `operation_id`;
+ALTER TABLE `report_collection_case_api` ADD `description` varchar(200) DEFAULT NULL after `api_path`;
+ALTER TABLE `report_collection_case_web` ADD `description` varchar(200) DEFAULT NULL after `operation_element`;
+ALTER TABLE `report_collection_case_app` ADD `description` varchar(200) DEFAULT NULL after `operation_element`;
+
 ALTER TABLE `collection` ADD `device_id` VARCHAR(50) DEFAULT NULL after `name`;
 ALTER TABLE `plan` ADD `max_thread` int(8) DEFAULT NULL after `environment_id`;
 ALTER TABLE `report` ADD `device_id` VARCHAR(50) DEFAULT NULL after `environment_id`;

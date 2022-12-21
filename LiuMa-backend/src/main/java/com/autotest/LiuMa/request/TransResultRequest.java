@@ -15,6 +15,8 @@ public class TransResultRequest {
 
     private String content;
 
+    private String description;
+
     private String log;
 
     private Integer during;

@@ -176,6 +176,7 @@ public class CaseJsonCreateService {
                     optData.setOperationName(operation.getName());
                     optData.setOperationCode(null);
                 }
+                optData.setOperationDesc(caseAppRequest.getDescription());
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getAppElement(caseAppRequest.getElement()));
                 optData.setOperationData(this.getAppData(caseAppRequest.getData()));
@@ -220,6 +221,7 @@ public class CaseJsonCreateService {
                     optData.setOperationName(operation.getName());
                     optData.setOperationCode(null);
                 }
+                optData.setOperationDesc(caseAppDTO.getDescription());
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getAppElement(JSONArray.parseArray(caseAppDTO.getElement())));
                 optData.setOperationData(this.getAppData(JSONArray.parseArray(caseAppDTO.getData())));
@@ -261,6 +263,7 @@ public class CaseJsonCreateService {
                     optData.setOperationName(operation.getName());
                     optData.setOperationCode(null);
                 }
+                optData.setOperationDesc(caseWebRequest.getDescription());
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getWebElement(caseWebRequest.getElement()));
                 optData.setOperationData(this.getWebData(caseWebRequest.getData(), environmentId));
@@ -295,6 +298,7 @@ public class CaseJsonCreateService {
                     optData.setOperationName(operation.getName());
                     optData.setOperationCode(null);
                 }
+                optData.setOperationDesc(caseWebDTO.getDescription());
                 optData.setOperationTrans(operation.getName());
                 optData.setOperationElement(this.getWebElement(JSONArray.parseArray(caseWebDTO.getElement())));
                 optData.setOperationData(this.getWebData(JSONArray.parseArray(caseWebDTO.getData()), environmentId));
@@ -325,6 +329,7 @@ public class CaseJsonCreateService {
                 ApiDTO apiDTO = apiMapper.getApiDetail(caseApiRequest.getApiId());
                 apiData.setApiId(caseApiRequest.getApiId());
                 apiData.setApiName(apiDTO.getName());
+                apiData.setApiDesc(caseApiRequest.getDescription());
                 apiData.setUrl(this.getUrlBySign(environmentId, apiDTO.getDomainSign(), apiDTO.getPath()));
                 apiData.setPath(apiDTO.getPath());
                 apiData.setMethod(apiDTO.getMethod());
@@ -363,6 +368,7 @@ public class CaseJsonCreateService {
                 TestCaseApiDataResponse apiData = new TestCaseApiDataResponse();
                 apiData.setApiId(caseApiDTO.getApiId());
                 apiData.setApiName(caseApiDTO.getApiName());
+                apiData.setApiDesc(caseApiDTO.getDescription());
                 apiData.setUrl(this.getUrlBySign(environmentId, caseApiDTO.getApiDomainSign(), caseApiDTO.getApiPath()));
                 apiData.setPath(caseApiDTO.getApiPath());
                 apiData.setMethod(caseApiDTO.getApiMethod());

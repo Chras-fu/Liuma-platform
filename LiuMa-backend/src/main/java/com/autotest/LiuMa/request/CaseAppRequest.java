@@ -16,6 +16,8 @@ public class CaseAppRequest {
 
     private String operationId;
 
+    private String description;
+
     private JSONArray element;
 
     private JSONArray data;

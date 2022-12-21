@@ -28,6 +28,11 @@
               <span v-html="scope.row.dataText"/>
           </template>
         </el-table-column>
+        <el-table-column label="步骤描述" min-width="200px">
+            <template slot-scope="scope">
+                <el-input size="mini" style="width: 90%" v-model="scope.row.description" placeholder="请输入步骤描述"/>
+            </template>
+        </el-table-column>
         <el-table-column label="操作" width="150px">
             <template slot-scope="scope">
                 <el-button size="mini" type="text" @click="editCaseApp(scope.$index, scope.row)">编辑</el-button>

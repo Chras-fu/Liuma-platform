@@ -22,15 +22,18 @@ public class TestCaseAppDataResponse {
     private String operationName;
 
     @JSONField(ordinal = 5)
-    private String operationTrans;
+    private String operationDesc;
 
     @JSONField(ordinal = 6)
-    private String operationCode;
+    private String operationTrans;
 
     @JSONField(ordinal = 7)
-    private JSONObject operationElement;
+    private String operationCode;
 
     @JSONField(ordinal = 8)
+    private JSONObject operationElement;
+
+    @JSONField(ordinal = 9)
     private JSONObject operationData;
 
 }

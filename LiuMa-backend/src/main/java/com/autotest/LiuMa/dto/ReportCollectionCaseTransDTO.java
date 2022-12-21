@@ -17,6 +17,8 @@ public class ReportCollectionCaseTransDTO {
 
     private String content;
 
+    private String description;
+
     private String execLog;
 
     private String during;

@@ -18,6 +18,8 @@ public class ReportCollectionCaseApi implements Serializable {
 
     private String apiPath;
 
+    private String description;
+
     private String execLog;
 
     private Integer during;

@@ -99,6 +99,7 @@ public class ReportUpdateService {
                     reportCollectionCaseApi.setApiId(transactionResult.getId());
                     reportCollectionCaseApi.setApiName(transactionResult.getName());
                     reportCollectionCaseApi.setApiPath(transactionResult.getContent());
+                    reportCollectionCaseApi.setDescription(transactionResult.getDescription());
                     reportCollectionCaseApi.setExecLog(transactionResult.getLog());
                     reportCollectionCaseApi.setDuring(transactionResult.getDuring());
                     reportCollectionCaseApi.setStatus(getStatusByIndex(transactionResult.getStatus()));
@@ -116,6 +117,7 @@ public class ReportUpdateService {
                     reportCollectionCaseWeb.setOperationId(transactionResult.getId());
                     reportCollectionCaseWeb.setOperationName(transactionResult.getName());
                     reportCollectionCaseWeb.setOperationElement(transactionResult.getContent());
+                    reportCollectionCaseWeb.setDescription(transactionResult.getDescription());
                     reportCollectionCaseWeb.setExecLog(transactionResult.getLog());
                     List<String> screenshot = new ArrayList<>();
                     for(String screenshotId:transactionResult.getScreenShotList()){
@@ -144,10 +146,17 @@ public class ReportUpdateService {
                     reportCollectionCaseApp.setOperationId(transactionResult.getId());
                     reportCollectionCaseApp.setOperationName(transactionResult.getName());
                     reportCollectionCaseApp.setOperationElement(transactionResult.getContent());
+                    reportCollectionCaseApp.setDescription(transactionResult.getDescription());
                     reportCollectionCaseApp.setExecLog(transactionResult.getLog());
                     List<String> screenshot = new ArrayList<>();
                     for(String screenshotId:transactionResult.getScreenShotList()){
-                        String url = downloadUrl + "/" + screenshotId + ".png";
+                        String url;
+                        if(cloudStorage.equals("on")){
+                            url = downloadUrl + "/" + screenshotId + ".png";
+                        }else {
+                            url = "/openapi/screenshot/" + screenshotId.split("_")[0] +
+                                    "/" + screenshotId.split("_")[1] + ".png";
+                        }
                         screenshot.add(url);
                     }
                     reportCollectionCaseApp.setScreenshot(JSONArray.toJSONString(screenshot));
