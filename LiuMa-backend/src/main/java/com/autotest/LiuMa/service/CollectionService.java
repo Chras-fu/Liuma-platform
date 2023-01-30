@@ -44,7 +44,6 @@ public class CollectionService {
             CollectionCase collectionCase = new CollectionCase();
             collectionCase.setId(UUID.randomUUID().toString());
             collectionCase.setIndex(collectionCaseDTO.getIndex());
-            collectionCase.setCollectionId(collectionDTO.getId());
             collectionCase.setCaseId(collectionCaseDTO.getCaseId());
             collectionCases.add(collectionCase);
         }
@@ -74,6 +73,11 @@ public class CollectionService {
             collectionDTO.setUpdateTime(System.currentTimeMillis());
             collectionMapper.updateCollection(collectionDTO);
         }
+
+        collectionCases.forEach(item -> {
+            item.setCollectionId(collectionDTO.getId());
+        });
+
         collectionCaseMapper.deleteCollectionCase(collectionDTO.getId());  //先删除全部集合用例
         if(collectionCases.size() > 0) {
             collectionCaseMapper.addCollectionCase(collectionCases);
