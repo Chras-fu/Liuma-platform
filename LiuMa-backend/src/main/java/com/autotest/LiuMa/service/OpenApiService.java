@@ -142,11 +142,13 @@ public class OpenApiService {
             response.setDebugData(null);
         }
         response.setReRun(false);
+        response.setMaxThread(1);
         if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
             Plan plan = planMapper.getPlanDetail(task.getSourceId());
             if(plan.getRetry().equals("Y")){
                 response.setReRun(true);
             }
+            response.setMaxThread(plan.getMaxThread());
         }
         response.setTaskId(task.getId());
         response.setTaskType(task.getType());

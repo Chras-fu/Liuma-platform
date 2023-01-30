@@ -16,6 +16,8 @@ public class TaskResponse {
 
     private String downloadUrl;
 
+    private Integer maxThread; // 最大并发数
+
     private Boolean reRun; // 是否失败重试
 
     private List<TaskTestCollectionResponse> testCollectionList;    // 非调试执行
