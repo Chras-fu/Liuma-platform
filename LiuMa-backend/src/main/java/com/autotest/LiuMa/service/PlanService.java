@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -93,7 +90,11 @@ public class PlanService {
         }
         planCollectionMapper.deletePlanCollection(planDTO.getId());  //先删除全部计划集合
         if(planCollections.size() > 0) {
-            planCollectionMapper.addPlanCollection(planCollections);
+            try {
+                planCollectionMapper.addPlanCollection(planCollections);
+            }catch (Exception e){
+                throw new LMException("一个测试计划不能重复选择同一测试集合");
+            }
         }
     }
 
