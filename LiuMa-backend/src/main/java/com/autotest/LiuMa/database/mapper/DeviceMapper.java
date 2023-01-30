@@ -13,6 +13,8 @@ public interface DeviceMapper {
 
     void updateDeviceByAgent(String agent);
 
+    void updateDeviceNameBySerial(String serial, String name);
+
     List<Device> selectTimeoutDevice();
 
     List<Device> getDeviceList(String owner, String condition, String status, List<String> brand,

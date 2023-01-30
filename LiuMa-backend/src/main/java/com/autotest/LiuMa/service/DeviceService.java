@@ -38,6 +38,10 @@ public class DeviceService {
         deviceMapper.updateDevice(device);
     }
 
+    public void updateDeviceName(String serial, String name) {
+        deviceMapper.updateDeviceNameBySerial(serial, name);
+    }
+
     public Boolean useDevice(String serial, Integer timeout, String user) {
         Device device = deviceMapper.getDeviceBySerial(serial);
         if(!device.getStatus().equals(DeviceStatus.ONLINE.toString())){

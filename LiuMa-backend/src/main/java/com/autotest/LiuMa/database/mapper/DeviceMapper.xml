@@ -28,6 +28,10 @@
     update device set sources='{}', update_time=REPLACE(unix_timestamp(current_timestamp(3)),'.',''),
     status='offline', `user`='', timeout=0 where agent=#{agent}
   </update>
+  <update id="updateDeviceNameBySerial" parameterType="java.lang.String">
+    update device set name=#{name}, update_time=REPLACE(unix_timestamp(current_timestamp(3)),'.','')
+    where serial=#{serial}
+  </update>
   <select id="selectTimeoutDevice" resultType="com.autotest.LiuMa.database.domain.Device">
     select * from device where `status` = 'using' and (update_time+timeout*1000) &lt; REPLACE(unix_timestamp(current_timestamp(3)),'.','')
   </select>

@@ -27,14 +27,14 @@
                     @change="handleCheckAllChange(scope.row)">全部</el-checkbox>
                 </template>
             </el-table-column>
-            <el-table-column label="" prop="conditions" min-width="1000">
+            <el-table-column prop="conditions">
                 <template slot-scope="scope" style="dispaly: flex">
                     <el-checkbox-group v-model="scope.row.selected" @change="handleCheckedChange(scope.row)">
-                        <el-checkbox style="width: 9.5%; float:left" v-for="condition in scope.row.conditions" :label="condition" :key="condition">{{condition}}</el-checkbox>
+                        <el-checkbox :style="'width:'+filterWidth+'; float:left'" v-for="condition in scope.row.conditions" :label="condition" :key="condition">{{condition}}</el-checkbox>
                     </el-checkbox-group>
                 </template>
             </el-table-column>
-            <el-table-column label="" align="right" prop="more" width="80px">
+            <el-table-column align="right" prop="more" width="80px">
                 <template slot-scope="scope">
                     <el-button type="text" v-if="scope.row.showMore" size="small" @click="showMore(scope.row)">{{scope.row.showBtn}} <i :class="scope.row.icon"/></el-button>
                 </template>
@@ -64,10 +64,11 @@
                                     <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:15px">
                                         <span style="font-weight:bold;font-size:16px;">{{device.name}}</span>
                                     </div>
-                                    <i class="el-icon-edit-outline" style="font-size:12px;margin-left:-12px;margin-top:6px" @click="editDevice(device)"/>
+                                    <i class="el-icon-edit-outline" style="font-size:12px;margin-left:-12px;margin-top:5px" @click="editDevice(device)"/>
                                 </div>
                                 <div style="display:flex; margin-top: 30px">
-                                    <img class="box-img" :src="device.img" alt=""/>
+                                    <img v-if="device.system==='android'" class="box-img" src="../../assets/img/android.png" alt=""/>
+                                    <img v-if="device.system==='apple'" class="box-img" src="../../assets/img/apple.png" alt=""/>
                                     <div>
                                         <div class="box-info">品牌: {{device.brand}}</div>
                                         <div class="box-info">型号: {{device.model}}</div>
@@ -128,6 +129,8 @@ export default {
       rules: {
         name: [{ required: true, message: '设备名称不能为空', trigger: 'blur' }]
       },
+      filterWidth: 100,
+      filterSize: 8,
       boxWidth: 250,
       rowSize: 5,
       keys: {
@@ -146,17 +149,18 @@ export default {
       that.getWidth();
     });
     this.getWidth();
+    this.getFilter();
     this.getData();
   },
   watch: {
     boxWidth: function (n, o) {
+      this.getFilter();
       this.getData();
     }
   },
   created() {
     this.$root.Bus.$emit('initBread', ["环境中心", "设备管理"]);
     this.currentUser = this.$store.state.userInfo.id;
-    this.getFilter();
   },
   methods: {
     // 获取过滤条件
@@ -169,7 +173,7 @@ export default {
           let filterName = this.keys[key];
           let conditions = [];
           for (let i = 0; i < filter[key].length; i++) {
-            if (i < 8) {
+            if (i < this.filterSize) {
               conditions.push(filter[key][i]);
             } else {
               break;
@@ -209,6 +213,8 @@ export default {
       let screenWidth = document.getElementsByClassName('device-list')[0].clientWidth + 20;
       this.rowSize = parseInt(screenWidth / 250);
       this.boxWidth = parseInt(screenWidth / this.rowSize);
+      this.filterSize = parseInt((screenWidth-350) / 100);
+      this.filterWidth = parseInt((screenWidth-350) / this.filterWidth);
     },
     // 搜索按钮
     search() {
@@ -233,7 +239,7 @@ export default {
     handleCheckAllChange(row) {
       row.isIndeterminate = false;
       if (row.selectAll) {
-        row.selected = row.conditions;
+        row.selected = row.allConditions;
       } else {
         row.selected = [];
       }
@@ -260,7 +266,7 @@ export default {
         row.showBtn = '收起';
         row.icon = 'el-icon-arrow-up';
       } else {
-        row.conditions = row.allConditions.slice(0, 8);
+        row.conditions = row.allConditions.slice(0, this.filterSize);
         row.showBtn = '更多';
         row.icon = 'el-icon-arrow-down';
       }
@@ -303,7 +309,7 @@ export default {
             serial: form.serial,
             name: form.name
           };
-          this.result = this.$request.post(url, {apiServer: 'cloudphone', data: data}).then(response => {
+          this.result = this.$post(url, data).then(response => {
             this.$message.success('保存成功');
             this.deviceVisible = false;
             // 更新列表

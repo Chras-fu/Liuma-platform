@@ -30,6 +30,7 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
             deviceMapper.addDevice(device);
         }else{ // 修改设备
             device.setId(oldDevice.getId());
+            device.setName(oldDevice.getName());    // 设备名字不再修改
             device.setUpdateTime(System.currentTimeMillis());
             deviceMapper.updateDevice(device);
         }

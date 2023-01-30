@@ -29,6 +29,11 @@ public class DeviceController {
         deviceService.stopUseDevice(serial);
     }
 
+    @PostMapping("/update")
+    public void updateDevice(@RequestBody Device device) {
+        deviceService.updateDeviceName(device.getSerial(), device.getName());
+    }
+
     @PostMapping("/use/{serial}/{timeout}")
     public Boolean UseDevice(@PathVariable String serial, @PathVariable Integer timeout,  HttpServletRequest request) {
         String user = request.getSession().getAttribute("userId").toString();
