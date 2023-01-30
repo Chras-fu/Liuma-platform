@@ -55,8 +55,10 @@ public class DashboardService {
             caseAddData.getJSONArray("apiCaseSum").add(dailyStatistics.getApiCaseSum());
             caseAddData.getJSONArray("webCaseSum").add(dailyStatistics.getWebCaseSum());
             caseAddData.getJSONArray("appCaseSum").add(dailyStatistics.getAppCaseSum());
-            caseAddData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseNew(), dailyStatistics.getWebCaseNew(), dailyStatistics.getAppCaseNew()));
-            caseAddData.put("yMaxRight", this.getMax(dailyStatistics.getApiCaseSum(), dailyStatistics.getWebCaseSum(), dailyStatistics.getAppCaseSum()));
+            caseAddData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseNew(), dailyStatistics.getWebCaseNew(),
+                    dailyStatistics.getAppCaseNew(), caseAddData.getInteger("yMaxLeft")));
+            caseAddData.put("yMaxRight", this.getMax(dailyStatistics.getApiCaseSum(), dailyStatistics.getWebCaseSum(),
+                    dailyStatistics.getAppCaseSum(), caseAddData.getInteger("yMaxRight")));
 
             caseRunData.getJSONArray("xAxis").add(dailyStatistics.getStatDate());
             caseRunData.getJSONArray("apiCaseRun").add(dailyStatistics.getApiCaseRun());
@@ -65,7 +67,8 @@ public class DashboardService {
             caseRunData.getJSONArray("apiCasePassRate").add(dailyStatistics.getApiCasePassRate());
             caseRunData.getJSONArray("webCasePassRate").add(dailyStatistics.getWebCasePassRate());
             caseRunData.getJSONArray("appCasePassRate").add(dailyStatistics.getAppCasePassRate());
-            caseRunData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseRun(), dailyStatistics.getWebCaseRun(), dailyStatistics.getAppCaseRun()));
+            caseRunData.put("yMaxLeft", this.getMax(dailyStatistics.getApiCaseRun(), dailyStatistics.getWebCaseRun(),
+                    dailyStatistics.getAppCaseRun(), caseRunData.getInteger("yMaxLeft")));
         }
         data.put("caseAddData", caseAddData);
         data.put("caseRunData", caseRunData);
@@ -86,16 +89,19 @@ public class DashboardService {
         return data;
     }
 
-    private Integer getMax(Integer a, Integer b, Integer c){
+    private Integer getMax(Integer a, Integer b, Integer c, Integer d){
         Integer max = 0;
-        if(a >= b && a >= c){
+        if(a >= b && a >= c && a >= d){
             max = a;
         }
-        if(b >= a && b >= c){
+        if(b >= a && b >= c && b >= d){
             max = b;
         }
-        if (c >= a && c >=b){
+        if (c >= a && c >=b && c >= d){
             max = c;
+        }
+        if (d >= a && d >=b && d >= c){
+            max = d;
         }
         return max;
     }
