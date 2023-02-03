@@ -121,10 +121,11 @@ const JMuxer = require('jmuxer');
 export default {
     name: 'AndroidRemote',
     props:{
-        device: Object,
+        serial: String,
     },
     data() {
         return{
+            device: {},
             activeName: 'common',
             websockets: {
               remote: null,
@@ -149,6 +150,9 @@ export default {
         }
     },
     mounted: function () {
+        // 获取设备信息
+        this.getDevice(this.serial)
+        
         // 开启投屏
         this.mirrorDisplay()
 
@@ -168,6 +172,14 @@ export default {
         this.fixInputMethod(true)
     },
     methods: {
+        getDevice(serial) {
+            let url = '/autotest/device/detail/' + serial;
+            this.$get(url, response =>{
+                let data = response.data;
+                data.sources = JSON.parse(data.sources);
+                this.device = data;
+            });
+        },
         uploadApk(option) {
             let formData = new FormData();
             formData.append('file', option.file);
@@ -296,25 +308,15 @@ export default {
             }))
         },
         stopUsing() {
-            $.ajax({
-            method: "delete",
-            url: urlPrefix + "/api/v1/user/devices/" + this.udid,
-            dataType: "json"
-            }).always(() => {
-            window.close()
-            })
+            let url = '/autotest/device/stop/' + this.device.serial;
+            this.$post(url, null, response => {
+                window.close();
+            });
         },
         runShell(command) {
-            return $.ajax({
-            method: "get",
-            url: this.deviceUrl + "/shell",
-            data: {
-                "command": command,
-            },
-            dataType: "json"
-            }).then(ret => {
-            console.log("runShell", command, ret)
-            return ret;
+            return this.$axios.post(this.deviceUrl + "/shell?command="+ command).then(ret => {
+                console.log("runShell", command, ret)
+                return ret;
             })
         },
         runKeyevent(key) {
@@ -338,7 +340,7 @@ export default {
                 },
                 debug: false
             });
-            var ws = new WebSocket(this.deviceServerUrl + '/scrcpy/screen');
+            var ws = new WebSocket(this.scrcpyServerUrl + '/scrcpy/screen');
             this.websockets.remote = ws;
             ws.binaryType = 'arraybuffer';
             ws.onopen = (ev) => {};
@@ -606,8 +608,8 @@ export default {
         whatsInputUrl() {
             return "ws://" + this.device.sources.whatsInputAddress;
         },
-        deviceServerUrl() {
-            return "http://" + this.device.sources.deviceServerAddress;
+        scrcpyServerUrl() {
+            return "http://" + this.device.sources.scrcpyServerAddress;
         }
     }
 

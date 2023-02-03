@@ -3,8 +3,8 @@
  */
 <template>
   <div>
-      <android-remote v-if="device.system==='android'" :device="device"/>
-      <apple-remote v-if="device.system==='apple'" :device="device"/>
+      <android-remote v-if="system==='android'" :serial="serial"/>
+      <apple-remote v-if="system==='apple'" :serial="serial"/>
   </div>
 </template>
 
@@ -18,26 +18,14 @@ export default {
     data() {
         return{
             serial: null,
-            device: {
-                system: "android"
-            }
+            system: null
         }
     },
     created() {
         this.$root.Bus.$emit('initBread', ["环境中心", "设备控制"]);
         this.currentUser = this.$store.state.userInfo.id;
         this.serial = this.$route.params.serial;
-        this.getDevice(this.serial);
-    },
-    methods: {
-        getDevice(serial) {
-            let url = '/autotest/device/detail/' + serial;
-            this.$get(url, response =>{
-                let data = response.data;
-                data.sources = JSON.parse(data.sources);
-                this.device = data;
-            });
-        }
+        this.system = this.$route.params.system;
     }
 }
 </script>

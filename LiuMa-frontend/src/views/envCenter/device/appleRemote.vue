@@ -107,10 +107,11 @@
 export default {
     name: 'AppleRemote',
     props:{
-        device: Object,
+        serial: String,
     },
     data() {
         return{
+            device: {},
             activeName: 'common',
             canvas: {
                 bg: null,
@@ -147,6 +148,9 @@ export default {
         }
     },
     mounted: function () {
+        // 获取设备信息
+        this.getDevice(this.serial)
+
         this.canvas.bg = this.$refs.bgCanvas;
 
         // save the bandwidth
@@ -179,6 +183,14 @@ export default {
         this.initClipboardJS()
     },
     methods: {
+        getDevice(serial) {
+            let url = '/autotest/device/detail/' + serial;
+            this.$get(url, response =>{
+                let data = response.data;
+                data.sources = JSON.parse(data.sources);
+                this.device = data;
+            });
+        },
         screenshot() {
             $.ajax({
             url: this.path2url("/screenshot"),

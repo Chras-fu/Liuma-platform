@@ -48,11 +48,11 @@
                         <div class="device-box-info">
                             <div class="box-header">
                                 <span style="float: left;">
-                                    <i v-if="device.status==='offline'" class="el-icon-warning-outline tpw-warning"> 已离线</i>
-                                    <i v-if="device.status==='online'" class="el-icon-video-play tpw-success"> 空闲中</i>
-                                    <i v-if="device.status==='using'" class="el-icon-video-pause tpw-error"> 占用中</i>
-                                    <i v-if="device.status==='testing'" class="el-icon-video-pause tpw-error"> 测试中</i>
-                                    <i v-if="device.status==='colding'" class="tpw-loading"><i class="el-icon-loading"/> 冷却中</i>
+                                    <i v-if="device.status==='offline'" class="el-icon-warning-outline lm-info"> 已离线</i>
+                                    <i v-if="device.status==='online'" class="el-icon-video-play lm-success"> 空闲中</i>
+                                    <i v-if="device.status==='using'" class="el-icon-video-pause lm-fail"> 占用中</i>
+                                    <i v-if="device.status==='testing'" class="el-icon-video-pause lm-error"> 测试中</i>
+                                    <i v-if="device.status==='colding'" class="lm-loading"><i class="el-icon-loading"/> 冷却中</i>
                                 </span>
                                 <el-button style="float: right" size="mini" v-if="device.status==='online'" type="primary" @click="useDevice(device)">立即使用</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user===currentUser" type="danger" @click="releaseDevice(device)">停用</el-button>
@@ -276,7 +276,7 @@ export default {
       let url = '/autotest/device/use/' + device.serial + "/600"; // 默认十分钟超时
       this.$post(url, null, response => {
         if(response.data === true){
-          let path = "/#/envCenter/deviceControl/" + device.serial;
+          let path = "/#/envCenter/deviceControl/" + device.system + "/" + device.serial;
           this.getData();
           window.open(path);
         }else{
@@ -294,7 +294,7 @@ export default {
     },
     // 查看设备
     viewDevice(device) {
-      window.open("/#/envCenter/deviceControl/" + device.serial);
+      window.open("/#/envCenter/deviceControl/" + device.system + "/" + device.serial);
     },
     editDevice(device) {
       this.deviceForm.serial = device.serial;

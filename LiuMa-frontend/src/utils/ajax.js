@@ -175,7 +175,7 @@ export default {
       return;
     }
 
-    axios.defaults.withCredentials = true;
+    // axios.defaults.withCredentials = true;
 
     Vue.prototype.$login = login;
 

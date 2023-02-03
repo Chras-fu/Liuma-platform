@@ -211,7 +211,7 @@ export default new Router({
                 requireAuth: true
             }
         },{
-            path: '/envCenter/deviceControl/:serial',
+            path: '/envCenter/deviceControl/:system/:serial',
             name: '设备控制',
             component: DeviceControl,
             meta: {
