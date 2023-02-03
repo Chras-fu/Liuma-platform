@@ -121,7 +121,7 @@ export default {
                     assertion.assertion = "isNone";
                     assertion.expect = "";
                     break;
-                case 'boolean':
+                case 'Boolean':
                     if(item.childValue === true){
                         assertion.assertion = "isTrue";
                         assertion.expect = "";
@@ -130,10 +130,13 @@ export default {
                         assertion.expect = "";
                     }
                     break;
-                case 'string':
+                case 'String':
                     assertion.assertion = "equals";
                     break;
-                case 'number':
+                case 'Int':
+                    assertion.assertion = "equalsNumber";
+                    break;
+                case 'Float':
                     assertion.assertion = "equalsNumber";
                     break;
                 default:

@@ -21,6 +21,7 @@
 <script>
 import vueJsonEditor from 'vue-json-editor'
 import JsonTree from './jsonTree'
+import {toJsonPath} from '@/utils/jsonPath'
 export default {
     name: 'JsonPath',
     props:{
@@ -47,81 +48,14 @@ export default {
                     this.$message.warning('解析接口响应数据失败 请确认是否为json');
                 }else{
                     this.treeData.splice(0, this.treeData.length);
-                    this.toJsonPath(this.treeData, this.jsonData, "$");
+                    toJsonPath(this.treeData, this.jsonData, "$");
                 }
             });
         },
         onJsonChange(value){
             this.jsonData = value;
             this.treeData.splice(0, this.treeData.length);
-            this.toJsonPath(this.treeData, this.jsonData, "$");
-        },
-        toJsonPath(arr, json, basePath) {
-            // 生成jsonpath
-            const type = this.validateType(json)
-            if (type === 'object') {
-                for(let key in json) {
-                    const item = {
-                        key,
-                        path: `${basePath}.${key}`,
-                        childValue: json[key]
-                    }
-                    const childType = this.validateType(json[key])
-                    item.type = childType
-                    if (childType === 'object' || childType === 'array') {
-                        item.leaf = true
-                        item.children = []
-                        this.toJsonPath(item.children, json[key], item.path);
-                    } else {
-                        item.leaf = false;
-                        item.value = json[key];
-                    }
-                    arr.push(item);
-                }
-            } else if (type === 'array') {
-                json.forEach((item,index) => {
-                    const childType = this.validateType(item);
-                    const obj = {
-                        key: index,
-                        childValue: item
-                    };
-                    obj.type = childType;
-                    obj.path = `${basePath}[${index}]`;
-                    if (childType === 'object' || childType === 'array') {
-                        obj.leaf = true;
-                        obj.children = [];
-                        this.toJsonPath(obj.children, item, obj.path);
-                    } else {
-                        obj.value = item;
-                        obj.leaf = false;
-                    }
-                    arr.push(obj);
-                })
-            }
-        },
-        validateType(val) {
-            // 校验JSON数据类型
-            const type = typeof val
-            if (type === 'object') {
-                if (Array.isArray(val)) {
-                return 'array';
-                } else if (val === null) {
-                return 'null';
-                } else {
-                return 'object';
-                }
-            } else {
-                switch(type) {
-                case 'boolean':
-                    return 'boolean';
-                case 'string':
-                    return 'string';
-                case 'number':
-                    return 'number';
-                default:
-                    return 'error';
-                }
-            }
+            toJsonPath(this.treeData, this.jsonData, "$");
         },
         addContent(item){
             this.$emit('addContent', item);

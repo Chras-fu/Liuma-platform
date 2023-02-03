@@ -12,11 +12,11 @@
             <el-button size="small" type="primary" @click="search">搜索</el-button>
             <el-button size="small" @click="reset">重置</el-button>
         </el-form-item>
-      <el-form-item style="float: right">
-        <el-button size="small" type="success" icon="el-icon-plus" @click="importApi">导入接口</el-button>
-      </el-form-item>
         <el-form-item style="float: right">
             <el-button size="small" type="primary" icon="el-icon-plus" @click="addApi">新增接口</el-button>
+        </el-form-item>
+          <el-form-item style="float: right">
+          <el-button size="small" type="success" icon="el-icon-plus" @click="importApi">导入接口</el-button>
         </el-form-item>
     </el-form>
     <!-- 接口模块 -->
@@ -27,18 +27,19 @@
     <!--接口列表-->
     <el-col :span="20" class="right-table">
         <el-table size="small" :data="apiListData" v-loading="loading" element-loading-text="拼命加载中">
-        <el-table-column prop="num" label="NO" width="60px"/>
-        <el-table-column prop="name" label="接口名称" min-width="180"/>
-        <el-table-column prop="path" label="接口地址" min-width="150"/>
-        <el-table-column prop="moduleName" label="所属模块"/>
-        <el-table-column prop="username" label="创建人"/>
-        <el-table-column prop="updateTime" label="更新时间" width="150"/>
-        <el-table-column fixed="right" align="operation" label="操作" width="100">
-            <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="editApi(scope.row)">编辑</el-button>
-            <el-button type="text" size="mini" @click="deleteApi(scope.row)">删除</el-button>
-            </template>
-        </el-table-column>
+            <el-table-column prop="num" label="NO" width="60px"/>
+            <el-table-column prop="name" label="接口名称" min-width="180"/>
+            <el-table-column prop="path" label="接口地址" min-width="150"/>
+            <el-table-column prop="moduleName" label="所属模块"/>
+            <el-table-column prop="username" label="创建人"/>
+            <el-table-column prop="updateTime" label="更新时间" width="150"/>
+            <el-table-column fixed="right" align="operation" label="操作" width="150">
+                <template slot-scope="scope">
+                    <el-button type="text" size="mini" @click="editApi(scope.row)">编辑</el-button>
+                    <el-button type="text" size="mini" @click="deleteApi(scope.row)">删除</el-button>
+                    <el-button type="text" size="mini" @click="generateCase(scope.row)">生成用例</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <!-- 分页组件 -->
         <Pagination v-bind:child-msg="pageParam" @callFather="callFather"></Pagination>
@@ -72,6 +73,16 @@
         <el-button size="small" type="primary" @click="submitFileForm('uploadFileForm', uploadFileForm)">上传</el-button>
       </div>
     </el-dialog>
+    <!-- 自动生成用例配置 -->
+    <el-drawer :visible.sync="editRuleVisible" direction="rtl" :with-header="false" destroy-on-close size="920px">
+        <div class="api-drawer-header">
+            <span style="float: left; font-size: 16px;">生成规则配置</span>
+            <el-button size="small" type="primary" style="float: right;" @click="submitRuleForm(paramRuleForm)">确定</el-button>
+        </div>
+        <div class="api-drawer-body">
+            <autocase :paramRuleForm="paramRuleForm"/>
+        </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -81,27 +92,27 @@ import ModuleTree from './common/module/moduleTree'
 import ModuleAppend from './common/module/moduleAppend'
 import {timestampToTime} from '@/utils/util'
 import SelectTree from "../common/business/selectTree";
+import Autocase from "./common/case/autocase"
 
 export default {
     // 注册组件
     components: {
-        Pagination, ModuleTree, ModuleAppend, SelectTree
+        Pagination, ModuleTree, ModuleAppend, SelectTree, Autocase
     },
     data() {
         return{
-          // apiSource : "",
-          uploadFileVisible: false, //控制上传api的dialog
-          uploadFileForm : {  //上传api信息的dict
-            apiSource: "",  //导入api的来源   1:postman  2:swagger
-            fileList: [],
-            moduleId:"",   //用于import_api的dialog 中的下拉选择框
-            moduleName:""  //用于import_api的dialog 中的下拉选择框
-          },
-          rules:{
-            apiSource:[{ required: true, message: '文件来源不能为空', trigger: 'blur' }],
-            fileList: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
-            moduleId: [{ required: true, message: '导入模块不能为空', trigger: 'blur' }]
-          },
+            uploadFileVisible: false, //控制上传api的dialog
+            uploadFileForm : {  //上传api信息的dict
+              apiSource: "",  //导入api的来源   1:postman  2:swagger
+              fileList: [],
+              moduleId:"",   //用于import_api的dialog 中的下拉选择框
+              moduleName:""  //用于import_api的dialog 中的下拉选择框
+            },
+            rules:{
+              apiSource:[{ required: true, message: '文件来源不能为空', trigger: 'blur' }],
+              fileList: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
+              moduleId: [{ required: true, message: '导入模块不能为空', trigger: 'blur' }]
+            },
             loading:false,
             moduleVisible: false,
             moduleForm: {
@@ -125,6 +136,16 @@ export default {
                 total: 0
             },
             treeData: [], //  存放所有module的数据: /autotest/module/list/api/的响应结果
+            editRuleVisible: false,
+            paramRuleForm: {
+                apiId: null,
+                header: [],
+                body: [],
+                query: [],
+                rest: [],
+                positiveAssertion: [],
+                oppositeAssertion: []
+            }
         }
     },
     created() {
@@ -143,7 +164,6 @@ export default {
         return true;
       },
       uploadFile(option) {
-        window.console.log(option)
         this.uploadFileForm.fileList.push(option.file);
         this.uploadFileForm.name = option.file.name;
         this.$refs.uploadFileForm.validateField('fileList');
@@ -161,8 +181,6 @@ export default {
       },
       submitFileForm(confirm, form){   //上传文件dialog中保存file中api的调用方法
         this.$refs[confirm].validate(valid => {
-          console.log("调用上传api");
-          console.log("valid: " + valid);
           if (valid) {
               let url = '/autotest/import/api';
               let platformType;
@@ -177,9 +195,7 @@ export default {
                 platformType
               };
             this.searchForm.module_id = this.uploadFileForm.moduleId  //更新查询module接口的参数
-            console.log("上传api的参数: " + data);
             let file = form.fileList[0];
-              console.log("prepare to send");
               this.$fileUpload(url, file, null, data, response =>{
                 this.$message.success("上传成功");
                 this.getdata(this.searchForm);
@@ -193,18 +209,14 @@ export default {
             })
             }
           });
-
-
       },
         // 点击模块
         clickModule(data){
-          console.log("点击模块了");
           this.searchForm.moduleId = data.id;
             this.getdata(this.searchForm);
         },
         // 添加模块
         appendModule(data) {
-          console.log("添加模块了");
           if (data){
                 this.moduleForm.parentId = data.id;
                 this.moduleForm.parentName = data.label;
@@ -265,7 +277,6 @@ export default {
         },
         // 获取树数据
         getTree(){
-          console.log("get tree data");
           let url = '/autotest/module/list/api/' + this.$store.state.projectId;
             this.$get(url, response =>{
                 this.treeData = response.data;
@@ -310,7 +321,6 @@ export default {
             this.getdata(this.searchForm);
         },
         importApi(){
-          console.log("click import api");
           this.uploadFileVisible = true;
         },
         // 新增接口
@@ -339,6 +349,29 @@ export default {
                 this.$message.success("取消成功");
             })
         },
+        // 自动生成用例
+        generateCase(row){
+          this.paramRuleForm.apiId = row.id;
+          this.paramRuleForm.header = [];
+          this.paramRuleForm.body = [];
+          this.paramRuleForm.query = [];
+          this.paramRuleForm.rest = [];
+          this.paramRuleForm.positiveAssertion = [];
+          this.paramRuleForm.oppositeAssertion = [];
+          this.editRuleVisible = true;
+        },
+        // 提交自动用例规则
+        submitRuleForm(form){
+          if(form.positiveAssertion.length === 0 | form.oppositeAssertion.length === 0){
+            this.$message.warning("请至少维护一条正向断言以及逆向断言");
+            return;
+          }
+          let url = '/autotest/api/generate/case';
+          this.$post(url, form, response => {
+              this.$message.success("生成成功 前往用例管理页查看");
+              this.editRuleVisible = false;
+          });
+        }
     }
 }
 </script>
@@ -350,5 +383,16 @@ export default {
 }
 .right-table {
     padding-left: 5px;
+}
+.api-drawer-header{
+    border-bottom: 1px solid rgb(219, 219, 219); 
+    height: 60px; 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 20px;
+}
+.api-drawer-body{
+    padding: 10px 20px;
 }
 </style>

@@ -45,7 +45,7 @@
         </div>
     </el-dialog>
     <!-- 接口编辑界面 -->
-    <el-drawer title="接口详情" :visible.sync="editCaseApiVisible" direction="rtl" :with-header="false" destroy-on-close size="900px">
+    <el-drawer title="接口详情" :visible.sync="editCaseApiVisible" direction="rtl" :with-header="false" destroy-on-close size="920px">
         <div class="api-drawer-header">
             <span style="float: left; font-size: 16px;">接口详情编辑</span>
             <el-button size="small" type="primary" style="float: right;" @click="editCaseApiVisible=false">确定</el-button>

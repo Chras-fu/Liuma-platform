@@ -137,7 +137,9 @@ export default {
     caseForm: Object,
     applications: {
         type: Array,
-        default: []
+        default:  () => {
+	        return [];
+	    },
     }
   },
   data() {
