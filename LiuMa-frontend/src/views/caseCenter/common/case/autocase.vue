@@ -3,18 +3,23 @@
 */ 
 <template>
     <div>
-        <el-tabs style="width: 100%" v-model="activeTab">
+        <el-empty v-if="isEmpty" description="当前接口不适用规则配置, 不支持自动生成"/>
+        <el-tabs v-else style="width: 100%" v-model="activeTab">
             <el-tab-pane label="请求头" name="header">
-                <request-param-rule :ruleForm="paramRuleForm.header" style="width: 100%"/>
+                <el-empty v-if="paramRuleForm.header.length===0" description="请求头没有可用规则配置参数"/>
+                <request-param-rule v-else :ruleForm="paramRuleForm.header" style="width: 100%"/>
             </el-tab-pane>
             <el-tab-pane label="请求体" name="body">
-                <request-param-rule :ruleForm="paramRuleForm.body" style="width: 100%"/>
+                <el-empty v-if="paramRuleForm.body.length===0" description="请求体没有可用规则配置参数"/>
+                <request-param-rule v-else :ruleForm="paramRuleForm.body" style="width: 100%"/>
             </el-tab-pane>
             <el-tab-pane label="QUERY参数" name="query">
-                <request-param-rule :ruleForm="paramRuleForm.query" style="width: 100%"/>
+                <el-empty v-if="paramRuleForm.query.length===0" description="QUERY参数没有可用规则配置参数"/>
+                <request-param-rule v-else :ruleForm="paramRuleForm.query" style="width: 100%"/>
             </el-tab-pane>
             <el-tab-pane label="REST参数" name="rest">
-                <request-param-rule :ruleForm="paramRuleForm.rest" style="width: 100%"/>
+                <el-empty v-if="paramRuleForm.rest.length===0" description="REST参数没有可用规则配置参数"/>
+                <request-param-rule v-else type="rest" :ruleForm="paramRuleForm.rest" style="width: 100%"/>
             </el-tab-pane>
             <el-tab-pane label="正向断言" name="positive">
                 <assertion :assertion="paramRuleForm.positiveAssertion" :apiId="paramRuleForm.apiId" style="width: 100%"/>
@@ -37,7 +42,8 @@ export default {
     components: { RequestParamRule, Assertion },
     data() {
         return{
-            activeTab: "body"
+            activeTab: "body",
+            isEmpty: false
         }
     },
     created() {
@@ -71,6 +77,10 @@ export default {
                 this.toRuleForm(data.header, this.paramRuleForm.header);
                 this.toRuleForm(data.query, this.paramRuleForm.query);
                 this.toRuleForm(data.rest, this.paramRuleForm.rest);
+                if(this.paramRuleForm.header.length === 0 & this.paramRuleForm.body.length === 0 &
+                this.paramRuleForm.query.length === 0 & this.paramRuleForm.rest.length === 0){
+                    this.isEmpty = true;
+                }
             });
         },
         toRuleForm(oldArr, newArr){
@@ -93,11 +103,13 @@ export default {
                 }else if(!item.required){
                     newItem.required = "must";
                 }
-
-                newArr.push(newItem);
+                if(item.type!=='JSONObject' & item.type!=='JSONArray' & item.type!=='File'){
+                    newArr.push(newItem);
+                }  
             });
         },
         filterPath(oldArr, newArr){
+            // 过滤掉数组以及对象
             oldArr.forEach((item, index) => {
                 if(item.type !== 'array' & item.type !== 'object'){
                     let newItem = {
@@ -117,7 +129,9 @@ export default {
                         newItem.value = null;
                         newItem.isNull = true;
                     }
-                    newArr.push(newItem);
+                    if(!item.path.endsWith("]")){
+                        newArr.push(newItem);
+                    }
                 }else{
                     this.filterPath(item.children, newArr);
                 }

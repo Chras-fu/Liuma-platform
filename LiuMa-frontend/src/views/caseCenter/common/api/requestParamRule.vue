@@ -29,13 +29,12 @@
             </el-table-column>
             <el-table-column label="默认值" prop="value" width="240px">
                 <template slot-scope="scope">
-                            <el-radio-group v-if="ruleForm[scope.$index].type==='Boolean'" style="width: 60%" v-model="ruleForm[scope.$index].value" :disabled="ruleForm[scope.$index].isNull">
-                                <el-radio :label="true">True</el-radio>
-                                <el-radio :label="false">False</el-radio>
-                            </el-radio-group>
-                            <el-input v-else size="small" style="width: 60%" placeholder="参数默认值" v-model="ruleForm[scope.$index].value" :disabled="ruleForm[scope.$index].isNull"/>
-                            <el-switch size="small" style="width: 35%" v-model="ruleForm[scope.$index].isNull" active-text="null" @change="changeValue($event, ruleForm[scope.$index])"/>
-                    <!-- </el-row> -->
+                    <el-radio-group v-if="ruleForm[scope.$index].type==='Boolean'" style="width: 64%" v-model="ruleForm[scope.$index].value" :disabled="ruleForm[scope.$index].isNull">
+                        <el-radio :label="true">True</el-radio>
+                        <el-radio :label="false">False</el-radio>
+                    </el-radio-group>
+                    <el-input v-else size="small" style="width: 65%" placeholder="参数默认值" v-model="ruleForm[scope.$index].value" :disabled="ruleForm[scope.$index].isNull"/>
+                    <el-switch size="small" style="width: 33%" v-model="ruleForm[scope.$index].isNull" active-text="null" @change="changeValue($event, ruleForm[scope.$index])"/>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="60px">
@@ -59,16 +58,14 @@ export default {
                 {label: '字段必填', value: 'must'},
                 {label: '字段可为空', value: 'empty'},
                 {label: '字段可为null', value: 'null'},
-                {label: '字段可缺失', value: 'lost', disabled: this.type === 'rest'},
+                {label: '字段可缺失', value: 'lost', disabled: this.type === 'rest'}
             ],
             types: [
                 {label: '整数型', value: 'Int'},
                 {label: '浮点型', value: 'Float'},
                 {label: '布尔型', value: 'Boolean'},
                 {label: '字符串(普通)', value: 'String'},
-                {label: '字符串(特殊)', value: 'specialStr'},
-                {label: 'JSONArray', value: 'JSONArray'},
-                {label: 'JSONObject', value: 'JSONObject'},
+                {label: '字符串(特殊)', value: 'specialStr'}
             ]
         }
         },
