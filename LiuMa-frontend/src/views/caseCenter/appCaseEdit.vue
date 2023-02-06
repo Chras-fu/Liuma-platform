@@ -30,7 +30,11 @@
         </el-table-column>
         <el-table-column label="步骤描述" min-width="200px">
             <template slot-scope="scope">
-                <el-input size="mini" style="width: 90%" v-model="scope.row.description" placeholder="请输入步骤描述"/>
+                <div v-if="scope.row.edit==true" >
+                  <el-input size="mini" style="width: 85%" v-model="scope.row.description" placeholder="请输入步骤描述" @change="scope.row.edit=false"/>
+                  <i class="el-icon-success" @click="scope.row.edit=false"/>
+                </div>
+                <span v-else>{{scope.row.description}} <i class="el-icon-edit"  @click="scope.row.edit=true"/></span>
             </template>
         </el-table-column>
         <el-table-column label="操作" width="150px">
@@ -313,6 +317,12 @@ export default {
                   break;
                 }
               }
+            }else if(datas[i].paramName === "continue"){
+              if(datas[i].value === true){
+                newText = datas[i].paramName+ " : "  + "是";
+              }else{
+                newText = datas[i].paramName+ " : "  + "否";
+              }
             }
             else{
               newText = datas[i].paramName+ " : " +datas[i].value;
@@ -333,7 +343,9 @@ export default {
               operationId: "",
               operationName: "",
               element: [],
-              data: []
+              data: [],
+              edit: false,
+              description: ""
           };
           this.editOperationVisible = true;
         },
@@ -345,7 +357,9 @@ export default {
             operationId: row.operationId,
             operationName: row.operationName,
             element: row.element,
-            data: row.data
+            data: row.data,
+            edit: row.edit,
+            description: row.description
           };
           for(let i=0;i<row.element.length;i++){
             if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
@@ -364,7 +378,9 @@ export default {
             operationId: row.operationId,
             operationName: row.operationName,
             element: JSON.parse(JSON.stringify(row.element)),
-            data: JSON.parse(JSON.stringify(row.data))
+            data: JSON.parse(JSON.stringify(row.data)),
+            edit: false,
+            description: row.description
           };
           for(let i=0;i<row.element.length;i++){
             if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
@@ -390,7 +406,8 @@ export default {
           for(let i=0;i<data.length;i++){
             if(data[i].paramName === 'continue'){
               data[i].value = false;
-              break;
+            }else{
+              data[i].value = "";
             }
           }
           this.operationForm.data = data;
@@ -533,6 +550,7 @@ export default {
                         caseApp.data = JSON.parse(caseApp.data);
                         caseApp.elementText = this.elementToText(caseApp.element);
                         caseApp.dataText = this.dataToText(caseApp.data);
+                        caseApp.edit = false;
                     }
                     if(param.type === "copy"){ //复用
                         data.id = "";
