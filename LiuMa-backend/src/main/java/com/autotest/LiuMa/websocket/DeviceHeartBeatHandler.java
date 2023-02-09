@@ -79,12 +79,18 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
             this.saveDevice(device);
         }else if(command.equals("cold")){
             Device device = deviceMapper.getDeviceBySerial(msg.getString("udid"));
+            if(device==null){
+                return;
+            }
             device.setSources(JSONObject.toJSONString(new JSONObject()));
             device.setUser("");
             device.setTimeout(0);
             device.setStatus(DeviceStatus.COLDING.toString());
         }else { // delete
             Device device = deviceMapper.getDeviceBySerial(msg.getString("udid"));
+            if(device==null){
+                return;
+            }
             device.setSources(JSONObject.toJSONString(new JSONObject()));
             device.setUser("");
             device.setTimeout(0);
