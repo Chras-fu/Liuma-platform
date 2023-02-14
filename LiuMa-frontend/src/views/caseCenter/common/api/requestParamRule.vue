@@ -21,7 +21,7 @@
             </el-table-column>
             <el-table-column label="参数范围" prop="random" min-width="120px">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 85%" placeholder="例如[1, 3)" v-model="ruleForm[scope.$index].random" :disabled="ruleForm[scope.$index].type==='Boolean'"/>
+                    <el-input size="small" style="width: 85%" placeholder="例如[1, 3)" v-model="ruleForm[scope.$index].random" :disabled="ruleForm[scope.$index].type==='Boolean' | ruleForm[scope.$index].type==='None'"/>
                     <el-tooltip content="数字型输入大小上下限, 字符串输入长度上下限, []表示包含边界值, ()表示不包含边界值." placement="bottom">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
@@ -58,14 +58,16 @@ export default {
                 {label: '字段必填', value: 'must'},
                 {label: '字段可为空', value: 'empty'},
                 {label: '字段可为null', value: 'null'},
-                {label: '字段可缺失', value: 'lost', disabled: this.type === 'rest'}
+                {label: '字段可缺失', value: 'lost', disabled: this.type === 'rest'},
+                {label: '不校验', value: 'None'}
             ],
             types: [
                 {label: '整数型', value: 'Int'},
                 {label: '浮点型', value: 'Float'},
                 {label: '布尔型', value: 'Boolean'},
                 {label: '字符串(普通)', value: 'String'},
-                {label: '字符串(特殊)', value: 'specialStr'}
+                {label: '字符串(特殊)', value: 'SpecialStr'},
+                {label: '不校验', value: 'None'}
             ]
         }
         },

@@ -103,7 +103,7 @@ export default {
                 }else if(!item.required){
                     newItem.required = "must";
                 }
-                if(item.type!=='JSONObject' & item.type!=='JSONArray' & item.type!=='File'){
+                if(item.type!=='JSONObject' & item.type!=='JSONArray' & item.type!=='File' & item.name !== "" & item.name !== null){
                     newArr.push(newItem);
                 }  
             });
@@ -121,11 +121,11 @@ export default {
                         isNull: false
                     };
                     if(item.type === 'error'){
-                        newItem.type = 'String';
+                        newItem.type = 'None';
                         newItem.value = '';
                     }
                     if(item.type === 'null'){
-                        newItem.type = 'String';
+                        newItem.type = 'None';
                         newItem.value = null;
                         newItem.isNull = true;
                     }

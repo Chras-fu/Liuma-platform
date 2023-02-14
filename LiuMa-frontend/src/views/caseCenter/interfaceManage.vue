@@ -366,7 +366,7 @@ export default {
             this.$message.warning("请至少维护一条正向断言以及逆向断言");
             return;
           }
-          let url = '/autotest/api/generate/case';
+          let url = '/autotest/case/auto/generate';
           this.$post(url, form, response => {
               this.$message.success("生成成功 前往用例管理页查看");
               this.editRuleVisible = false;

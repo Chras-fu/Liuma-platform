@@ -113,6 +113,12 @@
 			<artifactId>swagger-parser</artifactId>
 			<version>2.1.2</version>
 		</dependency>
+		<!--	jsonpath	-->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<!--配置mapper文件位置-->
