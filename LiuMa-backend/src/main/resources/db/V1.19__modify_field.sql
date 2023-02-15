@@ -23,6 +23,8 @@ ALTER TABLE `sum_statistics` DROP `plan_run_today`;
 ALTER TABLE `function` DROP INDEX `name`;
 ALTER TABLE `function` ADD UNIQUE `name`( `project_id`, `name` );
 
+ALTER TABLE `project` ADD UNIQUE `name`( `name` );
+
 ALTER TABLE `case` ADD INDEX app_system(`system`);
 
 ALTER TABLE `plan` MODIFY `environment_id` VARCHAR(50) DEFAULT NULL;
