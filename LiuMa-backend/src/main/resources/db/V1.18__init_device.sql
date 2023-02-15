@@ -25,6 +25,7 @@ CREATE TABLE `device` (
   `user` varchar(50) DEFAULT NULL COMMENT '设备使用者',
   `agent` varchar(50) NOT NULL COMMENT '设备代理id',
   `timeout` int(8) DEFAULT 0 COMMENT '使用超时时间',
+  `project_id` varchar(50) DEFAULT NULL COMMENT '设备使用者',
   `create_time` bigint(13) NOT NULL COMMENT '创建时间',
   `update_time` bigint(13) NOT NULL COMMENT '更新时间',
   `status` varchar(20) NOT NULL COMMENT '状态',

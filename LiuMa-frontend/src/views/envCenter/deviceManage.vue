@@ -102,6 +102,7 @@ export default {
   data() {
     return {
       searchForm: {
+        projectId: this.$store.state.projectId,
         condition: '',
         status: '',
         filter: {
@@ -165,7 +166,7 @@ export default {
   methods: {
     // 获取过滤条件
     getFilter() {
-      let url = '/autotest/device/filter';
+      let url = '/autotest/device/filter/' + this.$store.state.projectId;
       this.$get(url, response => {
         let filter = response.data;
         this.filterData = [];

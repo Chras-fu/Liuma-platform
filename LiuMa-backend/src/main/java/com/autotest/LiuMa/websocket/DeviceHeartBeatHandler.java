@@ -56,6 +56,7 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         Object agent = session.getAttributes().get("agentId");
         Object owner = session.getAttributes().get("owner");
+        Object project = session.getAttributes().get("project");
         Object url = session.getAttributes().get("url");
         JSONObject msg = JSON.parseObject(payload);
         String command = msg.getString("command");
@@ -72,6 +73,7 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
             device.setOwner(owner.toString());
             device.setUser("");
             device.setTimeout(0);
+            device.setProjectId(project.toString());
             JSONObject sources = msg.getJSONObject("provider");
             sources.put("url", url);
             device.setSources(JSONObject.toJSONString(sources));

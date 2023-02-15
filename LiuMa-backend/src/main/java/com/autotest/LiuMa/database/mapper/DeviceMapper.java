@@ -17,12 +17,12 @@ public interface DeviceMapper {
 
     List<Device> selectTimeoutDevice();
 
-    List<Device> getDeviceList(String owner, String condition, String status, List<String> brand,
+    List<Device> getDeviceList(String projectId, String owner, String condition, String status, List<String> brand,
                                List<String> android, List<String> apple, List<String> size);
 
-    List<Device> getDeviceListBySystem(String owner, String system);
+    List<Device> getDeviceListBySystem(String projectId, String owner, String system);
 
-    List<String> getDeviceFilter(String owner, String field, String system);
+    List<String> getDeviceFilter(String projectId, String owner, String field, String system);
 
     Device getDeviceBySerial(String serial);
 

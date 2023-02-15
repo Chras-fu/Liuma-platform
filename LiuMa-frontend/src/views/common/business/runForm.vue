@@ -102,7 +102,7 @@ export default {
             });
         },
         getDevice(){
-            let url = "/autotest/device/" + this.deviceSystem + "/list";
+            let url = "/autotest/device/" + this.deviceSystem + "/list/" + this.$store.state.projectId;
             this.$get(url, response => {
                 this.devices = response.data;
             });

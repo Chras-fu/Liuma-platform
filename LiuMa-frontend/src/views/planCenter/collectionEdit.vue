@@ -108,7 +108,7 @@ export default {
     methods: {
         getDevice(){
             let url = "/autotest/device/list";
-            this.$post(url, {}, response => {
+            this.$post(url, {projectId: this.$store.state.projectId}, response => {
                 this.deviceList = response.data;
             });
         },

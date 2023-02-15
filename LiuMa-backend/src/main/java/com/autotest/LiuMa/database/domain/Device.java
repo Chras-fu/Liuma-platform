@@ -32,6 +32,8 @@ public class Device implements Serializable {
 
     private Integer timeout;
 
+    private String projectId;
+
     private Long createTime;
 
     private Long updateTime;

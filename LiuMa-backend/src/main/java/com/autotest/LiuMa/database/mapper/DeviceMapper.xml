@@ -3,9 +3,9 @@
 <mapper namespace="com.autotest.LiuMa.database.mapper.DeviceMapper">
   <insert id="addDevice" parameterType="com.autotest.LiuMa.database.domain.Device">
     insert into device (id, serial, `name`, `system`, brand, model, version, `size`, sources,
-    `owner`, `user`, agent, timeout, create_time, update_time, `status`) values
+    `owner`, `user`, agent, timeout, project_id, create_time, update_time, `status`) values
     ( #{id}, #{serial}, #{name}, #{system}, #{brand}, #{model}, #{version}, #{size}, #{sources},
-    #{owner}, #{user}, #{agent}, #{timeout}, #{createTime}, #{updateTime}, #{status})
+    #{owner}, #{user}, #{agent}, #{timeout}, #{projectId}, #{createTime}, #{updateTime}, #{status})
   </insert>
   <update id="updateDevice" parameterType="com.autotest.LiuMa.database.domain.Device">
     update device set
@@ -17,6 +17,9 @@
     </if>
     <if test="agent != null and agent != ''">
       agent = #{agent},
+    </if>
+    <if test="projectId != null and projectId != ''">
+      project_id = #{projectId},
     </if>
     <if test="timeout != null">
       timeout = #{timeout},
@@ -36,7 +39,7 @@
     select * from device where `status` = 'using' and (update_time+timeout*1000) &lt; REPLACE(unix_timestamp(current_timestamp(3)),'.','')
   </select>
   <select id="getDeviceList" resultType="com.autotest.LiuMa.database.domain.Device">
-    select * from device where (`owner` = #{owner} or `owner` = 'system')
+    select * from device where (`owner` = #{owner} or `owner` = 'system') and (`project_id` = #{projectId} or `project_id` = 'system')
     <if test="condition != null and condition != ''">
       and `name` like #{condition}
     </if>
@@ -69,10 +72,11 @@
     </if>
   </select>
   <select id="getDeviceListBySystem" resultType="com.autotest.LiuMa.database.domain.Device">
-    select * from device where (`owner` = #{owner} or `owner` = 'system') and `system` = #{system} and `status` = 'online'
+    select * from device where (`owner` = #{owner} or `owner` = 'system') and
+    (`project_id` = #{projectId} or `project_id` = 'system') and `system` = #{system} and `status` = 'online'
   </select>
   <select id="getDeviceFilter" parameterType="java.lang.String" resultType="java.lang.String">
-    select distinct(${field}) from device where (`owner` = #{owner} or `owner` = 'system')
+    select distinct(${field}) from device where (`owner` = #{owner} or `owner` = 'system') and (`project_id` = #{projectId} or `project_id` = 'system')
     <if test="system != null and system != ''">
       and `system` = #{system}
     </if>

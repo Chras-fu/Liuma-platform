@@ -73,19 +73,19 @@ public class DeviceService {
             apple = filter.getJSONArray("apple").toJavaList(String.class);
             size = filter.getJSONArray("size").toJavaList(String.class);
         }
-        return deviceMapper.getDeviceList(owner, request.getCondition(), request.getStatus(), brand, android, apple, size);
+        return deviceMapper.getDeviceList(request.getProjectId(), owner, request.getCondition(), request.getStatus(), brand, android, apple, size);
     }
 
-    public List<Device> getDeviceListBySystem(String system, String owner){
-        return deviceMapper.getDeviceListBySystem(owner, system);
+    public List<Device> getDeviceListBySystem(String projectId, String system, String owner){
+        return deviceMapper.getDeviceListBySystem(projectId, owner, system);
     }
 
-    public HashMap<String, List<String>> getDeviceFilter(String owner){
+    public HashMap<String, List<String>> getDeviceFilter(String owner, String projectId){
         HashMap<String, List<String>> filter = new HashMap<>();
-        filter.put("brand", deviceMapper.getDeviceFilter(owner, "brand", null));
-        filter.put("android", deviceMapper.getDeviceFilter(owner, "version", "android"));
-        filter.put("apple", deviceMapper.getDeviceFilter(owner, "version", "apple"));
-        filter.put("size", deviceMapper.getDeviceFilter(owner, "size", null));
+        filter.put("brand", deviceMapper.getDeviceFilter(projectId, owner, "brand", null));
+        filter.put("android", deviceMapper.getDeviceFilter(projectId, owner, "version", "android"));
+        filter.put("apple", deviceMapper.getDeviceFilter(projectId, owner, "version", "apple"));
+        filter.put("size", deviceMapper.getDeviceFilter(projectId, owner, "size", null));
         return filter;
     }
 

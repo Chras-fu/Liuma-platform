@@ -18,10 +18,10 @@ public class DeviceController {
     @Resource
     private DeviceService deviceService;
 
-    @GetMapping("/filter")
-    public HashMap<String, List<String>> getDeviceFilter(HttpServletRequest request) {
+    @GetMapping("/filter/{projectId}")
+    public HashMap<String, List<String>> getDeviceFilter(@PathVariable String projectId, HttpServletRequest request) {
         String user = request.getSession().getAttribute("userId").toString();
-        return deviceService.getDeviceFilter(user);
+        return deviceService.getDeviceFilter(user, projectId);
     }
 
     @PostMapping("/stop/{serial}")
@@ -51,10 +51,10 @@ public class DeviceController {
         return deviceService.getDeviceList(queryRequest, user);
     }
 
-    @GetMapping("/{system}/list")
-    public List<Device> getDeviceListBySystem(@PathVariable String system, HttpServletRequest request){
+    @GetMapping("/{system}/list/{projectId}")
+    public List<Device> getDeviceListBySystem(@PathVariable String system, @PathVariable String projectId, HttpServletRequest request){
         String user = request.getSession().getAttribute("userId").toString();
-        return deviceService.getDeviceListBySystem(system, user);
+        return deviceService.getDeviceListBySystem(projectId, system, user);
     }
 
 }
