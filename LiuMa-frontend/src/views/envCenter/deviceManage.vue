@@ -30,7 +30,7 @@
             <el-table-column prop="conditions">
                 <template slot-scope="scope" style="dispaly: flex">
                     <el-checkbox-group v-model="scope.row.selected" @change="handleCheckedChange(scope.row)">
-                        <el-checkbox :style="'width:'+filterWidth+'; float:left'" v-for="condition in scope.row.conditions" :label="condition" :key="condition">{{condition}}</el-checkbox>
+                        <el-checkbox :style="'width:'+filterWidth+'px; float:left'" v-for="condition in scope.row.conditions" :label="condition" :key="condition">{{condition}}</el-checkbox>
                     </el-checkbox-group>
                 </template>
             </el-table-column>
@@ -130,7 +130,7 @@ export default {
       rules: {
         name: [{ required: true, message: '设备名称不能为空', trigger: 'blur' }]
       },
-      filterWidth: 100,
+      filterWidth: 80,
       filterSize: 8,
       boxWidth: 250,
       rowSize: 5,
@@ -214,8 +214,8 @@ export default {
       let screenWidth = document.getElementsByClassName('device-list')[0].clientWidth + 20;
       this.rowSize = parseInt(screenWidth / 250);
       this.boxWidth = parseInt(screenWidth / this.rowSize);
-      this.filterSize = parseInt((screenWidth-350) / 100);
-      this.filterWidth = parseInt((screenWidth-350) / this.filterWidth);
+      this.filterSize = parseInt((screenWidth-350) / 80);
+      this.filterWidth = parseInt((screenWidth-350) / this.filterSize);
     },
     // 搜索按钮
     search() {
@@ -385,6 +385,7 @@ export default {
 .box-info{
     font-size: 12px;
     margin-bottom: 15px;
+    width: 100px;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

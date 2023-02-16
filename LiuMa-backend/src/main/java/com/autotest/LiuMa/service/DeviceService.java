@@ -34,7 +34,7 @@ public class DeviceService {
         device.setTimeout(0);
         // 调用设备冷却接口
         String url = sources.getString("url");
-        HttpUtils.post(url+"/cold?udid="+device.getSerial(), null);
+        HttpUtils.post(url+"/cold?serial="+device.getSerial(), null);
         deviceMapper.updateDevice(device);
     }
 
@@ -46,9 +46,6 @@ public class DeviceService {
         Device device = deviceMapper.getDeviceBySerial(serial);
         if(!device.getStatus().equals(DeviceStatus.ONLINE.toString())){
             return false;   // 设备非空闲状态无法使用
-        }
-        if(!device.getOwner().equals(user) && !device.getOwner().equals("system")){
-            return false;   // 非设备拥有者 或非系统设备无法使用
         }
         device.setStatus(DeviceStatus.USING.toString());
         device.setUpdateTime(System.currentTimeMillis());

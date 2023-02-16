@@ -57,14 +57,13 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
         Object agent = session.getAttributes().get("agentId");
         Object owner = session.getAttributes().get("owner");
         Object project = session.getAttributes().get("project");
-        Object url = session.getAttributes().get("url");
         JSONObject msg = JSON.parseObject(payload);
         String command = msg.getString("command");
         if(command.equals("init")){
             Device device = new Device();
-            device.setSerial(msg.getString("udid"));
+            device.setSerial(msg.getString("serial"));
             device.setName(msg.getJSONObject("properties").getString("name"));
-            device.setSystem(msg.getString("platform"));
+            device.setSystem(msg.getJSONObject("properties").getString("system"));
             device.setBrand(msg.getJSONObject("properties").getString("brand"));
             device.setVersion(msg.getJSONObject("properties").getString("version"));
             device.setModel(msg.getJSONObject("properties").getString("model"));
@@ -74,22 +73,11 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
             device.setUser("");
             device.setTimeout(0);
             device.setProjectId(project.toString());
-            JSONObject sources = msg.getJSONObject("provider");
-            sources.put("url", url);
-            device.setSources(JSONObject.toJSONString(sources));
+            device.setSources(JSONObject.toJSONString(msg.getJSONObject("agent")));
             device.setStatus(DeviceStatus.ONLINE.toString());
             this.saveDevice(device);
-        }else if(command.equals("cold")){
-            Device device = deviceMapper.getDeviceBySerial(msg.getString("udid"));
-            if(device==null){
-                return;
-            }
-            device.setSources(JSONObject.toJSONString(new JSONObject()));
-            device.setUser("");
-            device.setTimeout(0);
-            device.setStatus(DeviceStatus.COLDING.toString());
         }else { // delete
-            Device device = deviceMapper.getDeviceBySerial(msg.getString("udid"));
+            Device device = deviceMapper.getDeviceBySerial(msg.getString("serial"));
             if(device==null){
                 return;
             }
@@ -97,6 +85,8 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
             device.setUser("");
             device.setTimeout(0);
             device.setStatus(DeviceStatus.OFFLINE.toString());
+            device.setUpdateTime(System.currentTimeMillis());
+            deviceMapper.updateDevice(device);
         }
     }
 

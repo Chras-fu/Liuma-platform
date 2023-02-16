@@ -30,7 +30,6 @@ public class WsInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         ServletServerHttpRequest req = (ServletServerHttpRequest) request;
         String owner = req.getServletRequest().getParameter("owner");
-        String url = req.getServletRequest().getParameter("url");
         String project = req.getServletRequest().getParameter("project");
         if(owner != null && !owner.equals("system")) {
             User user = userMapper.getUser(owner);
@@ -54,7 +53,6 @@ public class WsInterceptor implements HandshakeInterceptor {
         }
         attributes.put("owner", owner);
         attributes.put("project", project);
-        attributes.put("url", "http://"+url);
         return true;
     }
 
