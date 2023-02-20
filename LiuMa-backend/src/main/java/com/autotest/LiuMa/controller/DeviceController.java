@@ -29,9 +29,15 @@ public class DeviceController {
         deviceService.stopUseDevice(serial);
     }
 
+    @PostMapping("/active/{serial}")
+    public Boolean activeDevice(@PathVariable String serial, HttpServletRequest request) {
+        String user = request.getSession().getAttribute("userId").toString();
+        return deviceService.activeDevice(serial, user);
+    }
+
     @PostMapping("/update")
     public void updateDevice(@RequestBody Device device) {
-        deviceService.updateDeviceName(device.getSerial(), device.getName());
+        deviceService.updateDevice(device);
     }
 
     @PostMapping("/use/{serial}/{timeout}")

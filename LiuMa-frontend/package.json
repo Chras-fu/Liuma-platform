@@ -15,6 +15,7 @@
     "element-ui": "^2.3.2",
     "http-proxy-middleware": "^0.18.0",
     "jmuxer": "^2.0.5",
+    "jquery": "^3.6.3",
     "js-md5": "^0.7.3",
     "jsoneditor": "^9.5.3",
     "sortablejs": "^1.14.0",

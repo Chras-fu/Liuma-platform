@@ -24,16 +24,23 @@
     <if test="timeout != null">
       timeout = #{timeout},
     </if>
-    `user` = #{user}, sources=#{sources}, `owner`=#{owner}, update_time=#{updateTime}, status=#{status}
-    where serial=#{serial}
+    <if test="user != null and user != ''">
+      `user` = #{user},
+    </if>
+    <if test="sources != null and sources != ''">
+      sources=#{sources},
+    </if>
+    <if test="owner != null and owner != ''">
+      owner=#{owner},
+    </if>
+    <if test="status != null and status != ''">
+      status=#{status},
+    </if>
+    update_time=#{updateTime} where serial=#{serial}
   </update>
   <update id="updateDeviceByAgent" parameterType="java.lang.String">
     update device set sources='{}', update_time=REPLACE(unix_timestamp(current_timestamp(3)),'.',''),
     status='offline', `user`='', timeout=0 where agent=#{agent}
-  </update>
-  <update id="updateDeviceNameBySerial" parameterType="java.lang.String">
-    update device set name=#{name}, update_time=REPLACE(unix_timestamp(current_timestamp(3)),'.','')
-    where serial=#{serial}
   </update>
   <select id="selectTimeoutDevice" resultType="com.autotest.LiuMa.database.domain.Device">
     select * from device where `status` = 'using' and (update_time+timeout*1000) &lt; REPLACE(unix_timestamp(current_timestamp(3)),'.','')

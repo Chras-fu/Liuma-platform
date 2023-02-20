@@ -1,5 +1,5 @@
 /* Image Pool */
-function ImagePool(size) {
+export function ImagePool(size) {
     this.size = size
     this.images = []
     this.counter = 0

@@ -32,14 +32,27 @@ public class DeviceService {
         device.setSources("{}");
         device.setUser("");
         device.setTimeout(0);
-        // 调用设备冷却接口
-        String url = sources.getString("url");
-        HttpUtils.post(url+"/cold?serial="+device.getSerial(), null);
         deviceMapper.updateDevice(device);
+        new Thread(() -> {
+            // 调用设备冷却接口
+            String url = sources.getString("url");
+            HttpUtils.post(url + "/cold?serial=" + device.getSerial(), null);
+        }).start();
     }
 
-    public void updateDeviceName(String serial, String name) {
-        deviceMapper.updateDeviceNameBySerial(serial, name);
+    public Boolean activeDevice(String serial, String user) {
+        Device device = deviceMapper.getDeviceBySerial(serial);
+        if(user.equals(device.getUser()) && device.getStatus().equals(DeviceStatus.USING.toString())){
+            device.setUpdateTime(System.currentTimeMillis());
+            deviceMapper.updateDevice(device);
+            return true;
+        }
+        return false;
+    }
+
+    public void updateDevice(Device device) {
+        device.setUpdateTime(System.currentTimeMillis());
+        deviceMapper.updateDevice(device);
     }
 
     public Boolean useDevice(String serial, Integer timeout, String user) {

@@ -74,10 +74,12 @@ public class ScheduleJobService {
             device.setSources("{}");
             device.setUser("");
             device.setTimeout(0);
-            // 调用设备冷却接口
-            String url = sources.getString("url");
-            HttpUtils.post(url+"/cold?serial="+device.getSerial(), null);
             deviceMapper.updateDevice(device);
+            new Thread(() -> {
+                // 调用设备冷却接口
+                String url = sources.getString("url");
+                HttpUtils.post(url + "/cold?serial=" + device.getSerial(), null);
+            }).start();
         }
     }
 
