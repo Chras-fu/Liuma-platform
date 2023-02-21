@@ -24,7 +24,7 @@
     <if test="timeout != null">
       timeout = #{timeout},
     </if>
-    <if test="user != null and user != ''">
+    <if test="user != null">
       `user` = #{user},
     </if>
     <if test="sources != null and sources != ''">

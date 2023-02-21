@@ -601,7 +601,7 @@ export default {
             });
         },
         debugCase(){
-            if(!this.caseForm.commonParam.application){
+            if(!this.caseForm.commonParam.appId){
                 this.$message.warning("被测应用为空 无法调试");
                 return;
             }

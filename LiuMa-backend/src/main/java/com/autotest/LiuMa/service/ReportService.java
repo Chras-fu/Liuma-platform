@@ -76,7 +76,7 @@ public class ReportService {
             }else if(reportCase.getCaseType().equals("WEB")){
                 transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCase.getId());
             }else {
-                transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCase.getId());
+                transList = reportCollectionCaseAppMapper.getReportCaseActionList(reportCase.getId());
             }
             reportCase.setTransList(transList);
         }
@@ -96,7 +96,7 @@ public class ReportService {
                 }else if(reportCollectionCase.getCaseType().equals("WEB")){
                     transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCollectionCase.getId());
                 }else {
-                    transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCollectionCase.getId());
+                    transList = reportCollectionCaseAppMapper.getReportCaseActionList(reportCollectionCase.getId());
                 }
                 reportCollectionCase.setTransList(transList);
             }

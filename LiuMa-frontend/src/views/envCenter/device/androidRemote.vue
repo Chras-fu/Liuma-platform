@@ -3,28 +3,37 @@
 */
 <template>
     <div>
+        <div class="disabled-view" v-if="device.status==='testing'"/>
         <el-row :gutter="10">
-            <el-col :xs="8" :md="6" :xl="4">
+            <el-col :span="6">
                 <div class="screen-header">
-                    <div style="float:left; margin: 10px 5px">
-                        <span style="margin-left:5px;margin-top:11px">{{device.serial}}</span>
+                    <div style="float:left; margin: 11px 4px">
+                        <el-tooltip :content="device.serial" placement="bottom">
+                            <span class="long-text">{{device.name}}</span>
+                        </el-tooltip>
                     </div>
-                    <div style="float:right; margin: 4px 5px">
-                        <el-button type="danger" size="mini" @click="stopUsing" >停用</el-button>
+                    <div style="float:right; margin: 4px 3px">
+                        <el-button type="danger" size="mini" @click="stopUsing" round :disabled="device.serial===null">停用</el-button>
                     </div>
                 </div>
-                <div class="screen-body">
+                <div class="screen-body" :style="'height: '+ screenHeight +'px'">
                     <video id="screen-player" class="scrcpy-fg" muted autoplay></video>
                     <span class="finger finger-0" style="transform: translate3d(200px, 100px, 0px)"></span>
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
                 </div>
                 <div class="screen-footer">
-                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('MENU')" icon="el-icon-menu"></el-button>
-                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('HOME')" icon="el-icon-s-home"></el-button>
-                    <el-button size="mini" type="text" style="width:30%" @click="runKeyevent('BACK')" icon="el-icon-caret-left"></el-button>
+                    <el-button size="mini" type="text" :style="'width:'+ (screenWidth-20)/3 +'px;margin:0px !important'" @click="runKeyevent('MENU')">
+                        <i class="el-icon-menu device-sys-btn"/>
+                    </el-button>
+                    <el-button size="mini" type="text" :style="'width:'+ (screenWidth-20)/3 +'px;margin:0px !important'" @click="runKeyevent('HOME')">
+                        <i class="el-icon-s-home device-sys-btn"/>
+                    </el-button>
+                    <el-button size="mini" type="text" :style="'width:'+ (screenWidth-20)/3 +'px;margin:0px !important'" @click="runKeyevent('BACK')">
+                        <i class="el-icon-caret-left device-sys-btn"/>
+                    </el-button>
                 </div>
             </el-col>
-            <el-col :xs="16" :md="18" :xl="20">
+            <el-col :span="18">
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="常用功能" name="common">
                         <div class="card-columns" ref="commonContainer">
@@ -32,15 +41,14 @@
                                 <div class="card-header">
                                     输入框
                                     <span style="float:right">
-                                        <el-tooltip effect="dark" content="修复输入法" placement="top-start">
-                                            <i @click="fixInputMethod"> 修复输入法</i>
-                                        </el-tooltip>
+                                        <el-button type="text" size="mini" @click="fixInputMethod(false)">修复输入法</el-button>
                                     </span>
                                 </div>
                                 <div class="card-body">
-                                    <el-input size="small" :autosize="{ minRows: 3}" type="textarea"
+                                    <el-input size="small" :autosize="{ minRows: 3}" type="textarea" ref="whatsinput"
                                         :disabled="whatsinput.disabled" clearable placeholder="请输入..." v-model="whatsinput.text"
-                                        @keydown.tab.exact.prevent="sendInputKey('tab')" @keydown.enter.exact.prevent="sendInputKey('enter')"/>
+                                        @keydown.tab.native="sendInputKey('tab')" @keydown.enter.native="sendInputKey('enter')"
+                                        @input="sendInputText"/>
 
                                     <span style="text-align: right; font-size: 0.74em; color: gray;">
                                         <code>Shift+Enter</code> to start a new line, <code>Enter</code> to
@@ -53,9 +61,9 @@
                                 <div class="card-body">
                                     <dl>
                                         <dt>ATX-AGENT地址: </dt>
-                                        <dd><code v-text="deviceUrl"></code></dd>
+                                        <dd><code v-text="device.sources.atxAgentAddress"></code></dd>
                                         <dt>ADB远程连接: </dt>
-                                        <dd><code v-text="remoteConnectAddr"></code></dd>
+                                        <dd><code v-text="'adb connect '+ device.sources.remoteConnectAddress"></code></dd>
                                     </dl>
                                 </div>
                             </div>
@@ -100,7 +108,7 @@
                             <div class="card">
                                 <div class="card-header">截图下载</div>
                                 <div class="card-body">
-                                    <a :href="screenshotUrl+'?download=screenshot.jpg'" download>下载截图</a>
+                                    <a :href="'http://' + device.sources.atxAgentAddress + '/screenshot/0?download=screenshot.jpg'" download>下载截图</a>
                                 </div>
                             </div>
                         </div>
@@ -118,6 +126,8 @@
 </template>
 <script>
 const JMuxer = require('jmuxer');
+let elementResizeDetectorMaker = require('element-resize-detector');
+import $ from 'jquery';
 export default {
     name: 'AndroidRemote',
     props:{
@@ -125,7 +135,17 @@ export default {
     },
     data() {
         return{
-            device: {},
+            device: {
+                name:null,
+                serial: null,
+                status: 'using',
+                sources: {
+                    atxAgentAddress: null,
+                    remoteConnectAddress: null
+                }
+            },
+            screenWidth: 300,
+            screenHeight: 500,
             activeName: 'common',
             websockets: {
               remote: null,
@@ -150,162 +170,180 @@ export default {
         }
     },
     mounted: function () {
+        let erd = elementResizeDetectorMaker();
+        let that = this;
+        erd.listenTo(document.getElementsByClassName('screen-body'), function(element) {
+            that.getScreenHeight(that.device.size);
+        });
         // 获取设备信息
         this.getDevice(this.serial)
-        
-        // 开启投屏
-        this.mirrorDisplay()
-
-        // 开启操作
-        this.syncTouchpad()
-
-        // 唤醒屏幕
-        this.runKeyevent("WAKEUP")
-
-        // 加载whatsinput输入法
-        this.loadWhatsinput()
-
-        // 当设备不使用时自动退出
-        this.closeWindowWhenReleased(5000)
-
-        // Disable WhatsInputMethod to prevent influence UIAutomation
-        this.fixInputMethod(true)
     },
     methods: {
         getDevice(serial) {
             let url = '/autotest/device/detail/' + serial;
             this.$get(url, response =>{
                 let data = response.data;
+                // 判断当前操作人是否是设备占用者
+                if(data.status==='using' & data.user!==this.$store.state.userInfo.id){
+                    this.$message.warning("当前设备已被他人占用 请稍后再试");
+                    return;
+                }
+                if(data.status!=='testing' & data.user!==this.$store.state.userInfo.id){
+                    this.$message.warning("当前设备不可用 请稍后再试");
+                    return;
+                }
+                if(data.status==='testing'){
+                    this.$alert("当前设备执行测试中 禁用操作", '禁用提示', {
+                        confirmButtonText: '关闭页面',
+                        type: 'warning'
+                    }).then(() => {
+                        window.close();
+                    });
+                }
                 data.sources = JSON.parse(data.sources);
                 this.device = data;
+                // 等待渲染完成
+                this.$nextTick(() => {
+                    // 开启投屏
+                    this.mirrorDisplay();
+                    // 开启操作
+                    this.syncTouchpad();
+                    // 唤醒屏幕
+                    this.runKeyevent("WAKEUP");
+                    // 加载whatsinput输入法
+                    this.loadWhatsinput();
+                    // 当设备不使用时自动退出
+                    this.closeWindowWhenReleased(5000);
+                    // Disable WhatsInputMethod to prevent influence UIAutomation
+                    this.fixInputMethod(true);
+                });
             });
+        },
+        getScreenHeight(size){
+            this.screenWidth = document.getElementsByClassName("screen-body")[0].offsetWidth;
+            if(!size){
+                return;
+            }
+            const s = size.split("x");
+            this.screenHeight = s[1]/s[0]*(this.screenWidth-4)-10;
         },
         uploadApk(option) {
             let formData = new FormData();
             formData.append('file', option.file);
-            $.ajax({
-            method: "post",
-            url: urlPrefix + "/uploads",
-            data: formData,
-            processData: false,
-            contentType: false,
-            }).done(ret => {
-            this.app.installUrl = ret.data.url;
-            this.$notify.success("上传成功");
+            this.$axios.upload(urlPrefix + "/uploads", formData).then(ret => {
+                this.app.installUrl = ret.data.url;
+                this.$message.success("上传成功");
             }).fail(err => {
-            this.$notify.error("上传失败");
+                this.$message.error("上传失败");
             })
         },
         appInstall() {
-            this.app.packageName = ""
-            this.app.finished = false
-            this.app.message = "安裝中 ..."
+            this.app.packageName = "";
+            this.app.finished = false;
+            this.app.message = "安裝中 ...";
 
-            $.ajax({
-            method: "post",
-            url: this.address + "/app/install?udid=" + this.udid,
-            data: {
+            this.$axios.post(this.device.sources.url + "/app/install?udid=" + this.udid,
+            JSON.stringify({
                 url: this.app.installUrl,
                 launch: this.app.launch,
                 secret: this.source.secret,
-            }
-            }).done(ret => {
-            this.app.message = ret.output;
-            this.app.packageName = ret.packageName;
-            }).fail(err => {
-            if (err.status == 400) {
-                this.app.message = err.responseJSON.description;
-            } else {
-                this.app.message = err.responseText;
-            }
-            }).always(() => {
-            this.app.finished = true
+            })).then(ret => {
+                this.app.message = ret.output;
+                this.app.packageName = ret.packageName;
+            }).error(err => {
+                if (err.status == 400) {
+                    this.app.message = err.responseJSON.description;
+                } else {
+                    this.app.message = err.responseText;
+                }
+            }).finally(() => {
+                this.app.finished = true;
             })
         },
         fixInputMethod(quite) {
-            if (!quite) {
-            this.$notify.info({
-                title: "输入法",
-                message: "修复中",
-            })
-            }
-            const inputMethod = "com.buscode.whatsinput/.WifiInputMethod"
-            return this.runShell("ime enable " + inputMethod)
-            .then(() => {
-                return this.runShell("ime set " + inputMethod)
-            })
-            .then($.delay(1000))
-            .then(() => {
-                this.$refs.whatsinput.focus()
-                return this.loadWhatsinput()
-            })
-            .then(() => {
+            const inputMethod = "com.buscode.whatsinput/.WifiInputMethod";
+            return this.runShell("ime enable " + inputMethod).then(() => {
+                return this.runShell("ime set " + inputMethod);
+            }).then(() => {
+                this.$refs.whatsinput.focus();
+                return this.loadWhatsinput();
+            }).then(() => {
                 if (!quite) {
-                this.$notify.success({ message: "输入法修复完成" })
+                    this.$message.success({ message: "输入法修复完成" });
                 }
-            }, () => {
+            }, (ev) => {
                 if (!quite) {
-                this.$notify.success({ message: "输入法修复失败，F12查看详情" })
+                    this.$message.success({ message: "输入法修复失败，F12查看详情" });
                 }
             })
         },
         loadWhatsinput(callback) {
-            console.log(this.whatsInputUrl)
             let defer = $.Deferred()
-            let ws = new WebSocket(this.whatsInputUrl)
+            let ws = new WebSocket("ws://" + this.device.sources.whatsInputAddress)
             this.websockets.winput = ws;
             ws.onopen = (ev) => {
-            defer.resolve()
-            console.log("whatsinput connected")
+                defer.resolve();
             }
             ws.onmessage = (ev) => {
-            console.log("winput recv", ev)
-            let data = JSON.parse(ev.data)
-            switch (data.type) {
-                case "InputStart":
-                this.whatsinput.text = data.text;
-                this.whatsinput.disabled = false
-                setTimeout(() => {
-                    this.$refs.whatsinput.focus()
-                    this.$refs.whatsinput.select()
-                }, 1)
-                break;
-                case "InputFinish":
-                this.whatsinput.disabled = true
-                break
-                case "InputChange":
-                this.whatsinput.text = data.text;
-                break;
-            }
+                let data = JSON.parse(ev.data);
+                switch (data.type) {
+                    case "InputStart":
+                        this.whatsinput.text = data.text;
+                        this.whatsinput.disabled = false;
+                        setTimeout(() => {
+                            this.$refs.whatsinput.focus();
+                            this.$refs.whatsinput.select();
+                        }, 1);
+                        break;
+                    case "InputFinish":
+                        this.whatsinput.disabled = true;
+                        break;
+                    case "InputChange":
+                        this.whatsinput.text = data.text;
+                        break;
+                }
             }
             ws.onerror = (ev) => {
-            console.error(ev)
-            defer.reject()
+                defer.reject();
             }
             ws.onclose = (ev) => {
-            console.log("winput closed")
-            if (ws === this.websockets.winput) {
-                this.websockets.winput = null;
-            }
+                if (ws === this.websockets.winput) {
+                    this.websockets.winput = null;
+                }
             }
             return defer;
         },
         sendInputText() {
-            console.log("sync", this.whatsinput.text)
             let ws = this.websockets.winput;
             ws.send(JSON.stringify({
-            type: "InputEdit",
-            text: this.whatsinput.text,
-            }))
+                type: "InputEdit",
+                text: this.whatsinput.text,
+            }));
         },
         sendInputKey(key) {
-            console.log("Sync key", key)
             let code = { "enter": 66, "tab": 61 }[key] || key;
             let ws = this.websockets.winput;
             ws.send(JSON.stringify({
-            type: "InputKey",
-            code: "" + code,
-            }))
+                type: "InputKey",
+                code: "" + code,
+            }));
+        },
+        closeWindowWhenReleased(interval) {
+            setTimeout(() => {
+                if (!document.hidden) { // 设备在操作 刷新超时时间
+                    let url = '/autotest/device/active/' + this.serial;
+                    this.$post(url, null, response =>{
+                        if(response.data){  // 更新成功
+                            this.closeWindowWhenReleased(interval) 
+                        }else{  // 设备可能已经离线
+                            this.$message.warning('设备长时间未操作 可能被释放了');
+                            this.device.serial = null;
+                        }
+                    });
+                } else {
+                    this.closeWindowWhenReleased(5000)
+                }
+            }, interval);
         },
         stopUsing() {
             let url = '/autotest/device/stop/' + this.device.serial;
@@ -314,13 +352,13 @@ export default {
             });
         },
         runShell(command) {
-            return this.$axios.post(this.deviceUrl + "/shell?command="+ command).then(ret => {
-                console.log("runShell", command, ret)
-                return ret;
+            return this.$axios.post("http://" + this.device.sources.atxAgentAddress + "/shell?command="+ command)
+            .then(ret => {
+                return ret.data;
             })
         },
         runKeyevent(key) {
-            return this.runShell("input keyevent " + key.toUpperCase())
+            return this.runShell("input keyevent " + key.toUpperCase());
         },
         handleTabClick(tab, event) {
             if (tab.name == "control") {
@@ -328,7 +366,7 @@ export default {
             }
         },
         mirrorDisplay() {
-            jmu = new JMuxer({
+            let jmu = new JMuxer({
                 node: 'screen-player',
                 mode: 'video',
                 flushingTime: 0,
@@ -340,11 +378,11 @@ export default {
                 },
                 debug: false
             });
-            var ws = new WebSocket(this.scrcpyServerUrl + '/scrcpy/screen');
+            var ws = new WebSocket("ws://" + this.device.sources.scrcpyServerAddress + '/screen');
             this.websockets.remote = ws;
             ws.binaryType = 'arraybuffer';
-            ws.onopen = (ev) => {};
-            ws.onmessage = (ev) => {
+            ws.onopen = (event) => {};
+            ws.onmessage = (event) => {
                 if(typeof(event.data) === "string"){
                   this.$message({
                     showClose: true,
@@ -358,18 +396,14 @@ export default {
                   });
                 }
             };
-            ws.onclose = (ev) => {
-                if (this.websockets.screen === ws) {
-                    this.websockets.screen = null;
-                    this.$message({
-                        showClose: true,
-                        message: '设备屏幕同步中断',
-                        type: 'error',
-                    });
+            ws.onclose = (event) => {
+                if (this.websockets.remote === ws) {
+                    this.websockets.remote = null;
+                    this.$message.error('设备屏幕同步中断');
                 }
             };
-            ws.onerror = function (ev) {
-                console.log("screen websocket error")
+            ws.onerror = function (event) {
+                this.$message.error('设备屏幕同步错误');
             };
         },
         syncTouchpad() {
@@ -378,260 +412,237 @@ export default {
 
             // touch事件
             function inject_touch_event(pix_data, action){
-                msg = {
-                msg_type: 2,
-                action: action,
-                x: pix_data[0],
-                y: pix_data[1],
-                }
-                ws.send(JSON.stringify(msg))
+                let msg = {
+                    msg_type: 2,
+                    action: action,
+                    x: pix_data[0],
+                    y: pix_data[1],
+                };
+                ws.send(JSON.stringify(msg));
             }
 
             // scroll事件
             function inject_scroll_event(pix_data){
-                msg = {
-                msg_type: 3,
-                x: pix_data[0],
-                y: pix_data[1],
-                distance_x: pix_data[2],
-                distance_y: pix_data[3],
-                }
-                ws.send(JSON.stringify(msg))
+                let msg = {
+                    msg_type: 3,
+                    x: pix_data[0],
+                    y: pix_data[1],
+                    distance_x: pix_data[2],
+                    distance_y: pix_data[3],
+                };
+                ws.send(JSON.stringify(msg));
             }
 
             // swipe
             function swipe(pix_data, delay=0, unit=13){
-                delay = parseFloat(delay.toFixed(2))
+                delay = parseFloat(delay.toFixed(2));
                 if (delay <= 3 && delay >=0){
-                msg = {
-                    msg_type: 30,
-                    x: pix_data[0],
-                    y: pix_data[1],
-                    end_x: pix_data[2],
-                    end_y: pix_data[3],
-                    unit: unit,
-                    delay: delay,
-                }
-                ws.send(JSON.stringify(msg))
+                    let msg = {
+                        msg_type: 30,
+                        x: pix_data[0],
+                        y: pix_data[1],
+                        end_x: pix_data[2],
+                        end_y: pix_data[3],
+                        unit: unit,
+                        delay: delay,
+                    };
+                    ws.send(JSON.stringify(msg));
                 }
             }
 
             // 节流函数
             function throttle(fn,during) {
-                let t = null
+                let t = null;
                 return function(e){
                     if(!t){
                         t = setTimeout(()=>{
-                            fn.call(this,e)
-                            t = null
-                        },during)
+                            fn.call(this,e);
+                            t = null;
+                        },during);
                     }
                 }
             }
 
             // 获取鼠标在元素内的坐标
             function get_pointer_position(event, ele){
-                x = event.layerX;
-                x = parseInt(x);
+                let x = parseInt(event.layerX);
                 x = Math.min(x, ele.offsetWidth);
                 x = Math.max(x, 0);
-                y = event.layerY;
-                y = parseInt(y);
+                let y = parseInt(event.layerY);
                 y = Math.min(y, ele.offsetHeight);
                 y = Math.max(y, 0);
-                return [x/ele.offsetWidth, y/ele.offsetHeight]
+                return [x/ele.offsetWidth, y/ele.offsetHeight];
             }
 
             // canvas鼠标移动事件处理函数
             function canvas_mouse_move(event) {
-                pix_data = get_pointer_position(event, this)
-                inject_touch_event(pix_data, 2)
+                let pix_data = get_pointer_position(event, this);
+                inject_touch_event(pix_data, 2);
             }
 
             // touch事件
             function add_canvas_touch_event(ele){
                 // 在window对象记录touch开始
-                window.touch_start = null
+                window.touch_start = null;
                 // 节流的mouse_move
-                efficient_canvas_mouse_move = throttle(canvas_mouse_move, 30);
+                let efficient_canvas_mouse_move = throttle(canvas_mouse_move, 30);
                 // 1.mousedown
                 ele.addEventListener('mousedown', function (event) {
                     if(event.buttons == 1){
-                    window.touch_start = true
-                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
-                    pix_data = get_pointer_position(event, this)
-                    inject_touch_event(pix_data, 0)
-                    this.addEventListener('mousemove', efficient_canvas_mouse_move)
+                        window.touch_start = true;
+                        this.removeEventListener("mousemove", efficient_canvas_mouse_move);
+                        let pix_data = get_pointer_position(event, this);
+                        inject_touch_event(pix_data, 0);
+                        this.addEventListener('mousemove', efficient_canvas_mouse_move);
                     }
                 })
                 // 2.mouseup
                 ele.addEventListener('mouseup', function (event) {
                     if (window.touch_start){
-                    window.touch_start = false
-                    pix_data = get_pointer_position(event, this)
-                    inject_touch_event(pix_data, 1)
-                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
+                        window.touch_start = false;
+                        let pix_data = get_pointer_position(event, this);
+                        inject_touch_event(pix_data, 1);
+                        this.removeEventListener("mousemove", efficient_canvas_mouse_move);
                     }
                 })
                 // 3.mouseout
                 ele.addEventListener('mouseout', function (event) {
                     if (window.touch_start){
-                    window.touch_start = false
-                    pix_data = get_pointer_position(event, this)
-                    inject_touch_event(pix_data, 1)
-                    this.removeEventListener("mousemove", efficient_canvas_mouse_move)
+                        window.touch_start = false;
+                        let pix_data = get_pointer_position(event, this);
+                        inject_touch_event(pix_data, 1);
+                        this.removeEventListener("mousemove", efficient_canvas_mouse_move);
                     }
                 })
             }
 
             // swipe事件
             function add_canvas_swipe_event(ele){
-                window.swipe_start = null
-                window.swipe_start_pix_data = null
+                window.swipe_start = null;
+                window.swipe_start_pix_data = null;
                 // 1.mousedown
                 ele.addEventListener('mousedown', function (event) {
                     if(event.buttons == 4){
-                    window.swipe_start = Date.now()
-                    window.swipe_start_pix_data = get_pointer_position(event, this)
+                        window.swipe_start = Date.now();
+                        window.swipe_start_pix_data = get_pointer_position(event, this);
                     }
                 })
                 // 2.mouseup
                 ele.addEventListener('mouseup', function (event) {
                     if (window.swipe_start){
-                    swipe_end = Date.now()
-                    delay = (swipe_end - window.swipe_start)/1000
-                    window.swipe_start = null
-                    swipe_end_pix_data = get_pointer_position(event, this)
-                    pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data)
-                    window.swipe_start_pix_data = null
-                    swipe(pix_data, delay)
+                        let swipe_end = Date.now();
+                        let delay = (swipe_end - window.swipe_start)/1000;
+                        window.swipe_start = null;
+                        let swipe_end_pix_data = get_pointer_position(event, this);
+                        let pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data);
+                        window.swipe_start_pix_data = null;
+                        swipe(pix_data, delay);
                     }
                 })
                 // 3.mouseout
                 ele.addEventListener('mouseout', function (event) {
                     if (window.swipe_start){
-                    swipe_end = Date.now()
-                    delay = (swipe_end - window.swipe_start)/1000
-                    window.swipe_start = null
-                    swipe_end_pix_data = get_pointer_position(event, this)
-                    pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data)
-                    window.swipe_start_pix_data = null
-                    swipe(pix_data, delay)
+                        let swipe_end = Date.now();
+                        let delay = (swipe_end - window.swipe_start)/1000;
+                        window.swipe_start = null;
+                        let swipe_end_pix_data = get_pointer_position(event, this);
+                        let pix_data = window.swipe_start_pix_data.concat(swipe_end_pix_data);
+                        window.swipe_start_pix_data = null;
+                        swipe(pix_data, delay);
                     }
                 })
             }
 
             // 处理canvas mouse scroll
             function canvas_mouse_scroll(event) {
-                pix_data = get_pointer_position(event, this)
+                let pix_data = get_pointer_position(event, this);
+                let distance_x = 1;
                 if (event.deltaX >0){
-                distance_x = -1
-                } else{
-                distance_x = 1
+                    distance_x = -1;
                 }
-                pix_data[2] = distance_x
+                pix_data[2] = distance_x;
+                let distance_y = 1;
                 if (event.deltaY >0){
-                distance_y = -1
-                } else{
-                distance_y = 1
+                    distance_y = -1;
                 }
-                pix_data[3] = distance_y
-                inject_scroll_event(pix_data)
+                pix_data[3] = distance_y;
+                inject_scroll_event(pix_data);
             }
 
             // scroll事件
             function add_canvas_scroll_event(ele){
-                efficient_canvas_mouse_scroll = throttle(canvas_mouse_scroll, 100);
-                ele.addEventListener("wheel", efficient_canvas_mouse_scroll)
+                let efficient_canvas_mouse_scroll = throttle(canvas_mouse_scroll, 100);
+                ele.addEventListener("wheel", efficient_canvas_mouse_scroll);
             }
 
             add_canvas_touch_event(element);
             add_canvas_swipe_event(element);
             add_canvas_scroll_event(element);
         },
-        closeWindowWhenReleased(interval) {
-            setTimeout(() => {
-            if (document.hidden) {
-                $.getJSON(urlPrefix + "/api/v1/user/devices/" + udid)
-                .done(ret => {
-                    this.closeWindowWhenReleased(5000)
-                })
-                .fail(ret => {
-                    let content = '设备' + this.idleTimeout + "秒内没有操作，设备自动释放，点击刷新重新占用该设备"
-                    this.$alert(content, '设备超时提示', {
-                    confirmButtonText: '刷新',
-                    type: 'warning'
-                    }).then(() => {
-                    location.reload()
-                    }).catch(() => {
-                    window.close()
-                    })
-                })
-            } else {
-                $.getJSON(urlPrefix + "/api/v1/user/devices/" + udid + "/active?email=" + userEmail)
-                .done((ret) => {
-                    this.closeWindowWhenReleased(interval)
-                })
-                .fail(function (ret) {
-                    console.log(ret)
-                    alert("设备可能被释放了，Press F12 to debug")
-                })
-            }
-            }, interval)
-        },
         refreshTopApp() {
             this.runShell("dumpsys activity top").then(ret => {
-            const reActivity = String.raw`\s*ACTIVITY ([A-Za-z0-9_.]+)\/([A-Za-z0-9_.]+) \w+ pid=(\d+)`
-            let matches = ret.output.match(new RegExp(reActivity, "g"))
-            if (matches.length > 0) {
-                let m = matches.pop().match(new RegExp(reActivity))
-                this.topApp.packageName = m[1];
-                this.topApp.activity = m[2]
-                this.topApp.pid = m[3]
-            }
+                const reActivity = String.raw`\s*ACTIVITY ([A-Za-z0-9_.]+)\/([A-Za-z0-9_.]+) \w+ pid=(\d+)`;
+                let matches = ret.output.match(new RegExp(reActivity, "g"));
+                if (matches.length > 0) {
+                    let m = matches.pop().match(new RegExp(reActivity));
+                    this.topApp.packageName = m[1];
+                    this.topApp.activity = m[2];
+                    this.topApp.pid = m[3];
+                }
             })
         }
     },
-    computed: {
-        address() {
-            return this.device.sources.url;
-        },
-        deviceUrl() {
-            return "http://" + this.device.sources.atxAgentAddress;
-        },
-        screenshotUrl() {
-            return  this.deviceUrl + "/screenshot/0";
-        },
-        remoteConnectAddr() {
-            return "adb connect " + this.device.sources.remoteConnectAddress;
-        },
-        whatsInputUrl() {
-            return "ws://" + this.device.sources.whatsInputAddress;
-        },
-        scrcpyServerUrl() {
-            return "http://" + this.device.sources.scrcpyServerAddress;
-        }
-    }
-
 }
 </script>
 <style scoped>
+.disabled-view{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.05);
+    margin: 42px 20px 20px 68px;
+    z-index: 1500;
+}
+
 .screen-header{
     height: 36px;
     position: relative;
-    border:1px solid rgb(219, 219, 219);
+    border-radius: 12px 12px 0px 0px;
+    border-top:2px solid rgb(219, 219, 219);
+    border-left: 2px solid rgb(219, 219, 219);
+    border-right: 2px solid rgb(219, 219, 219);
+    background-color: rgb(44, 44, 44);
 }
 
 .screen-body{
-    min-height: 575px;
-    background-color: gray;
-    border:1px solid rgb(219, 219, 219);
+    background-color: black;
+    border-left: 2px solid rgb(219, 219, 219);
+    border-right: 2px solid rgb(219, 219, 219);
 }
 
 .screen-footer{
     height: 32px;
     position: relative;
-    border:1px solid rgb(219, 219, 219);
+    border-radius: 0px 0px 12px 12px;
+    border-bottom:2px solid rgb(219, 219, 219);
+    border-left: 2px solid rgb(219, 219, 219);
+    border-right: 2px solid rgb(219, 219, 219);
+    background-color: rgb(44, 44, 44);
+}
+
+.long-text {
+    width: 50px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: white;
+}
+
+.device-sys-btn{
+    width: 100%;
+    font-size: 18px;
 }
 
 .cursor-pointer {
@@ -642,6 +653,7 @@ export default {
     z-index: 20;
     max-width: 100%;
     height: auto;
+    margin-top: -5px;
 }
 
 .card-columns {
@@ -687,8 +699,7 @@ dt {
 }
 
 dd {
-    margin-bottom: 0.5rem;
-    margin-left: 0;
+    margin: 0.25rem 0px;
     display: block;
     margin-inline-start: 10px;
 }

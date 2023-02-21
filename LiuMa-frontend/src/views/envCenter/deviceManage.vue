@@ -43,7 +43,7 @@
         <!-- 设备列表 -->
         <div class="device-table">
             <div v-for="(devicesRow, index) in devicesData" :key="index" class="device-box-row">
-                <div v-for="(device, index) in devicesRow" :key="index" class="device-box">
+                <div v-for="(device, index) in devicesRow" :key="index" class="device-box" :style="'width:'+boxWidth+'px'">
                     <div class="device-box-border">
                         <div class="device-box-info">
                             <div class="box-header">
@@ -67,13 +67,13 @@
                                     <i class="el-icon-edit-outline" style="font-size:12px;margin-left:-12px;margin-top:5px" @click="editDevice(device)"/>
                                 </div>
                                 <div style="display:flex; margin-top: 30px">
-                                    <img v-if="device.system==='android'" class="box-img" src="../../assets/img/android.png" alt=""/>
-                                    <img v-if="device.system==='apple'" class="box-img" src="../../assets/img/apple.png" alt=""/>
+                                    <img v-if="device.system==='android'" class="box-img" :style="'width:'+ 72*boxWidth/250+'px;height:'+72*boxWidth/250*1.5+'px'" src="../../assets/img/android.png" alt=""/>
+                                    <img v-if="device.system==='apple'" class="box-img" :style="'width:'+ 72*boxWidth/250+'px;height:'+72*boxWidth/250*1.5+'px'"  src="../../assets/img/apple.png" alt=""/>
                                     <div>
-                                        <div class="box-info">品牌: {{device.brand}}</div>
-                                        <div class="box-info">型号: {{device.model}}</div>
-                                        <div class="box-info">系统: {{device.system}} {{device.version}}</div>
-                                        <div class="box-info">分辨率: {{device.size}}</div>
+                                        <div class="box-info" :style="'width:'+(boxWidth-72*boxWidth/250-60)+'px'">品牌: {{device.brand}}</div>
+                                        <div class="box-info" :style="'width:'+(boxWidth-72*boxWidth/250-60)+'px'">型号: {{device.model}}</div>
+                                        <div class="box-info" :style="'width:'+(boxWidth-72*boxWidth/250-60)+'px'">系统: {{device.system}} {{device.version}}</div>
+                                        <div class="box-info" :style="'width:'+(boxWidth-72*boxWidth/250-60)+'px'">分辨率: {{device.size}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -148,16 +148,12 @@ export default {
     let that = this;
     erd.listenTo(document.getElementsByClassName('device-list'), function(element) {
       that.getWidth();
+      that.getFilter();
+      that.getData();
     });
     this.getWidth();
     this.getFilter();
     this.getData();
-  },
-  watch: {
-    boxWidth: function (n, o) {
-      this.getFilter();
-      this.getData();
-    }
   },
   created() {
     this.$root.Bus.$emit('initBread', ["环境中心", "设备管理"]);
@@ -212,8 +208,12 @@ export default {
     // 获取屏幕宽度
     getWidth() {
       let screenWidth = document.getElementsByClassName('device-list')[0].clientWidth + 20;
-      this.rowSize = parseInt(screenWidth / 250);
-      this.boxWidth = parseInt(screenWidth / this.rowSize);
+      this.rowSize = parseInt(screenWidth / 270) + 1;
+      this.boxWidth = parseInt(screenWidth / this.rowSize) - 20;
+      if(this.boxWidth < 250){
+        this.rowSize -= 1;
+        this.boxWidth = parseInt(screenWidth / this.rowSize) - 20;
+      }
       this.filterSize = parseInt((screenWidth-350) / 80);
       this.filterWidth = parseInt((screenWidth-350) / this.filterSize);
     },
@@ -378,7 +378,7 @@ export default {
     padding: 20px;
 }
 .box-img{
-    width: 72px;
+    width: 72*boxWidth/250;
     height: 108px;
     margin-right: 10px;
 }

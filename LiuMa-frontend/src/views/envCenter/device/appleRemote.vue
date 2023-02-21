@@ -3,8 +3,9 @@
 */ 
 <template>
     <div>
+        <div class="disabled-view" v-if="device.status==='testing'"/>
         <el-row :gutter="10">
-            <el-col :xs="8" :md="6" :xl="4" class="left-screen">
+            <el-col :span="6">
                 <div class="screen-header">
                     <div style="float:left; margin:11px 4px">
                         <el-tooltip :content="device.serial" placement="bottom">
@@ -12,10 +13,10 @@
                         </el-tooltip>
                     </div>
                     <div style="float:right; margin: 4px 3px">
-                        <el-button type="danger" size="mini" @click="stopUsing" >停用</el-button>
+                        <el-button type="danger" size="mini" @click="stopUsing" round :disabled="device.serial===null">停用</el-button>
                     </div>
                 </div>
-                <div class="screen-body" :style="'height: '+screenHeight+'px'">
+                <div class="screen-body" :style="'height: '+ screenHeight +'px'">
                     <canvas ref="bgCanvas" class="canvas-bg" v-bind:style="canvasStyle"></canvas>
                     <span class="finger finger-0" style="transform: translate3d(200px, 100px, 0px)"></span>
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
@@ -26,7 +27,7 @@
                     </el-button>
                 </div>
             </el-col>
-            <el-col :xs="16" :md="18" :xl="20">
+            <el-col :span="18">
                 <el-tabs v-model="activeName" @tab-click="handleTabClick">
                     <el-tab-pane label="常用功能" name="common">
                         <div class="card-columns" ref="commonContainer">
@@ -109,12 +110,13 @@ export default {
             device: {
                 name:null,
                 serial: null,
+                status: 'using',
                 sources: {
                     wdaUrl: null
                 }
             },
             screenWidth: 300,
-            screenHeight: 550,
+            screenHeight: 500,
             activeName: 'common',
             canvas: {
                 bg: null
@@ -149,22 +151,34 @@ export default {
     mounted: function () {
         let erd = elementResizeDetectorMaker();
         let that = this;
-        erd.listenTo(document.getElementsByClassName('left-screen'), function(element) {
+        erd.listenTo(document.getElementsByClassName('screen-body'), function(element) {
             that.getScreenHeight(that.device.size);
         });
         // 获取设备信息
         this.getDevice(this.serial);
-    },
-    watch: {
-        screenWidth: function (n, o) {
-            this.getScreenHeight(this.device.size);
-        }
     },
     methods: {
         getDevice(serial) {
             let url = '/autotest/device/detail/' + serial;
             this.$get(url, response =>{
                 let data = response.data;
+                // 判断当前操作人是否是设备占用者
+                if(data.status==='using' & data.user!==this.$store.state.userInfo.id){
+                    this.$message.warning("当前设备已被他人占用 请稍后再试");
+                    return;
+                }
+                if(data.status!=='testing' & data.user!==this.$store.state.userInfo.id){
+                    this.$message.warning("当前设备不可用 请稍后再试");
+                    return;
+                }
+                if(data.status==='testing'){
+                    this.$alert("当前设备执行测试中 禁用操作", '禁用提示', {
+                        confirmButtonText: '关闭页面',
+                        type: 'warning'
+                    }).then(() => {
+                        window.close();
+                    });
+                }
                 data.sources = JSON.parse(data.sources);
                 this.device = data;
                 // 等待渲染完成
@@ -185,12 +199,12 @@ export default {
             });
         },
         getScreenHeight(size){
+            this.screenWidth = document.getElementsByClassName("screen-body")[0].offsetWidth;
             if(!size){
                 return;
             }
-            this.screenWidth = document.getElementsByClassName("screen-body")[0].offsetWidth;
             const s = size.split("*");
-            this.screenHeight = parseInt(s[1]/s[0]*this.screenWidth);
+            this.screenHeight = s[1]/s[0]*this.screenWidth;
             this.display.width = s[0];
             this.display.height = s[1];
         },
@@ -208,26 +222,6 @@ export default {
                     document.body.removeChild(a);
                 }, 0);
             })
-        },
-        chooseAlertButtons() {
-            this.alert.buttons = [];
-            this.alert.loading = true;
-            return this.$axios.get(this.path2url("/session/" + this.session.id + "/wda/alert/buttons")
-            ).then(ret => {
-                this.alert.buttons = ret.data.value;
-                this.$nextTick(() => {
-                    this.alert.visible = true;
-                })
-            }).finally(() => {
-                this.alert.loading = false;
-            })
-        },
-        alertAccept(name) {
-            let data = null;
-            if (typeof name === 'string' || name instanceof String) {
-                data = JSON.stringify({ name: name });
-            }
-            return this.$axios.post(this.path2url("/session/" + this.session.id + "/alert/accept"), data);
         },
         uploadIPA(resp, file, files) {
             if (!resp.success) {
@@ -253,9 +247,29 @@ export default {
                 }
             }).error(err => {
                 this.app.message = err.responseJSON.message;
-            }).always(() => {
+            }).finally(() => {
                 this.app.finished = true;
             });
+        },
+        chooseAlertButtons() {
+            this.alert.buttons = [];
+            this.alert.loading = true;
+            return this.$axios.get(this.path2url("/session/" + this.session.id + "/wda/alert/buttons")
+            ).then(ret => {
+                this.alert.buttons = ret.data.value;
+                this.$nextTick(() => {
+                    this.alert.visible = true;
+                })
+            }).finally(() => {
+                this.alert.loading = false;
+            })
+        },
+        alertAccept(name) {
+            let data = null;
+            if (typeof name === 'string' || name instanceof String) {
+                data = JSON.stringify({ name: name });
+            }
+            return this.$axios.post(this.path2url("/session/" + this.session.id + "/alert/accept"), data);
         },
         closeWindowWhenReleased(interval) {
             setTimeout(() => {
@@ -265,7 +279,8 @@ export default {
                         if(response.data){  // 更新成功
                             this.closeWindowWhenReleased(interval) 
                         }else{  // 设备可能已经离线
-                            this.$message.warning('设备可能被释放了');
+                            this.$message.warning('设备长时间未操作 可能被释放了');
+                            this.device.serial = null;
                         }
                     });
                 } else {
@@ -603,6 +618,17 @@ export default {
 }
 </script>
 <style scoped>
+.disabled-view{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.05);
+    margin: 42px 20px 20px 68px;
+    z-index: 1500;
+}
+
 .screen-header{
     height: 36px;
     position: relative;
@@ -629,7 +655,6 @@ export default {
     background-color: rgb(44, 44, 44);
 }
 
-
 .long-text {
     width: 50px;
     overflow-x: hidden;
@@ -651,6 +676,7 @@ export default {
     z-index: 20;
     max-width: 100%;
     height: auto;
+    margin-top: -2px;
 }
 
 .finger {
