@@ -8,8 +8,9 @@
     #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
   </insert>
   <select id="getTaskDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
-    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id,  r.source_type, r.source_id, r.id as reportId, t.create_user from task t
-    left join report r on r.task_id = t.id where t.id=#{id}
+    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id,  r.source_type, r.source_id,
+    r.id as reportId, t.create_user, r.device_id
+    from task t left join report r on r.task_id = t.id where t.id=#{id}
   </select>
   <select id="getTaskList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
     select t.id, t.name, t.type, t.status, t.engine_id, t.project_id, t.create_time,
@@ -19,7 +20,8 @@
     order by t.create_time
   </select>
   <select id="getToRunTask" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
-    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type, r.source_id, r.environment_id, r.device_id, r.id as reportId
+    select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type,
+    r.source_id, r.environment_id, r.device_id, r.id as reportId, t.create_user
     from task t left join report r on r.task_id = t.id
     where t.engine_id = #{engineId} and t.status = 'prepared'
     order by

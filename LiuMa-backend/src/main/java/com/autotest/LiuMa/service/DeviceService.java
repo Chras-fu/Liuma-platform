@@ -20,12 +20,12 @@ public class DeviceService {
     @Resource
     private DeviceMapper deviceMapper;
 
-    public Device getDeviceDetail(String serial){
-        return deviceMapper.getDeviceBySerial(serial);
+    public Device getDeviceDetail(String deviceId){
+        return deviceMapper.getDeviceById(deviceId);
     }
 
-    public void stopUseDevice(String serial) {
-        Device device = deviceMapper.getDeviceBySerial(serial);
+    public void stopUseDevice(String deviceId) {
+        Device device = deviceMapper.getDeviceById(deviceId);
         JSONObject sources = JSONObject.parseObject(device.getSources());
         device.setStatus(DeviceStatus.COLDING.toString());
         device.setUpdateTime(System.currentTimeMillis());
@@ -40,8 +40,8 @@ public class DeviceService {
         }).start();
     }
 
-    public Boolean activeDevice(String serial, String user) {
-        Device device = deviceMapper.getDeviceBySerial(serial);
+    public Boolean activeDevice(String deviceId, String user) {
+        Device device = deviceMapper.getDeviceById(deviceId);
         if(user.equals(device.getUser()) && device.getStatus().equals(DeviceStatus.USING.toString())){
             device.setUpdateTime(System.currentTimeMillis());
             deviceMapper.updateDevice(device);
@@ -55,8 +55,8 @@ public class DeviceService {
         deviceMapper.updateDevice(device);
     }
 
-    public Boolean useDevice(String serial, Integer timeout, String user) {
-        Device device = deviceMapper.getDeviceBySerial(serial);
+    public Boolean useDevice(String deviceId, Integer timeout, String user) {
+        Device device = deviceMapper.getDeviceById(deviceId);
         if(!device.getStatus().equals(DeviceStatus.ONLINE.toString())){
             return false;   // 设备非空闲状态无法使用
         }

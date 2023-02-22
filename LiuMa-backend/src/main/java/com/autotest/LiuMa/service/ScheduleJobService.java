@@ -2,10 +2,7 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.common.constants.DeviceStatus;
-import com.autotest.LiuMa.common.constants.ReportSourceType;
-import com.autotest.LiuMa.common.constants.ReportStatus;
-import com.autotest.LiuMa.common.constants.TaskType;
+import com.autotest.LiuMa.common.constants.*;
 import com.autotest.LiuMa.common.utils.HttpUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
@@ -49,19 +46,24 @@ public class ScheduleJobService {
     @Resource
     private DeviceMapper deviceMapper;
 
+    @Resource
+    private RunService runService;
+
     public void updateLostHeartbeatEngine(){
         Long minLastHeartbeatTime = System.currentTimeMillis() - 3*60*1000; // 三分钟没有心跳监控则离线
         engineMapper.updateLostHeartbeatEngine(minLastHeartbeatTime);
     }
 
     public void updateTimeoutTask(){
-        Long minLastUploadTime = System.currentTimeMillis() - 30*60*1000;   // 半小时内没有结果返回则任务超时
+        Long minLastUploadTime = System.currentTimeMillis() - 10*60*1000;   // 十分钟内没有结果返回则任务超时
         Long minLastToRunTime = System.currentTimeMillis() - 2*60*60*1000;   // 两小时内没有执行则任务超时
         List<Report> reports = reportMapper.selectTimeoutReport(minLastUploadTime, minLastToRunTime);
         for(Report report:reports){
             reportMapper.updateReportStatus(ReportStatus.DISCONTINUE.toString(), report.getId());
             taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), report.getTaskId());
             reportMapper.updateReportEndTime(report.getId(), System.currentTimeMillis(), System.currentTimeMillis());
+            // 释放设备
+            runService.stopDeviceWhenRunEnd(report.getTaskId());
         }
     }
 
@@ -130,7 +132,9 @@ public class ScheduleJobService {
             reportStatistics.setTotal(total);
             reportMapper.addReportStatistics(reportStatistics);
             // 回写定时任务表下次执行时间
-            planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
+            while (!planSchedule.getFrequency().equals(PlanFrequency.ONLY_ONE.toString()) && planSchedule.getNextRunTime() < System.currentTimeMillis()){ // 找到大于当前时间的日期
+                planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
+            }
             planScheduleMapper.updatePlanSchedule(planSchedule);
         }
     }

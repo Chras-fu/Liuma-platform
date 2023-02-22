@@ -25,6 +25,7 @@
     select * from plan_schedule where plan_id = #{planId}
   </select>
   <select id="getToRunPlanScheduleList" parameterType="java.lang.Long" resultType="com.autotest.LiuMa.database.domain.PlanSchedule">
-    select * from plan_schedule where next_run_time &gt;= #{minNextRunTime} and next_run_time &lt; #{maxNextRunTime}
+    select * from plan_schedule where (next_run_time &lt; #{maxNextRunTime} and frequency !='ONLY_ONE') or
+    (next_run_time &gt; #{minNextRunTime} and next_run_time &lt; #{maxNextRunTime} and frequency='ONLY_ONE')
   </select>
 </mapper>

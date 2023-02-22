@@ -7,7 +7,6 @@ import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.common.utils.*;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
-import com.autotest.LiuMa.dto.ReportDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
 import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.EngineRequest;
@@ -77,6 +76,9 @@ public class OpenApiService {
 
     @Resource
     private NotificationService notificationService;
+
+    @Resource
+    private RunService runService;
 
 
     public String applyEngineToken(EngineRequest request) {
@@ -164,8 +166,9 @@ public class OpenApiService {
     public String getTaskStatus(EngineRequest request){
         TaskDTO task = taskMapper.getTaskDetail(request.getTaskId());
         if(task.getStatus().equals(ReportStatus.DISCONTINUE.toString())){
-            // 任务终止时 更新引擎状态为在线
+            // 任务终止时 更新引擎状态为在线 并释放设备
             engineMapper.updateStatus(task.getEngineId(), EngineStatus.ONLINE.toString());
+            runService.stopDeviceWhenRunEnd(task.getId());
             return "STOP";
         }
         return null;
@@ -196,6 +199,8 @@ public class OpenApiService {
         engineMapper.updateStatus(request.getEngineCode(), EngineStatus.ONLINE.toString());
         reportMapper.updateReportStatus(reportStatus, task.getReportId());
         reportMapper.updateReportEndTime(task.getReportId(), System.currentTimeMillis(), System.currentTimeMillis());
+        // 释放设备
+        runService.stopDeviceWhenRunEnd(task.getId());
         // 删除任务文件 并通知执行人
         if(!task.getType().equals(TaskType.DEBUG.toString())){
             String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId()+".zip";

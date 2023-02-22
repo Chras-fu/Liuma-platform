@@ -24,15 +24,15 @@ public class DeviceController {
         return deviceService.getDeviceFilter(user, projectId);
     }
 
-    @PostMapping("/stop/{serial}")
-    public void stopUseDevice(@PathVariable String serial) {
-        deviceService.stopUseDevice(serial);
+    @PostMapping("/stop/{deviceId}")
+    public void stopUseDevice(@PathVariable String deviceId) {
+        deviceService.stopUseDevice(deviceId);
     }
 
-    @PostMapping("/active/{serial}")
-    public Boolean activeDevice(@PathVariable String serial, HttpServletRequest request) {
+    @PostMapping("/active/{deviceId}")
+    public Boolean activeDevice(@PathVariable String deviceId, HttpServletRequest request) {
         String user = request.getSession().getAttribute("userId").toString();
-        return deviceService.activeDevice(serial, user);
+        return deviceService.activeDevice(deviceId, user);
     }
 
     @PostMapping("/update")
@@ -40,15 +40,15 @@ public class DeviceController {
         deviceService.updateDevice(device);
     }
 
-    @PostMapping("/use/{serial}/{timeout}")
-    public Boolean UseDevice(@PathVariable String serial, @PathVariable Integer timeout,  HttpServletRequest request) {
+    @PostMapping("/use/{deviceId}/{timeout}")
+    public Boolean UseDevice(@PathVariable String deviceId, @PathVariable Integer timeout,  HttpServletRequest request) {
         String user = request.getSession().getAttribute("userId").toString();
-        return deviceService.useDevice(serial, timeout, user);
+        return deviceService.useDevice(deviceId, timeout, user);
     }
 
-    @GetMapping("/detail/{serial}")
-    public Device getDeviceDetail(@PathVariable String serial) {
-        return deviceService.getDeviceDetail(serial);
+    @GetMapping("/detail/{deviceId}")
+    public Device getDeviceDetail(@PathVariable String deviceId) {
+        return deviceService.getDeviceDetail(deviceId);
     }
 
     @PostMapping("/list")
