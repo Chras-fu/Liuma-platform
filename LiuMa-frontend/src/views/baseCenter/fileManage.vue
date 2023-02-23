@@ -18,7 +18,7 @@
     </el-form>
     <!--列表-->
     <el-table size="small" :data="fileData" v-loading="loading">
-        <el-table-column prop="id" label="uuid" width="250px"/>
+        <el-table-column prop="id" label="UUID" width="250px"/>
         <el-table-column prop="name" label="文件名称" min-width="200px"/>
         <el-table-column prop="description" label="文件描述" min-width="240px"/>
         <el-table-column prop="username" label="创建人"/>
@@ -190,7 +190,6 @@ export default {
             this.$message.warning('一次最多只能上传一个文件');
         },
         uploadFile(option) {
-            window.console.log(option)
             this.uploadFileForm.fileList.push(option.file);
             this.uploadFileForm.name = option.file.name;
             this.$refs.uploadFileForm.validateField('fileList');

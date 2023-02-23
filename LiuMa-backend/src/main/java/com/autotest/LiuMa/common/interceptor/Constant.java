@@ -9,6 +9,10 @@ public class Constant {
 
     public static final String SCREENSHOT_PATH = "^/openapi/screenshot/.+$";
 
+    public static final String DOWNLOAD_PATH = "^/openapi/download/.+$";
+
+    public static final String RUN_PATH = "^/openapi/run/.+$";
+
     public static final String ENGINE_PATH = "^/openapi/.+$";
 
 }

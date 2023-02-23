@@ -68,10 +68,10 @@
                             <div class="card">
                                 <div class="card-header">应用安装</div>
                                 <div class="card-body">
-                                    <el-upload ref="upload" accept=".ipa" drag action :http-request="uploadIPA">
+                                    <el-upload class="upload-demo" drag action :limit="1" :http-request="uploadIPA">
                                         <i class="el-icon-upload"></i>
                                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                        <div class="el-upload__tip" slot="tip">只能上传ipa文件，且不超过2G</div>
+                                        <div class="el-upload__tip" slot="tip">暂时只支持ipa的上传</div>
                                     </el-upload>
                                     <div class="form-group" style="margin-top: 20px">
                                         <span>URL</span>
@@ -146,6 +146,7 @@ export default {
                 visible: false,
             },
             app: {
+                packageUrl: "",
                 message: "",
                 finished: true,
             },
@@ -229,16 +230,20 @@ export default {
                 }, 0);
             })
         },
-        uploadIPA(resp, file, files) {
-            if (!resp.success) {
-                this.$message({
-                    message: resp.description,
-                    type: "error",
-                })
+        uploadIPA(option) {
+            if(option.file.type !== "ipa"){
+                this.$message.waring("文件格式不正确");
                 return;
             }
-            this.app.url = resp.data.url;
-            return this.appInstall();
+            let url = '/autotest/file/package/upload';
+            let data = {
+                name: option.file.name
+            };
+            let file = option.file;
+            this.$fileUpload(url, file, null, data, response =>{
+                this.$message.success("上传成功");
+                this.app.packageUrl = response.data;
+            });
         },
         appInstall() {
             const url = this.app.url

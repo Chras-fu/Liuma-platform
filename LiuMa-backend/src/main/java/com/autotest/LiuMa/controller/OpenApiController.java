@@ -1,12 +1,15 @@
 package com.autotest.LiuMa.controller;
 
+import com.autotest.LiuMa.database.domain.TestFile;
 import com.autotest.LiuMa.request.EngineRequest;
 import com.autotest.LiuMa.response.TaskResponse;
 import com.autotest.LiuMa.service.OpenApiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/openapi")
@@ -55,9 +58,14 @@ public class OpenApiController {
         return openApiService.downTaskFile(taskId);
     }
 
-    @GetMapping("/test/file/download/{fileId}")
+    @GetMapping("/download/test/file/{fileId}")
     public ResponseEntity<byte[]> downloadTestFile(@PathVariable String fileId) {
-        return openApiService.downTestFile(fileId);
+        return openApiService.downloadTestFile(fileId);
+    }
+
+    @GetMapping("/download/package/{date}/{packageName}")
+    public ResponseEntity<byte[]> downloadAppPackage(@PathVariable String date, @PathVariable String packageName) {
+        return openApiService.downloadAppPackage(date, packageName);
     }
 
     @GetMapping("/screenshot/{date}/{imageId}")

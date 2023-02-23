@@ -85,7 +85,7 @@
                             <div class="card">
                                 <div class="card-header">应用安装</div>
                                 <div class="card-body">
-                                    <el-upload  ref="upload" class="upload-demo" drag action :http-request="uploadApk" multiple>
+                                    <el-upload class="upload-demo" accept=".apk" drag action :limit="1" :http-request="uploadApk">
                                         <i class="el-icon-upload"></i>
                                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                                         <div class="el-upload__tip" slot="tip">暂时只支持apk的上传</div>
@@ -234,14 +234,16 @@ export default {
             this.screenHeight = s[1]/s[0]*(this.screenWidth-4)-10;
         },
         uploadApk(option) {
-            let formData = new FormData();
-            formData.append('file', option.file);
-            this.$axios.upload(urlPrefix + "/uploads", formData).then(ret => {
-                this.app.installUrl = ret.data.url;
+            console.log(oprion);
+            let url = '/autotest/file/package/upload';
+            let data = {
+                name: option.file.name
+            };
+            let file = option.file;
+            this.$fileUpload(url, file, null, data, response =>{
                 this.$message.success("上传成功");
-            }).fail(err => {
-                this.$message.error("上传失败");
-            })
+                this.app.installUrl = response.data;
+            });
         },
         appInstall() {
             this.app.packageName = "";
@@ -252,10 +254,9 @@ export default {
             JSON.stringify({
                 url: this.app.installUrl,
                 launch: this.app.launch,
-                secret: this.source.secret,
             })).then(ret => {
-                this.app.message = ret.output;
-                this.app.packageName = ret.packageName;
+                this.app.message = ret.data.message;
+                this.app.packageName = ret.data.packageName;
             }).error(err => {
                 if (err.status == 400) {
                     this.app.message = err.responseJSON.description;

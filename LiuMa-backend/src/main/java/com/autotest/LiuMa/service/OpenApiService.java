@@ -25,6 +25,9 @@ public class OpenApiService {
 
     @Value("${task.file.path}")
     public String TASK_FILE_PATH;
+
+    @Value("${app.package.path}")
+    private String APP_PACKAGE_PATH;
     
     @Value("${cloud.storage.on-off}")
     private String cloudStorage;  // 云存储开关
@@ -244,9 +247,14 @@ public class OpenApiService {
         }
     }
 
-    public ResponseEntity<byte[]> downTestFile(String fileId) {
+    public ResponseEntity<byte[]> downloadTestFile(String fileId) {
         TestFile testFile = testFileMapper.getTestFile(fileId);
         return FileUtils.downloadFile(testFile.getFilePath());
+    }
+
+    public ResponseEntity<byte[]> downloadAppPackage(String date, String packageName) {
+        String path = APP_PACKAGE_PATH + "/" + date + "/" + packageName;
+        return FileUtils.downloadFile(path);
     }
 
     public ResponseEntity<byte[]> previewImage(String date, String fileId) {
