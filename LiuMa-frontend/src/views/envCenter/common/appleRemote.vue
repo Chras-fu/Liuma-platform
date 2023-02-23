@@ -89,7 +89,7 @@
                         
                     </el-tab-pane>
                     <el-tab-pane label="测试用例" name="testcase">
-                        
+                        <app-case-list v-show="activeName==='testcase'" system="apple" :deviceId="deviceId" :drawerWidth="drawerWidth" @initSession="initSession"/>
                     </el-tab-pane>
                 </el-tabs>
             </el-col>
@@ -97,13 +97,17 @@
     </div>
 </template>
 <script>
+import AppCaseList from '../common/appCaseList'
 import {ImagePool} from "@/utils/imagepool";
-let elementResizeDetectorMaker = require('element-resize-detector');
 import $ from 'jquery';
+let elementResizeDetectorMaker = require('element-resize-detector');
 export default {
     name: 'AppleRemote',
+    components:{
+        AppCaseList
+    },
     props:{
-        serial: String,
+        deviceId: String,
     },
     data() {
         return{
@@ -146,6 +150,7 @@ export default {
                 finished: true,
             },
             imagePool: new ImagePool(100),
+            drawerWidth: 900
         }
     },
     mounted: function () {
@@ -155,11 +160,11 @@ export default {
             that.getScreenHeight(that.device.size);
         });
         // 获取设备信息
-        this.getDevice(this.serial);
+        this.getDevice(this.deviceId);
     },
     methods: {
-        getDevice(serial) {
-            let url = '/autotest/device/detail/' + serial;
+        getDevice(deviceId) {
+            let url = '/autotest/device/detail/' + deviceId;
             this.$get(url, response =>{
                 let data = response.data;
                 // 判断当前操作人是否是设备占用者
@@ -200,6 +205,7 @@ export default {
         },
         getScreenHeight(size){
             this.screenWidth = document.getElementsByClassName("screen-body")[0].offsetWidth;
+            this.drawerWidth = parseInt(this.screenWidth*3)+40;
             if(!size){
                 return;
             }
@@ -238,7 +244,7 @@ export default {
             const url = this.app.url
             this.app.finished = false
             this.app.message = "安装中 ..."
-            this.$axios.post(this.device.sources.url + "/app/install?serial=" + this.serial,
+            this.$axios.post(this.device.sources.url + "/app/install?serial=" + this.device.serial,
             JSON.stringify({url: url})).then(ret => {
                 if(ret.data.status === 10000){
                     this.app.message = "安装成功";
@@ -274,7 +280,7 @@ export default {
         closeWindowWhenReleased(interval) {
             setTimeout(() => {
                 if (!document.hidden) { // 设备在操作 刷新超时时间
-                    let url = '/autotest/device/active/' + this.serial;
+                    let url = '/autotest/device/active/' + this.deviceId;
                     this.$post(url, null, response =>{
                         if(response.data){  // 更新成功
                             this.closeWindowWhenReleased(interval) 
@@ -319,7 +325,7 @@ export default {
                 JSON.stringify({"settings": {"mjpegServerFramerate": 30}})); 
         },
         stopUsing() {
-            let url = '/autotest/device/stop/' + this.device.serial;
+            let url = '/autotest/device/stop/' + this.device.id;
             this.$post(url, null, response => {
                 window.close();
             });
@@ -401,7 +407,6 @@ export default {
                     y: Math.floor(y / bounds.h * this.display.height)
                 };
             }
-
 
             let mousePos = {
                 beganAt: null,

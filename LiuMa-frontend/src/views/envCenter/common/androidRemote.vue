@@ -117,7 +117,7 @@
 
                     </el-tab-pane>
                     <el-tab-pane label="测试用例" name="testcase">
-
+                        <app-case-list v-show="activeName==='testcase'" system="android" :deviceId="deviceId" :drawerWidth="drawerWidth"/>
                     </el-tab-pane>
                 </el-tabs>
             </el-col>
@@ -125,13 +125,17 @@
     </div>
 </template>
 <script>
+import AppCaseList from '../common/appCaseList';
+import $ from 'jquery';
 const JMuxer = require('jmuxer');
 let elementResizeDetectorMaker = require('element-resize-detector');
-import $ from 'jquery';
 export default {
     name: 'AndroidRemote',
+    components:{
+        AppCaseList
+    },
     props:{
-        serial: String,
+        deviceId: String,
     },
     data() {
         return{
@@ -166,7 +170,8 @@ export default {
               packageName: "",
               message: "",
               launch: true,
-            }
+            },
+            drawerWidth: 900
         }
     },
     mounted: function () {
@@ -176,11 +181,11 @@ export default {
             that.getScreenHeight(that.device.size);
         });
         // 获取设备信息
-        this.getDevice(this.serial)
+        this.getDevice(this.deviceId)
     },
     methods: {
-        getDevice(serial) {
-            let url = '/autotest/device/detail/' + serial;
+        getDevice(deviceId) {
+            let url = '/autotest/device/detail/' + deviceId;
             this.$get(url, response =>{
                 let data = response.data;
                 // 判断当前操作人是否是设备占用者
@@ -221,6 +226,7 @@ export default {
         },
         getScreenHeight(size){
             this.screenWidth = document.getElementsByClassName("screen-body")[0].offsetWidth;
+            this.drawerWidth = parseInt(this.screenWidth*3)+40;
             if(!size){
                 return;
             }
@@ -242,7 +248,7 @@ export default {
             this.app.finished = false;
             this.app.message = "安裝中 ...";
 
-            this.$axios.post(this.device.sources.url + "/app/install?udid=" + this.udid,
+            this.$axios.post(this.device.sources.url + "/app/install?serial=" + this.device.serial,
             JSON.stringify({
                 url: this.app.installUrl,
                 launch: this.app.launch,
@@ -331,7 +337,7 @@ export default {
         closeWindowWhenReleased(interval) {
             setTimeout(() => {
                 if (!document.hidden) { // 设备在操作 刷新超时时间
-                    let url = '/autotest/device/active/' + this.serial;
+                    let url = '/autotest/device/active/' + this.deviceId;
                     this.$post(url, null, response =>{
                         if(response.data){  // 更新成功
                             this.closeWindowWhenReleased(interval) 
@@ -346,7 +352,7 @@ export default {
             }, interval);
         },
         stopUsing() {
-            let url = '/autotest/device/stop/' + this.device.serial;
+            let url = '/autotest/device/stop/' + this.device.id;
             this.$post(url, null, response => {
                 window.close();
             });

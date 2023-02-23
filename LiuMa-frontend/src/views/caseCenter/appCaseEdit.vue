@@ -48,7 +48,7 @@
     </el-form>
     <el-button size="small" icon="el-icon-plus" type="text" @click="addCaseApp(-1)">新增操作</el-button>
     <!-- 添加操作界面 -->
-    <el-dialog title="选择操作" :visible.sync="editOperationVisible" width="750px" destroy-on-close>
+    <el-dialog title="选择操作" :visible.sync="editOperationVisible" width="750px" destroy-on-close :modal-append-to-body="false">
         <el-form ref="operationForm" :rules="rules" :model="operationForm" label-width="100px" label-position="top">
           <el-form-item label="操作名称" prop="operationId">
             <el-cascader size="small" style="width: 100%" filterable :options="operations" v-model="operationForm.operationIds" :show-all-levels="false"
@@ -125,7 +125,7 @@
         </div>
     </el-dialog>
     <!-- 添加属性定位 -->
-    <el-dialog title="编辑属性" :visible.sync="editExpressionVisible" width="550px" destroy-on-close>
+    <el-dialog title="编辑属性" :visible.sync="editExpressionVisible" width="550px" destroy-on-close :modal-append-to-body="false">
         <el-row v-for="(item, index) in expressionForm" :key="index" style="margin-bottom:10px">
             <el-col :span="8">
                 <el-select size="small" style="width:95%" v-model="item.propName" placeholder="属性名">
@@ -166,6 +166,11 @@ import {locateBys, locateProps, systemKeys, elementProps} from '@/utils/constant
 
 export default {
     components:{PageHeader, BaseInfo, RunForm, SelectTree, RunResult},
+    name: 'AppCaseEdit',
+    props:{
+        caseId: String,
+        system: String
+    },
     data() {
         return{
             caseForm: {
@@ -234,7 +239,11 @@ export default {
     },
     created() {
         this.$root.Bus.$emit('initBread', ["用例中心", "APP用例"]);
-        this.caseForm.system = this.$route.params.system;
+        if(this.system!==null){
+          this.caseForm.system = this.system;
+        }else{
+          this.caseForm.system = this.$route.params.system;
+        }
         if(this.caseForm.system === "android"){
             this.propList = locateProps.android;
             this.byList = locateBys.android;
@@ -250,7 +259,11 @@ export default {
         this.getOperations();
         this.getAssertion();
         this.getViews();
-        this.getDetail(this.$route.params);
+        if(this.system!==null){
+          this.getDetail({caseId: this.caseId});
+        }else{
+          this.getDetail(this.$route.params);
+        }
     },
     methods: {
         // 行拖拽
@@ -578,7 +591,11 @@ export default {
             });
         },
         cancelAdd(){
-            this.$router.push({path: '/caseCenter/caseManage'})
+            if(this.system!==null){
+              this.$emit("closeDrawer");
+            }else{
+              this.$router.push({path: '/caseCenter/caseManage'});
+            }
         },
         saveAdd(){
             this.$refs["caseForm"].validate(valid => {
@@ -593,7 +610,11 @@ export default {
                     let url = '/autotest/case/save';
                     this.$post(url, this.caseForm, response =>{
                         this.$message.success("保存成功");
-                        this.$router.push({path: '/caseCenter/caseManage'});
+                        if(this.system !==null){
+                          this.$emit("closeDrawer");
+                        }else{
+                          this.$router.push({path: '/caseCenter/caseManage'});
+                        }
                     });
                 }else{
                     return false;
@@ -604,6 +625,10 @@ export default {
             if(!this.caseForm.commonParam.appId){
                 this.$message.warning("被测应用为空 无法调试");
                 return;
+            }
+            if(this.system !== null){
+              this.$emit("debugCase", this.caseForm);
+              return;
             }
             // 用例调试
             this.runForm.engineId = 'system';
@@ -626,7 +651,6 @@ export default {
                 this.taskId = response.data.id;
                 this.resultVisable = true;
             });
-
             this.runVisible = false;
         },
         closeResult(){

@@ -57,6 +57,7 @@
                                 <el-button style="float: right" size="mini" v-if="device.status==='online'" type="primary" @click="useDevice(device)">立即使用</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user===currentUser" type="danger" @click="releaseDevice(device)">停用</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user!==currentUser" type="info" disabled><i class="el-icon-s-custom"> {{device.user}}</i></el-button>
+                                <el-button style="float: right" size="mini" v-if="device.status==='testing' && currentUser === 'system_admin_user'" type="danger" @click="releaseDevice(device)">停止测试</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='testing'" type="primary" @click="viewDevice(device)">查看</el-button>
                             </div>
                             <div class="box-body">
@@ -274,10 +275,10 @@ export default {
     },
     // 使用设备
     useDevice(device) {
-      let url = '/autotest/device/use/' + device.serial + "/600"; // 默认十分钟超时
+      let url = '/autotest/device/use/' + device.id + "/600"; // 默认十分钟超时
       this.$post(url, null, response => {
         if(response.data === true){
-          let path = "/#/envCenter/deviceControl/" + device.system + "/" + device.serial;
+          let path = "/#/envCenter/deviceControl/" + device.system + "/" + device.id;
           this.getData();
           window.open(path);
         }else{
@@ -288,14 +289,14 @@ export default {
     // 释放设备
     releaseDevice(device) {
       device.status = "colding";
-      let url = '/autotest/device/stop/' + device.serial;
+      let url = '/autotest/device/stop/' + device.id;
       this.$post(url, null, response => {
         this.getData();
       });
     },
     // 查看设备
     viewDevice(device) {
-      window.open("/#/envCenter/deviceControl/" + device.system + "/" + device.serial);
+      window.open("/#/envCenter/deviceControl/" + device.system + "/" + device.id);
     },
     editDevice(device) {
       this.deviceForm.serial = device.serial;

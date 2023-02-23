@@ -18,7 +18,11 @@
     <el-table size="small" :data="applicationData" v-loading="loading">
         <el-table-column prop="index" label="序号" align="center" width="50px"/>
         <el-table-column prop="name" label="应用名称"/>
-        <el-table-column prop="system" label="所属系统"/>
+        <el-table-column prop="system" label="所属系统">
+          <template slot-scope="scope">
+            {{scope.row.system==='ANDROID'? "安卓": "苹果"}}
+          </template>
+        </el-table-column>
         <el-table-column prop="appId" label="应用ID"/>
         <el-table-column prop="mainActivity" label="应用主页"/>
         <el-table-column prop="description" label="应用说明" min-width="180px"/>

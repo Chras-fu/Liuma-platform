@@ -54,9 +54,9 @@ public class RunService {
         // 判断app用例的设备是否可用
         if(runRequest.getDeviceId() != null && !runRequest.getDeviceId().equals("")){
             Device device = deviceMapper.getDeviceById(runRequest.getDeviceId());
-            if(!device.getStatus().equals(DeviceStatus.ONLINE.toString()) ||
-                    !(device.getStatus().equals(DeviceStatus.USING.toString()) &&
-                            runRequest.getRunUser().equals(device.getUser()))){
+            if((!device.getStatus().equals(DeviceStatus.ONLINE.toString())) &&
+                    (!(device.getStatus().equals(DeviceStatus.USING.toString()) &&
+                            runRequest.getRunUser().equals(device.getUser())))){
                 // 设备空闲中或者设备在使用中且使用者是自己可以执行单个用例
                 throw new LMException("设备非空闲状态 执行失败");
             }
@@ -128,7 +128,7 @@ public class RunService {
         TaskDTO task = taskMapper.getTaskDetail(taskId);
         if(task.getDeviceId() != null) { // 单用例执行
             Device device = deviceService.getDeviceDetail(task.getDeviceId());
-            if((device.getStatus().equals(DeviceStatus.USING.toString())
+            if(!(device.getStatus().equals(DeviceStatus.USING.toString())
                     && task.getCreateUser().equals(device.getUser()))){
                 deviceService.stopUseDevice(task.getDeviceId());    // 非占用中状态调试则释放设备
             }
@@ -139,7 +139,7 @@ public class RunService {
                     Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                     if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
                             task.getId().equals(device.getUser())){
-                        deviceService.stopUseDevice(task.getDeviceId());//当前设备使用者仍然是该任务才会停用
+                        deviceService.stopUseDevice(device.getId());//当前设备使用者仍然是该任务才会停用
                     }
                 }
             }else if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
@@ -150,7 +150,7 @@ public class RunService {
                         Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                         if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
                                 task.getId().equals(device.getUser())){
-                            deviceService.stopUseDevice(task.getDeviceId());
+                            deviceService.stopUseDevice(device.getId());
                         }
                     }
                 }
