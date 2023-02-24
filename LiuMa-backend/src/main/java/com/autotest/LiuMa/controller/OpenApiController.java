@@ -1,9 +1,10 @@
 package com.autotest.LiuMa.controller;
 
+import com.autotest.LiuMa.dto.ReportDTO;
 import com.autotest.LiuMa.request.EngineRequest;
+import com.autotest.LiuMa.request.RunRequest;
 import com.autotest.LiuMa.response.TaskResponse;
 import com.autotest.LiuMa.service.OpenApiService;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,5 +71,15 @@ public class OpenApiController {
     @GetMapping("/screenshot/{date}/{imageId}")
     public ResponseEntity<byte[]> previewImage(@PathVariable String date, @PathVariable String imageId) {
         return openApiService.previewImage(date, imageId);
+    }
+
+    @PostMapping("/exec/test/plan")
+    public String execTestPlan(@RequestBody RunRequest request) {
+        return openApiService.execTestPlan(request);
+    }
+
+    @PostMapping("/exec/result/{taskId}")
+    public ReportDTO getPlanReport(@PathVariable String taskId) {
+        return openApiService.getPlanReport(taskId);
     }
 }

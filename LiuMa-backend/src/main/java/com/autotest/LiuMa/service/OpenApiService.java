@@ -7,12 +7,13 @@ import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.common.utils.*;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
+import com.autotest.LiuMa.dto.ReportDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
 import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.EngineRequest;
+import com.autotest.LiuMa.request.RunRequest;
 import com.autotest.LiuMa.response.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +86,8 @@ public class OpenApiService {
     @Resource
     private RunService runService;
 
+    @Resource
+    private ReportService reportService;
 
     public String applyEngineToken(EngineRequest request) {
         Engine engine = engineMapper.getEngineById(request.getEngineCode());
@@ -268,6 +271,40 @@ public class OpenApiService {
         TaskDTO task = taskMapper.getTaskDetail(taskId);
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId()+".zip";
         FileUtils.downloadFile(taskZipPath, response);
+    }
+
+    public String execTestPlan(RunRequest request){
+        Plan plan = planMapper.getPlanDetail(request.getPlanId());
+        if(plan==null){
+            throw new LMException("测试计划不存在");
+        }
+        User user = userMapper.getUser(request.getUser());
+        if(user==null){
+            throw new LMException("用户账号不存在");
+        }
+
+        request.setSourceId(request.getPlanId());
+        request.setSourceType(ReportSourceType.PLAN.toString());
+        request.setSourceName("【外部执行】"+ plan.getName());
+        request.setTaskType(TaskType.API.toString());
+        request.setRunUser(user.getId());
+        if(request.getEnvironmentId()==null){
+            request.setEnvironmentId(plan.getEnvironmentId());
+        }
+        if(request.getEngineId()==null){
+            request.setEngineId(plan.getEngineId());
+        }
+        request.setProjectId(plan.getProjectId());
+        Task task = runService.run(request);
+        return task.getId();
+    }
+
+    public ReportDTO getPlanReport(String taskId){
+        TaskDTO taskDTO = taskMapper.getTaskDetail(taskId);
+        if(taskDTO==null){
+            throw new LMException("测试任务不存在");
+        }
+        return reportService.getPlanResult(taskDTO.getReportId());
     }
 
 }

@@ -17,4 +17,7 @@ public class RunRequest {
     private String projectId;
 
     private CaseRequest debugData;
+
+    private String user;
+    private String planId;
 }

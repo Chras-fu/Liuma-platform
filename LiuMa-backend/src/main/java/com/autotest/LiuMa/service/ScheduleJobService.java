@@ -92,7 +92,7 @@ public class ScheduleJobService {
         List<PlanSchedule> planSchedules = planScheduleMapper.getToRunPlanScheduleList(minNextRunTime, maxNextRunTime);
         for(PlanSchedule planSchedule: planSchedules){
             Plan plan = planMapper.getPlanDetail(planSchedule.getPlanId());
-            String runName = plan.getName() +"-"+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String runName = "【定时执行】" + plan.getName() +"-"+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             Task task = new Task();
             task.setId(UUID.randomUUID().toString());
             task.setName(runName);
