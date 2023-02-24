@@ -46,9 +46,10 @@ public class TestFileService {
         DateFormat dateInstance = DateFormat.getDateInstance();
         String date = dateInstance.format(new Date());
         // 保存文件
-        String path = APP_PACKAGE_PATH + "/" + date + "/" + packageName;
+        String fileId = UUID.randomUUID().toString();
+        String path = APP_PACKAGE_PATH + "/" + date + "/" + fileId;
         FileUtils.uploadTestFile(file, path);
-        return "/openapi/download/package/" + date + "/" + packageName;
+        return "/openapi/download/package/" + date + "/" + fileId + "/" + packageName;
     }
 
     public void deleteFile(String id) {

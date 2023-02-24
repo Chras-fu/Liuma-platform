@@ -7,12 +7,12 @@
         <el-row :gutter="10">
             <el-col :span="6">
                 <div class="screen-header">
-                    <div style="float:left; margin: 11px 4px">
+                    <div style="float:left; margin: 12px 4px">
                         <el-tooltip :content="device.serial" placement="bottom">
                             <span class="long-text">{{device.name}}</span>
                         </el-tooltip>
                     </div>
-                    <div style="float:right; margin: 4px 3px">
+                    <div style="float:right; margin: 7px 3px">
                         <el-button type="danger" size="mini" @click="stopUsing" round :disabled="device.serial===null">停用</el-button>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                             <div class="card">
                                 <div class="card-header">应用安装</div>
                                 <div class="card-body">
-                                    <el-upload class="upload-demo" accept=".apk" drag action :limit="1" :http-request="uploadApk">
+                                    <el-upload class="upload-demo" accept=".apk" drag action :limit="1" :http-request="uploadAPK" :before-upload="verifyFile">
                                         <i class="el-icon-upload"></i>
                                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                                         <div class="el-upload__tip" slot="tip">暂时只支持apk的上传</div>
@@ -94,13 +94,9 @@
                                         <span>URL</span>
                                         <el-input style="margin-top:5px" size="small" placeholder="http://..." v-model="app.installUrl"/>
                                     </div>
-                                    <div>
-                                        <el-checkbox v-model="app.launch">安装完成后启动应用</el-checkbox>
-                                    </div>
                                     <el-button style="margin-top:5px" type="primary" size="small" @click="appInstall" :disabled="!app.finished || !app.installUrl">安裝</el-button>
                                     <p>
                                         <pre v-show="!!app.message" v-text="app.message"></pre>
-                                        <small><code v-text="app.packageName"></code></small>
                                     </p>
                                 </div>
                             </div>
@@ -167,9 +163,7 @@ export default {
             app: {
               installUrl: "",
               finished: true,
-              packageName: "",
-              message: "",
-              launch: true,
+              message: ""
             },
             drawerWidth: 900
         }
@@ -233,8 +227,14 @@ export default {
             const s = size.split("x");
             this.screenHeight = s[1]/s[0]*(this.screenWidth-4)-10;
         },
-        uploadApk(option) {
-            console.log(oprion);
+        verifyFile(file) {
+            let s = file.name.split(".");
+            if(s[s.length-1] !== "apk"){
+                this.$message.warning("文件格式不正确");
+                return false;
+            }
+        },
+        uploadAPK(option) {
             let url = '/autotest/file/package/upload';
             let data = {
                 name: option.file.name
@@ -242,27 +242,19 @@ export default {
             let file = option.file;
             this.$fileUpload(url, file, null, data, response =>{
                 this.$message.success("上传成功");
-                this.app.installUrl = response.data;
+                this.app.installUrl = window.location.origin + response.data;
             });
         },
         appInstall() {
-            this.app.packageName = "";
             this.app.finished = false;
             this.app.message = "安裝中 ...";
 
-            this.$axios.post(this.device.sources.url + "/app/install?serial=" + this.device.serial,
+            this.$axios.post(this.device.sources.url + "/app/install",
             JSON.stringify({
-                url: this.app.installUrl,
-                launch: this.app.launch,
+                serial: this.device.serial,
+                url: this.app.installUrl
             })).then(ret => {
                 this.app.message = ret.data.message;
-                this.app.packageName = ret.data.packageName;
-            }).error(err => {
-                if (err.status == 400) {
-                    this.app.message = err.responseJSON.description;
-                } else {
-                    this.app.message = err.responseText;
-                }
             }).finally(() => {
                 this.app.finished = true;
             })
@@ -614,7 +606,7 @@ export default {
 }
 
 .screen-header{
-    height: 36px;
+    height: 42px;
     position: relative;
     border-radius: 12px 12px 0px 0px;
     border-top:2px solid rgb(219, 219, 219);
@@ -630,7 +622,7 @@ export default {
 }
 
 .screen-footer{
-    height: 32px;
+    height: 36px;
     position: relative;
     border-radius: 0px 0px 12px 12px;
     border-bottom:2px solid rgb(219, 219, 219);
@@ -660,7 +652,6 @@ export default {
     z-index: 20;
     max-width: 100%;
     height: auto;
-    margin-top: -5px;
 }
 
 .card-columns {

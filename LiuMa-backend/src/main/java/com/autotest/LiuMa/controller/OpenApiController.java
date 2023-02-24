@@ -1,15 +1,14 @@
 package com.autotest.LiuMa.controller;
 
-import com.autotest.LiuMa.database.domain.TestFile;
 import com.autotest.LiuMa.request.EngineRequest;
 import com.autotest.LiuMa.response.TaskResponse;
 import com.autotest.LiuMa.service.OpenApiService;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/openapi")
@@ -54,18 +53,18 @@ public class OpenApiController {
     }
 
     @GetMapping("/task/file/download/{taskId}")
-    public ResponseEntity<byte[]> downloadTaskFile(@PathVariable String taskId) {
-        return openApiService.downTaskFile(taskId);
+    public void downloadTaskFile(@PathVariable String taskId, HttpServletResponse response) {
+        openApiService.downTaskFile(taskId, response);
     }
 
     @GetMapping("/download/test/file/{fileId}")
-    public ResponseEntity<byte[]> downloadTestFile(@PathVariable String fileId) {
-        return openApiService.downloadTestFile(fileId);
+    public void downloadTestFile(@PathVariable String fileId, HttpServletResponse response) {
+        openApiService.downloadTestFile(fileId, response);
     }
 
-    @GetMapping("/download/package/{date}/{packageName}")
-    public ResponseEntity<byte[]> downloadAppPackage(@PathVariable String date, @PathVariable String packageName) {
-        return openApiService.downloadAppPackage(date, packageName);
+    @GetMapping("/download/package/{date}/{fileId}/{packageName}")
+    public void downloadAppPackage(@PathVariable String date, @PathVariable String fileId,  @PathVariable String packageName, HttpServletResponse response) {
+        openApiService.downloadAppPackage(date, fileId, packageName, response);
     }
 
     @GetMapping("/screenshot/{date}/{imageId}")

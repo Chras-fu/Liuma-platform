@@ -5,12 +5,19 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.autotest.LiuMa.common.exception.FileUploadException;
 import com.autotest.LiuMa.common.exception.LMException;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
+import java.util.Date;
 
 
 public class FileUtils {
@@ -99,16 +106,20 @@ public class FileUtils {
         return uploadFile(uploadFile, path, uploadFile.getOriginalFilename());
     }
 
-    public static ResponseEntity<byte[]> downloadFile(String path) {
+    public static void downloadFile(String path, HttpServletResponse response) {
         File file = new File(path);
-        byte[] fileByte= FileUtils.fileToByte(file);
-        if(fileByte == null){
-            return null;
+        if (!file.isFile()) {
+            throw new LMException("文件不存在");
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-                .body(fileByte);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(response.getOutputStream());
+            FileCopyUtils.copy(bufferedInputStream, bufferedOutputStream);
+        } catch(Exception e){
+            throw new LMException("文件下载失败");
+        }
     }
 
     public static ResponseEntity<byte[]> previewImage(String path) {

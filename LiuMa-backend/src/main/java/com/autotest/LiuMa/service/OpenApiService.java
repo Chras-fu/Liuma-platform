@@ -12,11 +12,13 @@ import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.EngineRequest;
 import com.autotest.LiuMa.response.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Service
@@ -247,14 +249,14 @@ public class OpenApiService {
         }
     }
 
-    public ResponseEntity<byte[]> downloadTestFile(String fileId) {
+    public void downloadTestFile(String fileId, HttpServletResponse response) {
         TestFile testFile = testFileMapper.getTestFile(fileId);
-        return FileUtils.downloadFile(testFile.getFilePath());
+        FileUtils.downloadFile(testFile.getFilePath(), response);
     }
 
-    public ResponseEntity<byte[]> downloadAppPackage(String date, String packageName) {
-        String path = APP_PACKAGE_PATH + "/" + date + "/" + packageName;
-        return FileUtils.downloadFile(path);
+    public void downloadAppPackage(String date, String fileId, String packageName, HttpServletResponse response) {
+        String path = APP_PACKAGE_PATH + "/" + date + "/" + fileId + "/" + packageName;
+        FileUtils.downloadFile(path, response);
     }
 
     public ResponseEntity<byte[]> previewImage(String date, String fileId) {
@@ -262,10 +264,10 @@ public class OpenApiService {
         return FileUtils.previewImage(path);
     }
 
-    public ResponseEntity<byte[]> downTaskFile(String taskId) {
+    public void downTaskFile(String taskId, HttpServletResponse response) {
         TaskDTO task = taskMapper.getTaskDetail(taskId);
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId()+".zip";
-        return FileUtils.downloadFile(taskZipPath);
+        FileUtils.downloadFile(taskZipPath, response);
     }
 
 }

@@ -7,12 +7,12 @@
         <el-row :gutter="10">
             <el-col :span="6">
                 <div class="screen-header">
-                    <div style="float:left; margin:11px 4px">
+                    <div style="float:left; margin:12px 4px">
                         <el-tooltip :content="device.serial" placement="bottom">
                             <span class="long-text">{{device.name}}</span>
                         </el-tooltip>
                     </div>
-                    <div style="float:right; margin: 4px 3px">
+                    <div style="float:right; margin: 7px 3px">
                         <el-button type="danger" size="mini" @click="stopUsing" round :disabled="device.serial===null">停用</el-button>
                     </div>
                 </div>
@@ -68,16 +68,16 @@
                             <div class="card">
                                 <div class="card-header">应用安装</div>
                                 <div class="card-body">
-                                    <el-upload class="upload-demo" drag action :limit="1" :http-request="uploadIPA">
+                                    <el-upload class="upload-demo" drag action :limit="1" :http-request="uploadIPA" :before-upload="verifyFile">
                                         <i class="el-icon-upload"></i>
                                         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                                         <div class="el-upload__tip" slot="tip">暂时只支持ipa的上传</div>
                                     </el-upload>
                                     <div class="form-group" style="margin-top: 20px">
                                         <span>URL</span>
-                                        <el-input style="margin-top:5px" size="small" placeholder="http://..." v-model="app.url"/>
+                                        <el-input style="margin-top:5px" size="small" placeholder="http://..." v-model="app.installUrl"/>
                                     </div>
-                                    <el-button style="margin-top:5px" type="primary" size="small" @click="appInstall" :disabled="!app.finished || !app.url">安裝</el-button>
+                                    <el-button style="margin-top:5px" type="primary" size="small" @click="appInstall" :disabled="!app.finished || !app.installUrl">安裝</el-button>
                                     <p>
                                         <pre v-show="!!app.message" v-text="app.message"></pre>
                                     </p>
@@ -146,7 +146,7 @@ export default {
                 visible: false,
             },
             app: {
-                packageUrl: "",
+                installUrl: "",
                 message: "",
                 finished: true,
             },
@@ -230,11 +230,14 @@ export default {
                 }, 0);
             })
         },
-        uploadIPA(option) {
-            if(option.file.type !== "ipa"){
-                this.$message.waring("文件格式不正确");
-                return;
+        verifyFile(file) {
+            let s = file.name.split(".");
+            if(s[s.length-1] !== "ipa"){
+                this.$message.warning("文件格式不正确");
+                return false;
             }
+        },
+        uploadIPA(option) {
             let url = '/autotest/file/package/upload';
             let data = {
                 name: option.file.name
@@ -242,22 +245,20 @@ export default {
             let file = option.file;
             this.$fileUpload(url, file, null, data, response =>{
                 this.$message.success("上传成功");
-                this.app.packageUrl = response.data;
+                this.app.installUrl = window.location.origin + response.data;
             });
         },
         appInstall() {
-            const url = this.app.url
-            this.app.finished = false
-            this.app.message = "安装中 ..."
-            this.$axios.post(this.device.sources.url + "/app/install?serial=" + this.device.serial,
-            JSON.stringify({url: url})).then(ret => {
-                if(ret.data.status === 10000){
-                    this.app.message = "安装成功";
-                }else{
-                    this.app.message = ret.data.message;
-                }
-            }).error(err => {
-                this.app.message = err.responseJSON.message;
+            this.app.finished = false;
+            this.app.message = "安装中 ...";
+
+            this.$axios.post(this.device.sources.url + "/app/install",
+            JSON.stringify({
+                serial: this.device.serial,
+                url: this.app.installUrl
+            })).then(ret => {
+                console.log(ret)
+                this.app.message = ret.data.message;
             }).finally(() => {
                 this.app.finished = true;
             });
@@ -640,7 +641,7 @@ export default {
 }
 
 .screen-header{
-    height: 36px;
+    height: 42px;
     position: relative;
     border-radius: 12px 12px 0px 0px;
     border-top:2px solid rgb(219, 219, 219);
@@ -656,7 +657,7 @@ export default {
 }
 
 .screen-footer{
-    height: 32px;
+    height: 36px;
     position: relative;
     border-radius: 0px 0px 12px 12px;
     border-bottom:2px solid rgb(219, 219, 219);
@@ -686,7 +687,6 @@ export default {
     z-index: 20;
     max-width: 100%;
     height: auto;
-    margin-top: -2px;
 }
 
 .finger {

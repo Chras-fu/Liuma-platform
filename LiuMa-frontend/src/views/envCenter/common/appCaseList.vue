@@ -105,7 +105,6 @@ export default {
         getdata(searchParam) {
             this.loading = true;
             let url = '/autotest/case/list/' + searchParam.page + '/' + searchParam.limit;
-            console.log(this.system)
             let param = {
                 condition: searchParam.condition,
                 moduleId: searchParam.moduleId,
