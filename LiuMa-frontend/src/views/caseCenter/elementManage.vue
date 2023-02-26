@@ -144,14 +144,11 @@ export default {
     methods: {
         // 点击模块
         clickModule(data){
-          console.log("点击模块");
           this.searchForm.moduleId = data.id;
             this.getdata(this.searchForm);
         },
         // 添加模块
         appendModule(data) {
-          console.log("add module");
-
           if (data){
                 this.moduleForm.parentId = data.id;
                 this.moduleForm.parentName = data.label;

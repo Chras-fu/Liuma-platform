@@ -55,56 +55,9 @@
         <Pagination v-bind:child-msg="pageparam" @callFather="callFather"/>
     </el-col>
     <!-- 添加模块弹框 -->
-    <module-append title="添加页面模块" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog" @submitModule="submitModule($event)"/>
+    <module-append title="添加页面模块" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog('module')" @submitModule="submitModule($event)"/>
     <!-- 添加控件弹框 -->
-    <el-dialog title="编辑控件" :visible.sync="controlVisible" width="50%" destroy-on-close>
-        <el-form label-width="120px" style="padding-right: 30px;" :model="addControlForm" :rules="rules" ref="addControlForm">
-            <el-form-item label="控件名称" prop="name">
-                <el-input size="small" style="width:95%" v-model="addControlForm.name" auto-complete="off" placeholder="控件名称"/>
-            </el-form-item>
-            <el-form-item label="所属系统" prop="system">
-                <el-select size="small" style="width:95%;" v-model="addControlForm.system" placeholder="所属系统">
-                    <el-option v-for="item in systems" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="定位方式" prop="by">
-                <el-select size="small" style="width:95%;" v-model="addControlForm.by" placeholder="定位方式" @change="changeBy">
-                    <el-option v-for="item in byList" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="表达式" prop="expression">
-                <div v-if="addControlForm.by === 'PROP'" style="width:95%">
-                    <el-row v-for="(item, index) in addControlForm.expressionList" :key="index">
-                        <el-col :span="6">
-                            <el-select size="small" style="width:95%" v-model="item.propName" placeholder="属性名">
-                                <el-option v-for="prop in propList" :key="prop" :label="prop" :value="prop"></el-option>
-                            </el-select>
-                        </el-col>
-                        <el-col :span="15">
-                            <el-input size="small" style="width:100%" v-model="item.propValue" placeholder="请输入属性值"/>
-                        </el-col>
-                        <el-col :span="3">
-                            <div style="font-size: 24px; margin-top:8px; margin-left:5px; display: flex">
-                                <i class="el-icon-circle-plus lm-success" @click="addProp(index)"></i>
-                                <i v-if="addControlForm.expressionList.length > 1" class="el-icon-remove lm-error" @click="deleteProp(index)"></i>
-                            </div>
-                        </el-col>
-                    </el-row>
-                </div>
-                <el-input v-else size="small" style="width:95%" v-model="addControlForm.expression" placeholder="请输入元素定位表达式"/>
-            </el-form-item>
-            <el-form-item label="所属页面" prop="moduleId">
-                <select-tree style="width:95%;" placeholder="所属页面" :selectedValue="addControlForm.moduleId" :selectedLabel="addControlForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
-            </el-form-item>
-            <el-form-item label="控件描述">
-                <el-input size="small" style="width:95%" v-model="addControlForm.description" :autosize="{ minRows: 3}" type="textarea" maxlength="200" show-word-limit auto-complete="off" placeholder="控件描述"/>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button size="small" @click="controlVisible=false">取消</el-button>
-            <el-button size="small" type="primary" @click="submitControl">确定</el-button>
-        </div>
-    </el-dialog>
+    <control-append :controlVisible="controlVisible" :controlForm="controlForm" @closeDialog="closeDialog('control')" @submitControlForm="submitControlForm"/>
   </div>
 </template>
 
@@ -112,33 +65,20 @@
 import Pagination from '../common/components/pagination'
 import ModuleTree from './common/module/moduleTree'
 import ModuleAppend from './common/module/moduleAppend'
-import SelectTree from '../common/business/selectTree'
 import {timestampToTime} from '@/utils/util'
-import {locateBys, locateProps} from '@/utils/constant'
+import controlAppend from './common/control/controlAppend'
 
 export default {
     // 注册组件
     components: {
-        Pagination, ModuleTree, ModuleAppend, SelectTree
+        Pagination, ModuleTree, ModuleAppend, controlAppend
     },
     data() {
         return{
             loading:false,
             moduleVisible: false,
             controlVisible: false,
-            moduleForm: {
-                moduleName: "",
-                fatherId: "",
-                fatherName: "",
-                data: "",
-            },
-            systems:[
-                { label: "安卓", value: "android" },
-                { label: "苹果", value: "apple" },
-            ],
-            byList:[],
-            propList: [],
-            addControlForm: {
+            controlForm: {
                 id:"",
                 name:"",
                 system: "",
@@ -149,6 +89,16 @@ export default {
                 moduleName:"",
                 description: ""
             },
+            moduleForm: {
+                moduleName: "",
+                fatherId: "",
+                fatherName: "",
+                data: "",
+            },
+            systems:[
+                { label: "安卓", value: "android" },
+                { label: "苹果", value: "apple" },
+            ],
             searchForm: {
                 page: 1,
                 limit: 10,
@@ -162,20 +112,13 @@ export default {
                 pageSize: 10,
                 total: 0
             },
-            treeData: [],
-            rules: {
-                name: [{ required: true, message: '控件名称不能为空', trigger: 'blur' }],
-                system: [{ required: true, message: '所属系统不能为空', trigger: 'blur' }],
-                by: [{ required: true, message: '定位方式不能为空', trigger: 'blur' }],
-                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '所属页面不能为空', trigger: 'blur' }]
-            }
+            treeData: []
         }
     },
     created() {
-        this.$root.Bus.$emit('initBread', ["用例中心", "控件管理"])
-        this.getTree()
-        this.getdata(this.searchForm)
+        this.$root.Bus.$emit('initBread', ["用例中心", "控件管理"]);
+        this.getTree();
+        this.getdata(this.searchForm);
     },
     methods: {
         selectSystem(val){
@@ -226,8 +169,12 @@ export default {
             });
         },
         // 关闭弹框
-        closeDialog(){
-            this.moduleVisible = false;
+        closeDialog(val){
+            if(val==='module'){
+                this.moduleVisible = false;
+            }else{
+                this.controlVisible = false;
+            }
         },
         // 提交模块
         submitModule(moduleForm) {
@@ -307,7 +254,7 @@ export default {
         },
         // 新增控件
         addControl(){
-            this.addControlForm = {
+            this.controlForm = {
                 system: this.searchForm.system,
                 id:"",
                 name:"",
@@ -320,57 +267,25 @@ export default {
             };
             this.controlVisible = true;
         },
-        selectModule(data){
-            this.addControlForm.moduleId = data.id;
-            this.addControlForm.moduleName = data.label;
-        },
-        // 提交控件
-        submitControl() {
-            // 请求接口
-            if(this.addControlForm.by === "PROP"){
-                let re = true;
-                for(let i=0;i<this.addControlForm.expressionList.length;i++){
-                    let expression = this.addControlForm.expressionList[i];
-                    if(expression.propName === "" || expression.propValue === ""){
-                        re = false;
-                        break;
-                    }
-                }
-                if(re){
-                    this.addControlForm.expression = JSON.stringify(this.addControlForm.expressionList);
-                }else{
-                    this.addControlForm.expression = "";
-                }
-            }
-            this.$refs["addControlForm"].validate(valid => {
-                if (valid) {
-                    this.addControlForm.projectId = this.$store.state.projectId;
-                    let url = '/autotest/control/save';
-                    this.$post(url, this.addControlForm, response =>{
-                        this.$message.success("保存成功");
-                        this.controlVisible = false;
-                        this.loading = true;
-                        this.getdata(this.searchForm);
-                    });
-                }else{
-                    return false;
-                }
-            })
-        },
         // 编辑控件
         editControl(row){
-            this.addControlForm.id = row.id;
-            this.addControlForm.name = row.name;
-            this.addControlForm.system = row.system;
-            this.addControlForm.by = row.by;
-            this.addControlForm.expression = row.expression;
+            this.controlForm.id = row.id;
+            this.controlForm.name = row.name;
+            this.controlForm.system = row.system;
+            this.controlForm.by = row.by;
+            this.controlForm.expression = row.expression;
             if(row.by === "PROP"){
-                this.addControlForm.expressionList = JSON.parse(row.expression);
+                this.controlForm.expressionList = JSON.parse(row.expression);
             }
-            this.addControlForm.moduleId = row.moduleId;
-            this.addControlForm.moduleName = row.moduleName;
-            this.addControlForm.description = row.description;
+            this.controlForm.moduleId = row.moduleId;
+            this.controlForm.moduleName = row.moduleName;
+            this.controlForm.description = row.description;
             this.controlVisible = true;
+        },
+        // 提交控件
+        submitControlForm() {
+            this.controlVisible = false;
+            this.getdata(this.searchForm);
         },
         // 删除控件
         deleteControl(row){
@@ -390,33 +305,6 @@ export default {
                 this.$message.success("取消成功");
             })
         },
-        // 更改定位方式
-        changeBy(val){
-            if(val === "PROP"){
-                if(this.addControlForm.expressionList.length === 0){
-                    this.addControlForm.expressionList.push({propName:"",propValue:""});
-                }
-            }
-        },
-        // 新增属性定位
-        addProp(index){
-            this.addControlForm.expressionList.splice(index+1, 0, {propName:"",propValue:""});
-        },
-        // 删除属性定位
-        deleteProp(index){
-            this.addControlForm.expressionList.splice(index, 1);
-        }
-    },
-    watch: {
-        'addControlForm.system'(newVal, oldVal){
-            if(newVal === "android"){
-                this.propList = locateProps.android;
-                this.byList = locateBys.android;
-            }else{
-                this.propList = locateProps.apple;
-                this.byList = locateBys.apple;
-            }
-        }
     }
 }
 </script>

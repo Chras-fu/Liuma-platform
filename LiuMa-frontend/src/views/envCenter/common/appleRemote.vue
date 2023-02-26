@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="screen-body" :style="'height: '+ screenHeight +'px'">
-                    <canvas ref="bgCanvas" class="canvas-bg" v-bind:style="canvasStyle"></canvas>
+                    <canvas ref="screenCanvas" class="canvas-screen" v-bind:style="canvasStyle"></canvas>
                     <span class="finger finger-0" style="transform: translate3d(200px, 100px, 0px)"></span>
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
                 </div>
@@ -86,7 +86,7 @@
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="控件元素" name="control">
-                        
+                        <control-view v-show="activeName==='control'" system="apple" :device="device" :imageHeight="screenHeight*7/8"/>
                     </el-tab-pane>
                     <el-tab-pane label="测试用例" name="testcase">
                         <app-case-list v-show="activeName==='testcase'" system="apple" :deviceId="deviceId" :drawerWidth="drawerWidth" @initSession="initSession"/>
@@ -98,13 +98,14 @@
 </template>
 <script>
 import AppCaseList from '../common/appCaseList'
+import controlView from '../common/controlView'
 import {ImagePool} from "@/utils/imagepool";
 import $ from 'jquery';
 let elementResizeDetectorMaker = require('element-resize-detector');
 export default {
     name: 'AppleRemote',
     components:{
-        AppCaseList
+        AppCaseList, controlView
     },
     props:{
         deviceId: String,
@@ -116,6 +117,7 @@ export default {
                 serial: null,
                 status: 'using',
                 sources: {
+                    url:null,
                     wdaUrl: null
                 }
             },
@@ -192,7 +194,7 @@ export default {
                     // 动态计算屏幕区域高度
                     this.getScreenHeight(data.size);
                     // 初始化canvas
-                    this.canvas.bg = this.$refs.bgCanvas;
+                    this.canvas.bg = this.$refs.screenCanvas;
                     // 开启投屏
                     this.mirrorDisplay();
                     // 开启操作
@@ -257,7 +259,6 @@ export default {
                 serial: this.device.serial,
                 url: this.app.installUrl
             })).then(ret => {
-                console.log(ret)
                 this.app.message = ret.data.message;
             }).finally(() => {
                 this.app.finished = true;
@@ -337,7 +338,6 @@ export default {
             });
         },
         handleTabClick(tab, event) {
-            console.log(tab.name)
         },
         path2url(pathname) {
             return "http://" + this.device.sources.wdaUrl + pathname
@@ -683,7 +683,7 @@ export default {
     cursor: pointer;
 }
 
-.canvas-bg {
+.canvas-screen {
     z-index: 20;
     max-width: 100%;
     height: auto;

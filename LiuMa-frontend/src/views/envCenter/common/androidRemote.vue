@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="screen-body" :style="'height: '+ screenHeight +'px'">
-                    <video id="screen-player" class="scrcpy-fg" muted autoplay></video>
+                    <video id="screen-player" class="scrcpy-screen" muted autoplay></video>
                     <span class="finger finger-0" style="transform: translate3d(200px, 100px, 0px)"></span>
                     <span class="finger finger-1" style="transform: translate3d(200px, 100px, 0px)"></span>
                 </div>
@@ -140,6 +140,7 @@ export default {
                 serial: null,
                 status: 'using',
                 sources: {
+                    url:null,
                     atxAgentAddress: null,
                     remoteConnectAddress: null
                 }
@@ -360,9 +361,6 @@ export default {
             return this.runShell("input keyevent " + key.toUpperCase());
         },
         handleTabClick(tab, event) {
-            if (tab.name == "control") {
-
-            }
         },
         mirrorDisplay() {
             let jmu = new JMuxer({
@@ -648,7 +646,7 @@ export default {
     cursor: pointer;
 }
 
-.scrcpy-fg {
+.scrcpy-screen {
     z-index: 20;
     max-width: 100%;
     height: auto;

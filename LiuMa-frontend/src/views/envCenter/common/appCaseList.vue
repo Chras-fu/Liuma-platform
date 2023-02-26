@@ -2,7 +2,7 @@
 * 选择用例弹窗
 */ 
 <template>
-    <div style="padding: 0px 10px">
+    <div>
         <el-form :inline="true" :model="searchForm">
             <el-form-item label="" prop="condition">
                 <el-input size="small" style="width:180px" v-model="searchForm.condition" prefix-icon="el-icon-search" placeholder="请输入用例NO、名称"/>
