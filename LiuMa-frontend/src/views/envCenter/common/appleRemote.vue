@@ -86,7 +86,7 @@
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="控件元素" name="control">
-                        <control-view v-show="activeName==='control'" system="apple" :device="device" :imageHeight="screenHeight*7/8"/>
+                        <control-view v-show="activeName==='control'" system="apple" :device="device" :loading="controlLoading" :imageHeight="screenHeight*7/8"/>
                     </el-tab-pane>
                     <el-tab-pane label="测试用例" name="testcase">
                         <app-case-list v-show="activeName==='testcase'" system="apple" :deviceId="deviceId" :drawerWidth="drawerWidth" @initSession="initSession"/>
@@ -153,7 +153,8 @@ export default {
                 finished: true,
             },
             imagePool: new ImagePool(100),
-            drawerWidth: 900
+            drawerWidth: 900,
+            controlLoading: false
         }
     },
     mounted: function () {
@@ -337,7 +338,12 @@ export default {
                 window.close();
             });
         },
-        handleTabClick(tab, event) {
+        handleTabClick(tab) {
+            if(tab.name==='control'){
+                this.controlLoading = true;
+            }else{
+                this.controlLoading = false;
+            }
         },
         path2url(pathname) {
             return "http://" + this.device.sources.wdaUrl + pathname
@@ -565,9 +571,9 @@ export default {
             // Support jQuery Promise
             var dtd = $.Deferred();
             var ctx = canvas.getContext('2d'),
-            URL = window.URL || window.webkitURL,
-            BLANK_IMG ='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==',
-            img = this.imagePool.next();
+                URL = window.URL || window.webkitURL,
+                BLANK_IMG ='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==',
+                img = this.imagePool.next();
 
             img.onload = () => {
                 canvas.width = img.width

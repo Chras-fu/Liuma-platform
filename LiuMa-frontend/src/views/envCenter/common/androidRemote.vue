@@ -110,7 +110,7 @@
                         </div>
                     </el-tab-pane>
                     <el-tab-pane label="控件元素" name="control">
-
+                        <control-view v-show="activeName==='control'" system="android" :device="device" :loading="controlLoading" :imageHeight="screenHeight*7/8"/>
                     </el-tab-pane>
                     <el-tab-pane label="测试用例" name="testcase">
                         <app-case-list v-show="activeName==='testcase'" system="android" :deviceId="deviceId" :drawerWidth="drawerWidth"/>
@@ -122,13 +122,14 @@
 </template>
 <script>
 import AppCaseList from '../common/appCaseList';
+import controlView from '../common/controlView'
 import $ from 'jquery';
 const JMuxer = require('jmuxer');
 let elementResizeDetectorMaker = require('element-resize-detector');
 export default {
     name: 'AndroidRemote',
     components:{
-        AppCaseList
+        AppCaseList, controlView
     },
     props:{
         deviceId: String,
@@ -166,7 +167,8 @@ export default {
               finished: true,
               message: ""
             },
-            drawerWidth: 900
+            drawerWidth: 900,
+            controlLoading: false
         }
     },
     mounted: function () {
@@ -360,7 +362,12 @@ export default {
         runKeyevent(key) {
             return this.runShell("input keyevent " + key.toUpperCase());
         },
-        handleTabClick(tab, event) {
+        handleTabClick(tab) {
+            if(tab.name==='control'){
+                this.controlLoading = true;
+            }else{
+                this.controlLoading = false;
+            }
         },
         mirrorDisplay() {
             let jmu = new JMuxer({
