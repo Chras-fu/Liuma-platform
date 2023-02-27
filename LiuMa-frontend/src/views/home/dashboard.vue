@@ -20,9 +20,9 @@
       </el-col>
       <el-col :span="6">
         <el-card class="box-card card-fix">
-          <div>计划执行总数</div>
-          <div class="statistics-total">{{statisticsData.planRunTotal}}</div>
-          <div>今日执行: {{statisticsData.planRunToday}}</div>
+          <div>APP用例总数</div>
+          <div class="statistics-total">{{statisticsData.appCaseTotal}}</div>
+          <div>本周新增: {{statisticsData.appCaseNewWeek}}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
@@ -86,32 +86,36 @@ export default {
           apiCaseNewWeek: 0,
           webCaseTotal: 0,
           webCaseNewWeek: 0,
-          planRunTotal: 0,
-          planRunToday: 0,
+          appCaseTotal: 0,
+          appCaseNewWeek: 0,
           caseRunTotal: 0,
           caseRunToday: 0,
           caseAddData: {
             xAxis: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             yLeft: { name:"每日新增数", max: 100},
             yRight:{ name: "用例总数", max: 100},
-            legend: ['API用例新增', 'WEB用例新增', 'API用例总数', 'WEB用例总数'],
+            legend: ['API用例新增', 'WEB用例新增', 'APP用例新增','API用例总数', 'WEB用例总数', 'APP用例总数'],
             series: [
               {name: "API用例新增",type: 'bar',data: [0,0,0,0,0,0,0]},
               {name: "WEB用例新增",type: 'bar',data: [0,0,0,0,0,0,0]},
+              {name: "APP用例新增",type: 'bar',data: [0,0,0,0,0,0,0]},
               {name: "API用例总数",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]},
-              {name: "WEB用例总数",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]}
+              {name: "WEB用例总数",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]},
+              {name: "APP用例总数",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]}
             ]
           },
           caseRunData:{
             xAxis: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             yLeft: { name:"每日执行数", max: 100},
             yRight:{ name: "通过率(%)", max: 100},
-            legend: ['API用例执行数', 'WEB用例执行数', 'API用例通过率', 'WEB用例通过率'],
+            legend: ['API用例执行数', 'WEB用例执行数', 'APP用例执行数', 'API用例通过率', 'WEB用例通过率', 'APP用例通过率'],
             series: [
               {name: "API用例执行数",type: 'bar',data: [0,0,0,0,0,0,0]},
               {name: "WEB用例执行数",type: 'bar',data: [0,0,0,0,0,0,0]},
+              {name: "APP用例执行数",type: 'bar',data: [0,0,0,0,0,0,0]},
               {name: "API用例通过率",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]},
-              {name: "WEB用例通过率",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]}
+              {name: "WEB用例通过率",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]},
+              {name: "APP用例通过率",type: 'line',yAxisIndex: 1,data: [0,0,0,0,0,0,0]}
             ]
           },
           planRunWeekTop:{
@@ -142,13 +146,13 @@ export default {
       let url = "/autotest/dashboard/get/" + this.$store.state.projectId;
       this.$get(url, response => {
         let data = response.data;
-        if(data.apiCaseTotal){
+        if(data.apiCaseTotal !== undefined){
           this.statisticsData.apiCaseTotal = data.apiCaseTotal;
           this.statisticsData.apiCaseNewWeek = data.apiCaseNewWeek;
           this.statisticsData.webCaseTotal = data.webCaseTotal;
           this.statisticsData.webCaseNewWeek = data.webCaseNewWeek;
-          this.statisticsData.planRunTotal = data.planRunTotal;
-          this.statisticsData.planRunToday = data.planRunToday;
+          this.statisticsData.appCaseTotal = data.appCaseTotal;
+          this.statisticsData.appCaseNewWeek = data.appCaseNewWeek;
           this.statisticsData.caseRunTotal = data.caseRunTotal;
           this.statisticsData.caseRunToday = data.caseRunToday;
           
@@ -157,15 +161,19 @@ export default {
           this.statisticsData.caseAddData.yRight.max = this.getMaxRight(data.caseAddData.yMaxRight);
           this.statisticsData.caseAddData.series[0].data = data.caseAddData.apiCaseNew;
           this.statisticsData.caseAddData.series[1].data = data.caseAddData.webCaseNew;
-          this.statisticsData.caseAddData.series[2].data = data.caseAddData.apiCaseSum;
-          this.statisticsData.caseAddData.series[3].data = data.caseAddData.webCaseSum;
+          this.statisticsData.caseAddData.series[2].data = data.caseAddData.appCaseNew;
+          this.statisticsData.caseAddData.series[3].data = data.caseAddData.apiCaseSum;
+          this.statisticsData.caseAddData.series[4].data = data.caseAddData.webCaseSum;
+          this.statisticsData.caseAddData.series[5].data = data.caseAddData.appCaseSum;
 
           this.statisticsData.caseRunData.xAxis = data.caseRunData.xAxis;
           this.statisticsData.caseRunData.yLeft.max = this.getMax(data.caseRunData.yMaxLeft);
           this.statisticsData.caseRunData.series[0].data = data.caseRunData.apiCaseRun;
           this.statisticsData.caseRunData.series[1].data = data.caseRunData.webCaseRun;
-          this.statisticsData.caseRunData.series[2].data = data.caseRunData.apiCasePassRate;
-          this.statisticsData.caseRunData.series[3].data = data.caseRunData.webCasePassRate;
+          this.statisticsData.caseRunData.series[2].data = data.caseRunData.appCaseRun;
+          this.statisticsData.caseRunData.series[3].data = data.caseRunData.apiCasePassRate;
+          this.statisticsData.caseRunData.series[4].data = data.caseRunData.webCasePassRate;
+          this.statisticsData.caseRunData.series[5].data = data.caseRunData.appCasePassRate;
 
           this.statisticsData.planRunWeekTop.xAxis = data.planRunWeekTop.xAxis;
           this.statisticsData.planRunWeekTop.yLeft.max = this.getMax(data.planRunWeekTop.yMaxLeft);

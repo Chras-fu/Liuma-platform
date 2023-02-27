@@ -11,6 +11,8 @@ public class TaskTestCollectionResponse {
 
     private String collectionId;
 
+    private String deviceId;
+
     private List<TaskTestCaseResponse> testCaseList;
 
 }

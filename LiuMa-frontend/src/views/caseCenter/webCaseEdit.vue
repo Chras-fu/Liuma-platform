@@ -28,6 +28,15 @@
               <span v-html="scope.row.dataText"/>
           </template>
         </el-table-column>
+        <el-table-column label="步骤描述" min-width="200px">
+            <template slot-scope="scope">
+                <div v-if="scope.row.edit==true" >
+                  <el-input size="mini" style="width: 85%" v-model="scope.row.description" placeholder="请输入步骤描述" @change="scope.row.edit=false"/>
+                  <i class="el-icon-success" @click="scope.row.edit=false"/>
+                </div>
+                <span v-else>{{scope.row.description}} <i class="el-icon-edit"  @click="scope.row.edit=true"/></span>
+            </template>
+        </el-table-column>
         <el-table-column label="操作" width="150px">
             <template slot-scope="scope">
                 <el-button size="mini" type="text" @click="editCaseWeb(scope.$index, scope.row)">编辑</el-button>
@@ -106,9 +115,9 @@
         </div>
     </el-dialog>
     <!-- 用例调试选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="true" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
-    <run-result :taskId="taskId" :caseType="caseType" :resultVisable="resultVisable" @closeResult="closeResult"/>
+    <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
 </template>
 
@@ -171,7 +180,6 @@ export default {
                 engineId: "",
                 environmentId: []
             },
-            caseType: "WEB",
             resultVisable: false,
             taskId: "",
             rules: {
@@ -258,7 +266,14 @@ export default {
                   break;
                 }
               }
-            }else{
+            }else if(datas[i].paramName === "continue"){
+              if(datas[i].value === true){
+                newText = newText + "是";
+              }else{
+                newText = newText + "否";
+              }
+            }
+            else{
               if(datas[i].value){
                 newText = newText + datas[i].value;
               }
@@ -279,7 +294,9 @@ export default {
               operationId: "",
               operationName: "",
               element: [],
-              data: []
+              data: [],
+              edit: false,
+              description: ""
           };
           this.editOperationVisible = true;
         },
@@ -291,7 +308,9 @@ export default {
             operationId: row.operationId,
             operationName: row.operationName,
             element: row.element,
-            data: row.data
+            data: row.data,
+            edit: row.edit,
+            description: row.description
           };
           for(let i=0;i<row.element.length;i++){
             if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
@@ -310,7 +329,9 @@ export default {
             operationId: row.operationId,
             operationName: row.operationName,
             element: JSON.parse(JSON.stringify(row.element)),
-            data: JSON.parse(JSON.stringify(row.data))
+            data: JSON.parse(JSON.stringify(row.data)),
+            edit: false,
+            description: row.description
           };
           for(let i=0;i<row.element.length;i++){
             if(row.element[i].selectElements != undefined & row.element[i].selectElements > 0){
@@ -336,7 +357,8 @@ export default {
           for(let i=0;i<data.length;i++){
             if(data[i].paramName === 'continue'){
               data[i].value = false;
-              break;
+            }else{
+              data[i].value = "";
             }
           }
           this.operationForm.data = data;
@@ -383,7 +405,6 @@ export default {
                   this.caseForm.caseWebs.push(form);
                 }else{
                   form.index = form.index + 1;
-                  // this.caseForm.caseWebs[form.index-1] = form;
                   this.$set(this.caseForm.caseWebs, form.index-1, form);
                 }
                 this.editOperationVisible = false;
@@ -433,6 +454,7 @@ export default {
                         caseWeb.data = JSON.parse(caseWeb.data);
                         caseWeb.elementText = this.elementToText(caseWeb.element);
                         caseWeb.dataText = this.dataToText(caseWeb.data);
+                        caseWeb.edit = false;
                     }
                     if(param.type === "copy"){ //复用
                         data.id = "";
@@ -448,7 +470,7 @@ export default {
             });
         },
         getOperations(){
-          let url = '/autotest/operation/group/list/' + this.$store.state.projectId;
+          let url = '/autotest/operation/group/web/list/' + this.$store.state.projectId + "?system=";
             this.$get(url, response =>{
                 this.operations = response.data;
             });

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -36,6 +37,11 @@ public class CollectionController {
     @GetMapping("/detail/{collectionId}")
     public CollectionDTO getCollectionDetail(@PathVariable String collectionId){
         return collectionService.getCollectionDetail(collectionId);
+    }
+
+    @GetMapping("/types/{collectionId}")
+    public Map<String, Boolean> getCollectionCaseTypes(@PathVariable String collectionId){
+        return collectionService.getCollectionCaseTypes(collectionId);
     }
 
     @PostMapping("/list/{goPage}/{pageSize}")

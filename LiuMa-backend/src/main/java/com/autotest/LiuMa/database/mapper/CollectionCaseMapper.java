@@ -15,4 +15,6 @@ public interface CollectionCaseMapper {
     List<CollectionCaseDTO> getCollectionCaseList(String collectionId);
 
     Integer getCollectionCaseCount(String collectionId);
+
+    List<String> getCollectionCaseTypes(String collectionId);
 }

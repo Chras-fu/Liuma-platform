@@ -36,6 +36,12 @@ public class TestFileController {
         testFileService.uploadFile(testFile, file);
     }
 
+    @PostMapping(value = "/package/upload", consumes = {"multipart/form-data"})
+    public String uploadPackage(@RequestParam("name") String packageName,
+                           @RequestParam(value = "file", required=false) MultipartFile file) {
+        return testFileService.uploadPackage(packageName, file);
+    }
+
     @PostMapping("/delete")
     public void deleteFile(@RequestBody TestFile testFile) {
         testFileService.deleteFile(testFile.getId());

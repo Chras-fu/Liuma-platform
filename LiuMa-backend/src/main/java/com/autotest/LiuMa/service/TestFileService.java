@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +23,9 @@ public class TestFileService {
 
     @Value("${test.file.path}")
     public String TEST_FILE_PATH;
+
+    @Value("${app.package.path}")
+    public String APP_PACKAGE_PATH;
 
     @Resource
     private TestFileMapper testFileMapper;
@@ -32,11 +37,19 @@ public class TestFileService {
         testFile.setCreateUser(testFile.getUpdateUser());
         // 保存文件
         String path = TEST_FILE_PATH + "/" + testFile.getProjectId() + "/" + testFile.getId();
-
         String filePath = FileUtils.uploadTestFile(file, path);
-
         testFile.setFilePath(filePath);
         testFileMapper.saveTestFile(testFile);
+    }
+
+    public String uploadPackage(String packageName, MultipartFile file){
+        DateFormat dateInstance = DateFormat.getDateInstance();
+        String date = dateInstance.format(new Date());
+        // 保存文件
+        String fileId = UUID.randomUUID().toString();
+        String path = APP_PACKAGE_PATH + "/" + date + "/" + fileId;
+        FileUtils.uploadTestFile(file, path);
+        return "/openapi/download/package/" + date + "/" + fileId + "/" + packageName;
     }
 
     public void deleteFile(String id) {

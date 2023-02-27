@@ -19,15 +19,18 @@ public class TestCaseWebDataResponse {
     private String operationName;
 
     @JSONField(ordinal = 4)
-    private String operationTrans;
+    private String operationDesc;
 
     @JSONField(ordinal = 5)
-    private String operationCode;
+    private String operationTrans;
 
     @JSONField(ordinal = 6)
-    private JSONObject operationElement;
+    private String operationCode;
 
     @JSONField(ordinal = 7)
+    private JSONObject operationElement;
+
+    @JSONField(ordinal = 8)
     private JSONObject operationData;
 
 }

@@ -17,7 +17,14 @@
                     </el-select>
                 </el-form-item>
             </el-col>
-            <el-col :span="10">
+            <el-col v-if="caseForm.type==='APP'" :span="10">
+                <el-form-item label="操作系统">
+                    <el-select size="small" style="width: 100%" v-model="caseForm.system" disabled placeholder="请选择操作系统">
+                        <el-option v-for="item in systems" :key="item" :label="item" :value="item"/>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col v-else :span="10">
                 <el-form-item label="环境标签">
                     <el-select size="small" style="width: 100%" v-model="caseForm.environmentIds" multiple filterable clearable placeholder="请选择环境标签">
                         <el-option v-for="item in environments" :key="item.id" :label="item.name" :value="item.id"/>
@@ -102,7 +109,20 @@
                 </el-form-item>
             </el-col>
         </el-row>
-        
+        <el-row :gutter="40" v-if="caseForm.type === 'APP'">
+            <el-col :span="12">
+                <el-form-item label="被测应用" prop="commonParam.appId">
+                    <el-select size="small" style="width: 100%" v-model="caseForm.commonParam.appId" placeholder="被测应用">
+                        <el-option v-for="item in applications" :key="item.id" :label="item.name" :value="item.id"/>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col :span="12" v-if="caseForm.system === 'android'">
+                <el-form-item label="启动视图">
+                    <el-input  size="small" style="width: 100%" v-model="caseForm.commonParam.activity" placeholder="指定app启动视图 例: com.demo.activity"/>
+                </el-form-item>
+            </el-col>
+        </el-row>
     </div>
 </template>
 <script>
@@ -115,28 +135,36 @@ export default {
     },
   props:{
     caseForm: Object,
+    applications: {
+        type: Array,
+        default:  () => {
+	        return [];
+	    },
+    }
   },
   data() {
       return{
         levels: ["P0", "P1", "P2", "P3"],
-        caseTypes:["API", "WEB"],
+        caseTypes:["API", "WEB", "APP"],
         modules: [],
         headers: [],
         proxys: [],
         environments: [],
+        systems: ["android", "apple"],
         functionList: [],
-        paramList: []
+        paramList: [],
       }
     },
     created() {
         this.getModule();
-        this.getEnvironment();
+        if(this.caseForm.type !== "APP"){
+            this.getEnvironment();
+        }
         this.getFunction();
         this.getParam();
         if(this.caseForm.type === "API"){
             this.getHeader();
             this.getProxy();
-
         }
     },
     methods: {

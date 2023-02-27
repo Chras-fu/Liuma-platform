@@ -20,4 +20,6 @@ public interface ElementMapper {
     List<ElementDTO> getElementList(QueryRequest request);
 
     ElementDTO getElementById(String id);
+
+    Element getElementByName(String moduleId, String name);
 }

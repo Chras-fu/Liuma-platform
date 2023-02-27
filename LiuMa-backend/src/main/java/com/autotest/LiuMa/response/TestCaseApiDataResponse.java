@@ -17,39 +17,42 @@ public class TestCaseApiDataResponse {
     private String apiName;
 
     @JSONField(ordinal = 3)
-    private String url;
+    private String apiDesc;
 
     @JSONField(ordinal = 4)
-    private String path;
+    private String url;
 
     @JSONField(ordinal = 5)
-    private String method;
+    private String path;
 
     @JSONField(ordinal = 6)
-    private String protocol;
+    private String method;
 
     @JSONField(ordinal = 7)
-    private JSONObject headers;
+    private String protocol;
 
     @JSONField(ordinal = 8)
-    private JSONObject proxies;
+    private JSONObject headers;
 
     @JSONField(ordinal = 9)
-    private JSONObject body;
+    private JSONObject proxies;
 
     @JSONField(ordinal = 10)
-    private JSONObject query;
+    private JSONObject body;
 
     @JSONField(ordinal = 11)
-    private JSONObject rest;
+    private JSONObject query;
 
     @JSONField(ordinal = 12)
-    private JSONArray assertions;
+    private JSONObject rest;
 
     @JSONField(ordinal = 13)
-    private JSONArray relations;
+    private JSONArray assertions;
 
     @JSONField(ordinal = 14)
+    private JSONArray relations;
+
+    @JSONField(ordinal = 15)
     private JSONObject controller;
 
 }

@@ -48,6 +48,11 @@ function then(success, response, result) {
       message.warning(response.data.message);
     }
     return false;
+  }else if(response.data.status == 1000){
+    // 未知错误提示具体报错信息
+    if (response.data.data) {
+      message.warning(response.data.data);
+    }
   }else {
     window.console.warn(response.data);
     if (response.data.message) {
@@ -170,7 +175,7 @@ export default {
       return;
     }
 
-    axios.defaults.withCredentials = true;
+    // axios.defaults.withCredentials = true;
 
     Vue.prototype.$login = login;
 

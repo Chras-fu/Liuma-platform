@@ -18,7 +18,7 @@
     </el-form>
     <!--列表-->
     <el-table size="small" :data="fileData" v-loading="loading">
-        <el-table-column prop="id" label="uuid" width="250px"/>
+        <el-table-column prop="id" label="UUID" width="250px"/>
         <el-table-column prop="name" label="文件名称" min-width="200px"/>
         <el-table-column prop="description" label="文件描述" min-width="240px"/>
         <el-table-column prop="username" label="创建人"/>
@@ -38,7 +38,7 @@
                 <el-input size="small" style="width: 90%" v-model="uploadFileForm.name" placeholder="请输入文件名称"/>
             </el-form-item>
             <el-form-item label="文件描述" prop="description">
-                <el-input size="small" style="width: 90%" v-model="uploadFileForm.description" :autosize="{ minRows: 3}" 
+                <el-input size="small" style="width: 90%" v-model="uploadFileForm.description" :autosize="{ minRows: 3}"
                 maxlength="200" show-word-limit type="textarea" clearable placeholder="请输入文件描述"/>
             </el-form-item>
             <el-form-item label="选择文件" prop="fileList">
@@ -141,7 +141,8 @@ export default {
         },
         submitFileForm(confirm, form){
             this.$refs[confirm].validate(valid => {
-                if (valid) {
+              console.log("file valid: "+ valid);
+              if (valid) {
                     let url = '/autotest/file/upload';
                     let data = {
                         name: form.name,
@@ -189,7 +190,6 @@ export default {
             this.$message.warning('一次最多只能上传一个文件');
         },
         uploadFile(option) {
-            window.console.log(option)
             this.uploadFileForm.fileList.push(option.file);
             this.uploadFileForm.name = option.file.name;
             this.$refs.uploadFileForm.validateField('fileList');

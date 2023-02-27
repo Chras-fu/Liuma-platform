@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.ReportCollectionCaseWebMapper">
   <insert id="batchAddReportCollectionCaseWeb" parameterType="java.util.List">
-    insert into report_collection_case_web (id, report_collection_case_id, case_web_index, operation_id, operation_name, operation_element, exec_log, screen_shot, status)
+    insert into report_collection_case_web (id, report_collection_case_id, case_web_index, operation_id, operation_name, operation_element, description, exec_log, screen_shot, status)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id}, #{item.reportCollectionCaseId}, #{item.caseWebIndex}, #{item.operationId}, #{item.operationName}, #{item.operationElement}, #{item.execLog},
+      (#{item.id}, #{item.reportCollectionCaseId}, #{item.caseWebIndex}, #{item.operationId}, #{item.operationName}, #{item.operationElement},  #{item.description}, #{item.execLog},
       #{item.screenshot}, #{item.status})
     </foreach>
   </insert>
   <select id="getReportCaseActionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionCaseTransDTO">
-    select status, operation_id as transId, operation_name as transName, operation_element as content, exec_log, screen_shot as screenshotList from report_collection_case_web
+    select status, operation_id as transId, operation_name as transName, operation_element as content, description, exec_log, screen_shot as screenshotList from report_collection_case_web
     where report_collection_case_id = #{reportCaseId} order by case_web_index
   </select>
 </mapper>

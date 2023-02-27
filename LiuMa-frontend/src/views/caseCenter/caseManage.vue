@@ -13,6 +13,11 @@
                 <el-option v-for="item in caseTypes" :key="item" :label="item" :value="item"/>
             </el-select>
         </el-form-item>
+        <el-form-item label="" v-if="searchForm.caseType==='APP'">
+            <el-select size="small" clearable style="width:120px" v-model="searchForm.system" placeholder="操作系统">
+                <el-option v-for="item in systems" :key="item" :label="item" :value="item"/>
+            </el-select>
+        </el-form-item>
         <el-form-item>
             <el-button size="small" type="primary" @click="search">搜索</el-button>
             <el-button size="small" @click="reset">重置</el-button>
@@ -39,7 +44,12 @@
                 </template>
             </el-table-column>
             <el-table-column prop="level" label="用例等级"/>
-            <el-table-column prop="type" label="用例类型"/>
+            <el-table-column prop="type" label="用例类型">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.type==='APP'">{{scope.row.type}}({{scope.row.system}})</span>
+                    <span v-else>{{scope.row.type}}</span>
+                </template>
+            </el-table-column>
             <el-table-column prop="moduleName" label="所属模块"/>
             <el-table-column prop="username" label="创建人"/>
             <el-table-column prop="updateTime" label="更新时间"  width="150px"/>
@@ -57,17 +67,20 @@
     <!-- 添加模块弹框 -->
     <module-append title="添加用例模块" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog" @submitModule="submitModule($event)"/>
     <!-- 添加用例弹框 -->
-    <el-dialog title="选择用例类型" :visible.sync="caseVisible" width="300px" destroy-on-close>
+    <el-dialog title="选择用例类型" :visible.sync="caseVisible" width="500px" destroy-on-close>
         <el-radio-group style="margin-left:15px;" v-model="newCaseType">
             <el-radio :label="'API'">API</el-radio>
             <el-radio :label="'WEB'">WEB</el-radio>
+            <el-radio :label="'ANDROID'">APP(android)</el-radio>
+            <el-radio :label="'APPLE'">APP(apple)</el-radio>
         </el-radio-group>
         <div slot="footer" class="dialog-footer">
             <el-button size="small" type="primary" @click="submitCase">确定</el-button>
         </div>
     </el-dialog>
     <!-- 用例执行选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="showEnvironment" :deviceSystem="deviceSystem"
+         :showDevice="showDevice" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
     <run-result :taskId="taskId" :caseType="caseType" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
@@ -98,13 +111,15 @@ export default {
                 data: "",
             },
             newCaseType:"API",
-            caseTypes:["API", "WEB"],
+            caseTypes:["API", "WEB", "APP"],
+            systems: ["android", "apple"],
             searchForm: {
                 page: 1,
                 limit: 10,
                 condition: "",
                 caseType: "",
                 moduleId: "",
+                system: ""
             },
             caseListData: [],
             pageParam: {
@@ -114,9 +129,13 @@ export default {
             },
             treeData: [],
             runVisible: false,
+            showEnvironment: false,
+            showDevice: false,
+            deviceSystem: null,
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
             resultVisable: false,
             taskId: "",
@@ -209,7 +228,8 @@ export default {
                 condition: searchParam.condition,
                 caseType: searchParam.caseType,
                 moduleId: searchParam.moduleId,
-                projectId: this.$store.state.projectId
+                projectId: this.$store.state.projectId,
+                system: searchParam.system
             };
             this.$post(url, param, response => {
                 let data = response.data;
@@ -239,6 +259,7 @@ export default {
             this.searchForm.condition = "";
             this.searchForm.caseType = "";
             this.searchForm.moduleId = "";
+            this.searchForm.system = "";
             this.getdata(this.searchForm);
         },
         // 新增用例
@@ -249,32 +270,68 @@ export default {
         // 提交用例保存
         submitCase() {
             if (this.newCaseType == "API"){
-              this.$router.push({path: '/caseCenter/caseManage/apiCase/add'})
+                this.$router.push({path: '/caseCenter/caseManage/apiCase/add'});
             }else if (this.newCaseType == "WEB"){
-              this.$router.push({path: '/caseCenter/caseManage/webCase/add'})
+                this.$router.push({path: '/caseCenter/caseManage/webCase/add'});
+            }else if (this.newCaseType == "ANDROID"){ 
+                this.$router.push({path: '/caseCenter/caseManage/appCase/android/add'});
+            }else if (this.newCaseType == "APPLE"){
+                this.$router.push({path: '/caseCenter/caseManage/appCase/apple/add'});
             }
         },
         // 编辑用例
         editCase(row){
-            if (row.type == "API"){
-              this.$router.push({path: '/caseCenter/caseManage/apiCase/edit/' + row.id})
-            }else if (row.type == "WEB"){
-              this.$router.push({path: '/caseCenter/caseManage/webCase/edit/' + row.id})
+            if (row.type === "API"){
+                this.$router.push({path: '/caseCenter/caseManage/apiCase/edit/' + row.id});
+            }else if (row.type === "WEB"){
+                this.$router.push({path: '/caseCenter/caseManage/webCase/edit/' + row.id});
+            }else{
+                if(row.system === "android"){
+                    this.$router.push({path: '/caseCenter/caseManage/appCase/android/edit/' + row.id});
+                }else if (row.system === "apple"){
+                    this.$router.push({path: '/caseCenter/caseManage/appCase/apple/edit/' + row.id});
+                }
+            }
+        },
+        // 复用用例
+        copyCase(row){
+            if (row.type === "API"){
+                this.$router.push({path: '/caseCenter/caseManage/apiCase/copy/' + row.id});
+            }else if (row.type === "WEB"){
+                this.$router.push({path: '/caseCenter/caseManage/webCase/copy/' + row.id});
+            }else{
+                if(row.system === "android"){
+                    this.$router.push({path: '/caseCenter/caseManage/appCase/android/copy/' + row.id});
+                }else if (row.system === "apple"){
+                    this.$router.push({path: '/caseCenter/caseManage/appCase/apple/copy/' + row.id});
+                }
             }
         },
         runCase(row){
             // 用例调试
             this.runForm.engineId = 'system';
+            this.runForm.environmentId = null;
+            this.runForm.deviceId = null;
             let environmentIds = JSON.parse(row.environmentIds);
-            if(environmentIds.length > 0){
-                this.runForm.environmentId = environmentIds[0];
-            }
+            
             this.runForm.sourceType = "case";
             this.runForm.sourceId = row.id;
             this.runForm.sourceName = row.name;
             this.runForm.taskType = "debug";
             this.runForm.projectId = this.$store.state.projectId;
             this.caseType = row.type;
+            if(this.caseType === 'API' || this.caseType === 'WEB'){
+                if(environmentIds.length > 0){
+                    this.runForm.environmentId = environmentIds[0];
+                }
+                this.showEnvironment = true;
+                this.showDevice = false;
+                this.deviceSystem = null;
+            }else{
+                this.showEnvironment = false;
+                this.showDevice = true;
+                this.deviceSystem = row.system;
+            }
             this.runVisible = true;
         },
         closeRun(){
@@ -290,14 +347,6 @@ export default {
         },
         closeResult(){
             this.resultVisable = false;
-        },
-        // 复用用例
-        copyCase(row){
-            if (row.type == "API"){
-              this.$router.push({path: '/caseCenter/caseManage/apiCase/copy/' + row.id})
-            }else if (row.type == "WEB"){
-              this.$router.push({path: '/caseCenter/caseManage/webCase/copy/' + row.id})
-            }
         },
         // 删除用例
         deleteCase(row){

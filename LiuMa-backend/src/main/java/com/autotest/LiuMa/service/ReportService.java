@@ -35,6 +35,9 @@ public class ReportService {
     @Resource
     private ReportCollectionCaseWebMapper reportCollectionCaseWebMapper;
 
+    @Resource
+    private ReportCollectionCaseAppMapper reportCollectionCaseAppMapper;
+
     public void deleteReport(Report report) {
         reportMapper.deleteReport(report.getId());
     }
@@ -70,8 +73,10 @@ public class ReportService {
             List<ReportCollectionCaseTransDTO> transList;
             if(reportCase.getCaseType().equals("API")){
                 transList = reportCollectionCaseApiMapper.getReportCaseActionList(reportCase.getId());
-            }else {
+            }else if(reportCase.getCaseType().equals("WEB")){
                 transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCase.getId());
+            }else {
+                transList = reportCollectionCaseAppMapper.getReportCaseActionList(reportCase.getId());
             }
             reportCase.setTransList(transList);
         }
@@ -88,8 +93,10 @@ public class ReportService {
                 List<ReportCollectionCaseTransDTO> transList;
                 if(reportCollectionCase.getCaseType().equals("API")){
                     transList = reportCollectionCaseApiMapper.getReportCaseActionList(reportCollectionCase.getId());
-                }else {
+                }else if(reportCollectionCase.getCaseType().equals("WEB")){
                     transList = reportCollectionCaseWebMapper.getReportCaseActionList(reportCollectionCase.getId());
+                }else {
+                    transList = reportCollectionCaseAppMapper.getReportCaseActionList(reportCollectionCase.getId());
                 }
                 reportCollectionCase.setTransList(transList);
             }

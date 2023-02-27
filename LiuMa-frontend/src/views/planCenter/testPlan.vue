@@ -48,24 +48,31 @@
             </template>
         </el-table-column>
         <el-table-column label="序号" prop="index" width="50px" align="center"/>
-        <el-table-column label="计划名称" prop="name" min-width="160px"/>
+        <el-table-column label="计划名称" prop="name" min-width="160px" :show-overflow-tooltip="true">
+            <template slot-scope="scope">
+                <el-button type="text" class="plan-name" @click="editPlan(scope.row)">
+                    <a>{{scope.row.name}}</a>
+                </el-button>
+            </template>
+        </el-table-column>
         <el-table-column label="版本" prop="versionName"/>
-        <el-table-column label="执行环境" prop="environmentName"/>
         <el-table-column label="计划描述" prop="description" min-width="180px"/>
         <el-table-column label="创建人" prop="username"/>
         <el-table-column label="更新时间" prop="updateTime" width="150px"/>
-        <el-table-column fixed="right" align="center" label="操作" width="150px">
+        <el-table-column fixed="right" align="operation" label="操作" width="150px">
             <template slot-scope="scope">
                 <el-button type="text" size="mini" @click="runPlan(scope.row)">执行</el-button>
-                <el-button type="text" size="mini" @click="editPlan(scope.row)">编辑</el-button>
                 <el-button type="text" size="mini" @click="deletePlan(scope.row)">删除</el-button>
+                <el-button type="text" size="mini" @click="editNotice(scope.row)">通知配置</el-button>
             </template>
         </el-table-column>
     </el-table>
     <!-- 分页组件 -->
     <Pagination v-bind:child-msg="pageparam" @callFather="planCallFather"/>
-    <!-- 集合执行选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <!-- 配置计划通知弹框 -->
+    <edit-notice :noticeForm="noticeForm" :noticeVisible="noticeVisible" @closeNotice="closeNotice" @submitNotice="submitNotice($event)"/>
+    <!-- 计划执行选择引擎和环境 -->
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="showEnvironment" @closeRun="closeRun" @run="run($event)"/>
   </div>
 </template>
 
@@ -73,9 +80,10 @@
 import Pagination from '../common/components/pagination'
 import {timestampToTime} from '@/utils/util'
 import RunForm from '@/views/common/business/runForm'
+import EditNotice from './common/editNotice'
 export default {
     components: {
-        Pagination, RunForm
+        Pagination, RunForm, EditNotice
     },
     data() {
         return{
@@ -92,10 +100,18 @@ export default {
                 total: 0
             },
             runVisible: false,
+            showEnvironment: false,
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
+            noticeVisible: false,
+            noticeForm: {
+                planId: null,
+                notificationId: null,
+                condition: null
+            }
         }
     },
     created() {
@@ -204,8 +220,14 @@ export default {
             this.$router.push({path: '/planManage/testplan/edit/' + row.id});
         },
         runPlan(row){
+            if(row.environmentId != null){
+                this.showEnvironment = true;
+            }else{
+                this.showEnvironment = false;
+            }
             this.runForm.engineId = row.engineId;
             this.runForm.environmentId = row.environmentId;
+            this.runForm.deviceId = null;
             this.runForm.sourceType = "plan";
             this.runForm.sourceId = row.id;
             this.runForm.sourceName = row.name;
@@ -220,11 +242,34 @@ export default {
             let url = '/autotest/run';
             this.$post(url, runForm, response =>{
                 this.$message.success("执行成功 执行结果请查看报告");
-                let taskId = response.data.id;
-                // 执行结果框
             });
-
             this.runVisible = false;
+        },
+        editNotice(row){
+            let url = '/autotest/plan/notice/'+row.id;
+            this.$get(url, response => {
+                let data = response.data;
+                if(data !== null){
+                    this.noticeForm.id = data.id;
+                    this.noticeForm.planId = data.planId;
+                    this.noticeForm.notificationId = data.notificationId;
+                    this.noticeForm.condition = data.condition;
+                }else{
+                    this.noticeForm.planId = row.id;
+                    this.noticeForm.condition = 'A';
+                }
+                this.noticeVisible = true;
+            });
+        },
+        closeNotice(){
+            this.noticeVisible = false;
+        },
+        submitNotice(noticeForm){
+            let url = '/autotest/plan/save/notice';
+            this.$post(url, noticeForm, response =>{
+                this.$message.success("保存成功");
+                this.noticeVisible = false;
+            });
         },
         // 查看报告
         viewReport(row){
@@ -271,5 +316,11 @@ export default {
 </script>
 
 <style scoped>
-
+.plan-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
+}
 </style>

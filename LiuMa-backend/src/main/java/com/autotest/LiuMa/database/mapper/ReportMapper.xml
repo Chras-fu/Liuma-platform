@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.ReportMapper">
   <insert id="addReport" parameterType="com.autotest.LiuMa.database.domain.Report">
-    insert into report (id, name, task_id, environment_id, source_type, source_id, start_time, end_time, status,
+    insert into report (id, name, task_id, environment_id, device_id, source_type, source_id, start_time, end_time, status,
     project_id, create_time, update_time, create_user, update_user)
-    values (#{id}, #{name}, #{taskId}, #{environmentId}, #{sourceType}, #{sourceId}, #{startTime}, #{endTime}, #{status},
+    values (#{id}, #{name}, #{taskId}, #{environmentId}, #{deviceId}, #{sourceType}, #{sourceId}, #{startTime}, #{endTime}, #{status},
     #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
   </insert>
   <insert id="addReportStatistics" parameterType="com.autotest.LiuMa.database.domain.ReportStatistics">

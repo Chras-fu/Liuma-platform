@@ -15,33 +15,74 @@
         <el-form-item style="float: right">
             <el-button size="small" type="primary" icon="el-icon-plus" @click="addApi">新增接口</el-button>
         </el-form-item>
+          <el-form-item style="float: right">
+          <el-button size="small" type="success" icon="el-icon-plus" @click="importApi">导入接口</el-button>
+        </el-form-item>
     </el-form>
     <!-- 接口模块 -->
     <el-col :span="4" class="left-tree">
-        <module-tree title="接口模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)" 
+        <module-tree title="接口模块" :treeData="treeData" :currentModule="searchForm.moduleId" @clickModule="clickModule($event)" @appendModule="appendModule($event)"
             @removeModule="removeModule(arguments)" @dragNode="dragNode(arguments)"/>
     </el-col>
     <!--接口列表-->
     <el-col :span="20" class="right-table">
         <el-table size="small" :data="apiListData" v-loading="loading" element-loading-text="拼命加载中">
-        <el-table-column prop="num" label="NO" width="60px"/>
-        <el-table-column prop="name" label="接口名称" min-width="180"/>
-        <el-table-column prop="path" label="接口地址" min-width="150"/>
-        <el-table-column prop="moduleName" label="所属模块"/>
-        <el-table-column prop="username" label="创建人"/>
-        <el-table-column prop="updateTime" label="更新时间" width="150"/>
-        <el-table-column fixed="right" align="operation" label="操作" width="100">
-            <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="editApi(scope.row)">编辑</el-button>
-            <el-button type="text" size="mini" @click="deleteApi(scope.row)">删除</el-button>
-            </template>
-        </el-table-column>
+            <el-table-column prop="num" label="NO" width="60px"/>
+            <el-table-column prop="name" label="接口名称" min-width="180"/>
+            <el-table-column prop="path" label="接口地址" min-width="150"/>
+            <el-table-column prop="moduleName" label="所属模块"/>
+            <el-table-column prop="username" label="创建人"/>
+            <el-table-column prop="updateTime" label="更新时间" width="150"/>
+            <el-table-column fixed="right" align="operation" label="操作" width="150">
+                <template slot-scope="scope">
+                    <el-button type="text" size="mini" @click="editApi(scope.row)">编辑</el-button>
+                    <el-button type="text" size="mini" @click="deleteApi(scope.row)">删除</el-button>
+                    <el-button type="text" size="mini" @click="generateCase(scope.row)">生成用例</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <!-- 分页组件 -->
         <Pagination v-bind:child-msg="pageParam" @callFather="callFather"></Pagination>
     </el-col>
     <!-- 添加模块弹窗 -->
     <module-append :title="title" :show.sync="moduleVisible" :moduleForm="moduleForm" @closeDialog="closeDialog" @submitModule="submitModule($event)"/>
+    <!--上传文件的弹窗-->
+    <el-dialog title="上传文件" :visible.sync="uploadFileVisible" width="600px" destroy-on-close>
+      <el-form label-width="120px" style="padding-right: 30px;" :model="uploadFileForm" :rules="rules" ref="uploadFileForm">
+        <el-form-item label="文件来源" prop="apiSource">
+          <el-radio-group v-model="uploadFileForm.apiSource">
+            <el-radio label="1">postman</el-radio>
+            <el-radio label="2">swagger</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="选择模块" prop="moduleId">
+          <select-tree style="width:90%" placeholder="请选择导入后的模块" :selectedValue="uploadFileForm.moduleId"
+                       :selectedLabel="uploadFileForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
+        </el-form-item>
+        <el-form-item label="选择文件" prop="fileList">
+          <el-upload class="upload-demo" :file-list="uploadFileForm.fileList" :before-upload="beforeUpload" :http-request="uploadFile"
+                     :on-remove="removeFile" :on-exceed="handleExceed" drag action :limit="1" ref="upload">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传单个文件，且不超过50M</div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="uploadFileVisible=false">取消</el-button>
+        <el-button size="small" type="primary" @click="submitFileForm('uploadFileForm', uploadFileForm)">上传</el-button>
+      </div>
+    </el-dialog>
+    <!-- 自动生成用例配置 -->
+    <el-drawer :visible.sync="editRuleVisible" direction="rtl" :with-header="false" destroy-on-close size="920px">
+        <div class="api-drawer-header">
+            <span style="float: left; font-size: 16px;">生成规则配置</span>
+            <el-button size="small" type="primary" style="float: right;" @click="submitRuleForm(paramRuleForm)">确定</el-button>
+        </div>
+        <div class="api-drawer-body">
+            <autocase :paramRuleForm="paramRuleForm"/>
+        </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -50,14 +91,28 @@ import Pagination from '../common/components/pagination'
 import ModuleTree from './common/module/moduleTree'
 import ModuleAppend from './common/module/moduleAppend'
 import {timestampToTime} from '@/utils/util'
+import SelectTree from "../common/business/selectTree";
+import Autocase from "./common/case/autocase"
 
 export default {
     // 注册组件
     components: {
-        Pagination, ModuleTree, ModuleAppend
+        Pagination, ModuleTree, ModuleAppend, SelectTree, Autocase
     },
     data() {
         return{
+            uploadFileVisible: false, //控制上传api的dialog
+            uploadFileForm : {  //上传api信息的dict
+              apiSource: "",  //导入api的来源   1:postman  2:swagger
+              fileList: [],
+              moduleId:"",   //用于import_api的dialog 中的下拉选择框
+              moduleName:""  //用于import_api的dialog 中的下拉选择框
+            },
+            rules:{
+              apiSource:[{ required: true, message: '文件来源不能为空', trigger: 'blur' }],
+              fileList: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
+              moduleId: [{ required: true, message: '导入模块不能为空', trigger: 'blur' }]
+            },
             loading:false,
             moduleVisible: false,
             moduleForm: {
@@ -73,13 +128,24 @@ export default {
                 condition: "",
                 moduleId: "",
             },
+            moduleList:[] , //存放当前项目中所有module的列表
             apiListData: [],
             pageParam: {
                 currentPage: 1,
                 pageSize: 10,
                 total: 0
             },
-            treeData: [],
+            treeData: [], //  存放所有module的数据: /autotest/module/list/api/的响应结果
+            editRuleVisible: false,
+            paramRuleForm: {
+                apiId: null,
+                header: [],
+                body: [],
+                query: [],
+                rest: [],
+                positiveAssertion: [],
+                oppositeAssertion: []
+            }
         }
     },
     created() {
@@ -89,14 +155,69 @@ export default {
         this.getdata(this.searchForm)
     },
     methods: {
+      // 上传前判断格式和大小
+      beforeUpload(file) {
+        if (file.size > 50 * 1024 * 1024) {
+          this.$message.warning('文件大小超过50M 无法上传');
+          return false;
+        }
+        return true;
+      },
+      uploadFile(option) {
+        this.uploadFileForm.fileList.push(option.file);
+        this.uploadFileForm.name = option.file.name;
+        this.$refs.uploadFileForm.validateField('fileList');
+      },
+      removeFile() {
+        this.uploadFileForm.fileList = [];
+      },
+      handleExceed() {
+        this.$message.warning('一次最多只能上传一个文件');
+      },
+      selectModule(data){
+        this.uploadFileForm.moduleId = data.id;
+        this.uploadFileForm.moduleName = data.label;
+
+      },
+      submitFileForm(confirm, form){   //上传文件dialog中保存file中api的调用方法
+        this.$refs[confirm].validate(valid => {
+          if (valid) {
+              let url = '/autotest/import/api';
+              let platformType;
+              if (this.uploadFileForm.apiSource === "1"){
+                platformType = "postman"
+              } else {
+                platformType = "swagger"
+              }
+              let data = {
+                project_id: this.$store.state.projectId,
+                module_id: this.uploadFileForm.moduleId,
+                platformType
+              };
+            this.searchForm.module_id = this.uploadFileForm.moduleId  //更新查询module接口的参数
+            let file = form.fileList[0];
+              this.$fileUpload(url, file, null, data, response =>{
+                this.$message.success("上传成功");
+                this.getdata(this.searchForm);
+              });
+            this.uploadFileVisible = false; //关闭弹窗
+          }else{
+            this.$message({
+              message: "请检查必填项是否完整!",
+              type: "error",
+              duration: 1500
+            })
+            }
+          });
+      },
         // 点击模块
         clickModule(data){
-            this.searchForm.moduleId = data.id;
+          this.searchForm.moduleId = data.id;
             this.getdata(this.searchForm);
         },
         // 添加模块
         appendModule(data) {
-            if (data){
+          if (data){
                 this.moduleForm.parentId = data.id;
                 this.moduleForm.parentName = data.label;
                 this.moduleForm.data = data;
@@ -156,7 +277,7 @@ export default {
         },
         // 获取树数据
         getTree(){
-            let url = '/autotest/module/list/api/' + this.$store.state.projectId;
+          let url = '/autotest/module/list/api/' + this.$store.state.projectId;
             this.$get(url, response =>{
                 this.treeData = response.data;
             });
@@ -199,6 +320,9 @@ export default {
             this.searchForm.moduleId = "";
             this.getdata(this.searchForm);
         },
+        importApi(){
+          this.uploadFileVisible = true;
+        },
         // 新增接口
         addApi(){
             this.$router.push({path: '/caseCenter/interfaceManage/add'})
@@ -225,6 +349,29 @@ export default {
                 this.$message.success("取消成功");
             })
         },
+        // 自动生成用例
+        generateCase(row){
+          this.paramRuleForm.apiId = row.id;
+          this.paramRuleForm.header = [];
+          this.paramRuleForm.body = [];
+          this.paramRuleForm.query = [];
+          this.paramRuleForm.rest = [];
+          this.paramRuleForm.positiveAssertion = [];
+          this.paramRuleForm.oppositeAssertion = [];
+          this.editRuleVisible = true;
+        },
+        // 提交自动用例规则
+        submitRuleForm(form){
+          if(form.positiveAssertion.length === 0 | form.oppositeAssertion.length === 0){
+            this.$message.warning("请至少维护一条正向断言以及逆向断言");
+            return;
+          }
+          let url = '/autotest/case/auto/generate';
+          this.$post(url, form, response => {
+              this.$message.success("生成成功 前往用例管理页查看");
+              this.editRuleVisible = false;
+          });
+        }
     }
 }
 </script>
@@ -236,5 +383,16 @@ export default {
 }
 .right-table {
     padding-left: 5px;
+}
+.api-drawer-header{
+    border-bottom: 1px solid rgb(219, 219, 219); 
+    height: 60px; 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 20px;
+}
+.api-drawer-body{
+    padding: 10px 20px;
 }
 </style>

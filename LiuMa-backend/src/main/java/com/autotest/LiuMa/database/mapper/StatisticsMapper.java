@@ -29,10 +29,6 @@ public interface StatisticsMapper {
 
     List<StatisticsDTO> getCaseTotalTodayRunCountByProject();
 
-    List<StatisticsDTO> getPlanRunCountByProject();
-
-    List<StatisticsDTO> getPlanTodayRunCountByProject();
-
     List<StatisticsDTO> getPlanRunTopByProject();
 
     List<StatisticsDTO> getCaseFailTopByProject();

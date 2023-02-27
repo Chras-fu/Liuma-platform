@@ -2,36 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.OperationMapper">
   <insert id="addOperation" parameterType="com.autotest.LiuMa.database.domain.Operation">
-    insert into `operation` (id, `name`, type, `from`, element, data, code, description,
-    project_id, create_time, update_time, create_user, update_user)
-    values (#{id}, #{name}, #{type}, #{from}, #{element}, #{data}, #{code}, #{description},
-    #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    insert into `operation_${uiType}` (id, `name`, type, `from`,
+    <if test="uiType == 'app'">
+      `system`,
+    </if>
+    element, data, code, description,project_id, create_time, update_time, create_user, update_user)
+    values (#{id}, #{name}, #{type}, #{from},
+    <if test="uiType == 'app'">
+      #{system},
+    </if>
+    #{element}, #{data}, #{code}, #{description}, #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
   </insert>
   <update id="updateOperation" parameterType="com.autotest.LiuMa.database.domain.Operation">
-    update `operation` set element=#{element}, data=#{data}, code=#{code}, description=#{description},
+    update `operation_${uiType}` set element=#{element}, data=#{data}, code=#{code}, description=#{description},
     update_time=#{updateTime}, update_user=#{updateUser}
     where id=#{id}
   </update>
   <select id="getOperationDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Operation">
-    select * from `operation` where id = #{id}
+    select *, #{uiType} as 'uiType' from `operation_${uiType}` where id = #{id}
   </select>
   <select id="getOperationByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Operation">
-    select * from `operation` where name = #{name} and (project_id = #{projectId} or project_id = 'system')
+    select * from `operation_${uiType}` where name = #{name} and (project_id = #{projectId} or project_id = 'system')
+    <if test="uiType == 'app'">
+      and `system` = #{system}
+    </if>
   </select>
   <select id="getGroupOperationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.OperationDTO">
-    select * from `operation` where (project_id = #{projectId} or `from` = 'system') and `type` = #{operationType}
+    select * from `operation_${uiType}` where (project_id = #{projectId} or project_id = 'system') and `type` = #{operationType}
+    <if test="uiType == 'app'">
+      and (`system` = #{system} or `system` = 'common')
+    </if>
   </select>
-  <select id="getOperationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.OperationDTO">
-    select op.id, op.`name`, op.type, op.`from`, op.description, op.project_id, op.create_time, op.update_time,
-    op.create_user, op.update_user, u.username as username
-    from `operation` op left join user u on u.id = op.create_user
-    where (op.project_id = #{projectId} or op.`from` = 'system') and op.type = #{operationType}
+  <select id="getOperationList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.OperationDTO">
+    select op.id, op.`name`, op.type, op.`from`,
+    <if test="uiType == 'app'">
+      op.`system`,
+    </if>
+    op.description, op.project_id, op.create_time, op.update_time, op.create_user, op.update_user, u.username as username
+    from `operation_${uiType}` op left join user u on u.id = op.create_user
+    where (op.project_id = #{projectId} or op.project_id = 'system') and op.type = #{operationType}
     <if test="condition != null and condition != ''">
       and op.name like #{condition}
+    </if>
+    <if test="uiType == 'app' and system != null and system != ''">
+      and op.`system` = #{system}
     </if>
     order by op.create_time desc, op.name
   </select>
   <delete id="deleteOperation" parameterType="java.lang.String">
-    delete from `operation` where id = #{id}
+    delete from `operation_${uiType}` where id = #{id}
   </delete>
 </mapper>

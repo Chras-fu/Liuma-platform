@@ -2,6 +2,7 @@ package com.autotest.LiuMa.database.mapper;
 
 import com.autotest.LiuMa.database.domain.Operation;
 import com.autotest.LiuMa.dto.OperationDTO;
+import com.autotest.LiuMa.request.QueryRequest;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -12,13 +13,13 @@ public interface OperationMapper {
 
     void updateOperation(Operation operation);
 
-    Operation getOperationDetail(String id);
+    Operation getOperationDetail(String id, String uiType);
 
-    Operation getOperationByName(String name, String projectId);
+    Operation getOperationByName(String name, String projectId, String uiType, String system);
 
-    List<OperationDTO> getGroupOperationList(String projectId, String operationType);
+    List<OperationDTO> getGroupOperationList(String projectId, String uiType, String system, String operationType);
 
-    void deleteOperation(String id);
+    void deleteOperation(String id, String uiType);
 
-    List<OperationDTO> getOperationList(String projectId, String operationType, String condition);
+    List<OperationDTO> getOperationList(QueryRequest request);
 }

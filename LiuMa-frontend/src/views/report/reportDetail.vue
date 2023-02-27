@@ -54,8 +54,9 @@
                                         <span v-if="scope.row.status==='error'" class="lm-error"><i class="el-icon-error"/> 错误</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="事务名称" prop="transName" min-width="150px"/>
-                                <el-table-column label="事务内容" prop="content" min-width="200px"/>
+                                <el-table-column :label="caseData.row.caseType ==='API'?'接口名称':'操作名称'" prop="transName" min-width="150px"/>
+                                <el-table-column :label="caseData.row.caseType ==='API'?'接口地址':'操作元素'" prop="content" min-width="200px"/>
+                                <el-table-column label="步骤描述" prop="description" min-width="200px"/>
                                 <el-table-column label="执行日志" prop="execLog" width="120px">
                                     <template slot-scope="scope">
                                         <el-button size="small" type="text" @click="viewLog(scope.row.execLog)">查看日志</el-button>
@@ -186,6 +187,8 @@ export default {
               this.$router.push({path: '/caseCenter/caseManage/apiCase/edit/' + row.caseId})
             }else if (row.caseType == "WEB"){
               this.$router.push({path: '/caseCenter/caseManage/webCase/edit/' + row.caseId})
+            }else{
+              this.$router.push({path: '/caseCenter/caseManage/appCase/edit/' + row.caseId})
             }
         },
         viewLog(log){

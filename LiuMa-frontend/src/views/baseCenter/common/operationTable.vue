@@ -5,14 +5,21 @@
   <div>
     <el-table size="small" :data="operationData" v-loading="loading">
         <el-table-column prop="index" label="序号" align="center" width="50px"/>
-        <el-table-column prop="name" label="控件名称"/>
-        <el-table-column prop="from" label="控件类型">
+        <el-table-column prop="name" label="操作名称"/>
+        <el-table-column prop="from" label="操作类型">
             <template slot-scope="scope">
-                <span v-if="scope.row.from==='system'">系统内置控件</span>
-                <span v-if="scope.row.from==='custom'">用户定义控件</span>
+                <span v-if="scope.row.from==='system'">系统内置操作</span>
+                <span v-if="scope.row.from==='custom'">用户定义操作</span>
             </template>
         </el-table-column>
-        <el-table-column prop="description" label="控件说明" min-width="200px"/>
+        <el-table-column v-if="uiType==='app'" label="操作系统">
+            <template slot-scope="scope">
+                <span v-if="scope.row.system==='android'">安卓</span>
+                <span v-if="scope.row.system==='apple'">苹果</span>
+                <span v-if="scope.row.system==='common'">通用</span>
+            </template>
+        </el-table-column>
+        <el-table-column prop="description" label="操作说明" min-width="200px"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="updateTime" label="更新时间" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="100px">
@@ -38,6 +45,7 @@ export default {
         operationData: Array,
         loading: Boolean,
         pageparam: Object,
+        uiType: String
     },
     data(){
         return {
@@ -54,7 +62,7 @@ export default {
         },
         // 查看控件
         viewOperation(row){
-            this.$router.push({path: '/common/operationManage/edit/' + row.id});
+            this.$router.push({path: '/common/operationManage/' + this.uiType + '/edit/' + row.id});
         },
         // 删除控件
         deleteOperation(row){

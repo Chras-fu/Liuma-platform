@@ -8,6 +8,7 @@ import lombok.Setter;
 public class RunRequest {
     private String engineId;
     private String environmentId;
+    private String deviceId;
     private String sourceType;
     private String sourceId;
     private String sourceName;
@@ -16,4 +17,7 @@ public class RunRequest {
     private String projectId;
 
     private CaseRequest debugData;
+
+    private String user;
+    private String planId;
 }

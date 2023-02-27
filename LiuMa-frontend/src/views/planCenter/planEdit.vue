@@ -12,7 +12,7 @@
                 </el-form-item>
             </el-col>
             <el-col :span="8">
-                <el-form-item label="版本" prop="versionId">
+                <el-form-item label="迭代版本" prop="versionId">
                     <el-select  size="small" style="width: 100%" v-model="planForm.versionId" placeholder="请选择计划版本">
                         <el-option v-for="item in versionList" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
@@ -21,13 +21,6 @@
         </el-row>
         <el-row :gutter="40">
             <el-col :span="8">
-                <el-form-item label="执行环境" prop="environmentId">
-                    <el-select size="small" style="width: 100%" v-model="planForm.environmentId" placeholder="请选择执行环境">
-                        <el-option v-for="item in environmentList" :key="item.id" :label="item.name" :value="item.id"/>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-            <el-col :span="8">
                 <el-form-item label="执行引擎" prop="engineId">
                     <el-select size="small" style="width: 100%" v-model="planForm.engineId" placeholder="请选择执行引擎">
                         <el-option v-for="item in engineList" :key="item.id" :label="item.name" :value="item.id"/>
@@ -35,10 +28,21 @@
                 </el-form-item>
             </el-col>
             <el-col :span="8">
-                <el-form-item label="失败重试" prop="retry">
-                    <el-select size="small" style="width: 100%" v-model="planForm.retry" placeholder="请选择是否失败重试">
-                        <el-option v-for="item in retryList" :key="item.value" :label="item.label" :value="item.value"/>
+                <el-form-item label="执行环境" prop="environmentId">
+                    <el-select size="small" style="width: 90%" v-model="planForm.environmentId" clearable placeholder="请选择执行环境">
+                        <el-option v-for="item in environmentList" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
+                    <el-tooltip style="width:5%" content="当前计划包含API/WEB用例时 环境不能为空" placement="bottom">
+                        <i class="el-icon-info"></i>
+                    </el-tooltip>
+                </el-form-item>
+            </el-col>
+            <el-col :span="8">
+                <el-form-item label="最大并发" prop="maxThread">
+                    <el-input-number size="small" style="width: 60%" v-model="planForm.maxThread" label="最大并发数" step-strictly :step="1" :max="20" :min="1"/>
+                    <el-tooltip content="最大并发指同时执行的集合数 受限引擎服务资源 并发数并非越大越好" placement="bottom">
+                        <i class="el-icon-info"></i>
+                    </el-tooltip>
                 </el-form-item>
             </el-col>
         </el-row>
@@ -53,6 +57,14 @@
                     <el-select size="small" style="width: 100%" v-model="planForm.frequency" placeholder="请选择执行频率">
                         <el-option v-for="item in frequencyList" :key="item.value" :label="item.label" :value="item.value"/>
                     </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col :span="8">
+                <el-form-item label="失败重试" prop="retry">
+                    <el-radio-group style="width: 60%" v-model="planForm.retry">
+                        <el-radio :label="'Y'">是</el-radio>
+                        <el-radio :label="'N'">否</el-radio>
+                    </el-radio-group>
                 </el-form-item>
             </el-col>
         </el-row>
@@ -115,7 +127,8 @@ export default {
                 id: "",
                 name: "",
                 versionId: "",
-                environmentId: "",
+                environmentId: null,
+                maxThread: 5,
                 engineId: "",
                 retry:"N",
                 startTime: "",
@@ -127,10 +140,6 @@ export default {
             versionList: [],
             environmentList: [],
             engineList: [],
-            retryList: [
-                {value: "Y", label: "是"},
-                {value: "N", label: "否"}
-            ],
             expireTimeOption:{
                 disabledDate (date) {
                     return date.getTime() < Date.now() - 24 * 60 * 60 * 1000;
@@ -149,8 +158,8 @@ export default {
             rules: {
                 name: [{ required: true, message: '计划名称不能为空', trigger: 'blur' }],
                 versionId: [{ required: true, message: '版本不能为空', trigger: 'blur' }],
-                environmentId: [{ required: true, message: '执行环境不能为空', trigger: 'blur' }],
-                engineId: [{ required: true, message: '执行不能为空', trigger: 'blur' }],
+                engineId: [{ required: true, message: '执行引擎不能为空', trigger: 'blur' }],
+                maxThread: [{ required: true, message: '最大并发不能为空', trigger: 'blur' }],
                 retry: [{ required: true, message: '失败重试不能为空', trigger: 'blur' }],
                 startTime: [{ required: true, message: '执行开始时间不能为空', trigger: 'blur' },
                             { validator: validateStartTime, trigger: 'blur', required: true }],

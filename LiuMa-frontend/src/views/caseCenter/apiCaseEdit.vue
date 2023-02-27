@@ -18,9 +18,18 @@
         </el-table-column>
         <el-table-column label="接口名称" prop="apiName">
         </el-table-column>
-        <el-table-column label="请求方法" prop="apiMethod">
+        <el-table-column label="请求方式" prop="apiMethod">
         </el-table-column>
         <el-table-column label="接口地址" prop="apiPath">
+        </el-table-column>
+        <el-table-column label="步骤描述" min-width="200px">
+            <template slot-scope="scope">
+                <div v-if="scope.row.edit==true" >
+                  <el-input size="mini" style="width: 85%" v-model="scope.row.description" placeholder="请输入步骤描述" @change="scope.row.edit=false"/>
+                  <i class="el-icon-success" @click="scope.row.edit=false"/>
+                </div>
+                <span v-else>{{scope.row.description}} <i class="el-icon-edit"  @click="scope.row.edit=true"/></span>
+            </template>
         </el-table-column>
         <el-table-column label="操作" width="120px">
             <template slot-scope="scope">
@@ -40,7 +49,7 @@
         </div>
     </el-dialog>
     <!-- 接口编辑界面 -->
-    <el-drawer title="接口详情" :visible.sync="editCaseApiVisible" direction="rtl" :with-header="false" destroy-on-close size="900px">
+    <el-drawer title="接口详情" :visible.sync="editCaseApiVisible" direction="rtl" :with-header="false" destroy-on-close size="920px">
         <div class="api-drawer-header">
             <span style="float: left; font-size: 16px;">接口详情编辑</span>
             <el-button size="small" type="primary" style="float: right;" @click="editCaseApiVisible=false">确定</el-button>
@@ -72,9 +81,9 @@
         </div>
     </el-drawer>
     <!-- 用例调试选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="true" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
-    <run-result :taskId="taskId" :caseType="caseType" :resultVisable="resultVisable" @closeResult="closeResult"/>
+    <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
 </template>
 
@@ -132,11 +141,11 @@ export default {
             activeTab: "body",
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
             resultVisable: false,
             taskId: "",
-            caseType: "API",
             rules: {
                 name: [{ required: true, message: '用例名称不能为空', trigger: 'blur' }],
                 type: [{ required: true, message: '用例类型不能为空', trigger: 'blur' }],
@@ -181,6 +190,8 @@ export default {
                     apiMethod: this.selections[i].method,
                     apiName: this.selections[i].name,
                     apiPath: this.selections[i].path,
+                    description: this.selections[i].description,
+                    edit: false
                 }
                 this.caseForm.caseApis.push(caseApi);
             }
@@ -240,6 +251,7 @@ export default {
                     }
                     for(let i=0;i<data.caseApis.length;i++){
                         let caseApi = data.caseApis[i];
+                        caseApi.edit = false;
                         if(caseApi.header){
                             caseApi.header = JSON.parse(caseApi.header);
                         }

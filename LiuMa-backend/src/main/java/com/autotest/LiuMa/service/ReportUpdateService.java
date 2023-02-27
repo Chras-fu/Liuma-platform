@@ -24,6 +24,9 @@ public class ReportUpdateService {
     @Value("${qiniu.cloud.downloadUrl}")
     private String downloadUrl;  // 七牛云加速域名
 
+    @Value("${cloud.storage.on-off}")
+    private String cloudStorage;  // 云存储开关
+
     @Resource
     private ReportMapper reportMapper;
 
@@ -44,6 +47,9 @@ public class ReportUpdateService {
 
     @Resource
     ReportCollectionCaseWebMapper reportCollectionCaseWebMapper;
+
+    @Resource
+    ReportCollectionCaseAppMapper reportCollectionCaseAppMapper;
 
     public void updateReport(TaskDTO task, List<CaseResultRequest> caseResultList) {
         // 更新报告 每次可更新多条用例
@@ -93,13 +99,14 @@ public class ReportUpdateService {
                     reportCollectionCaseApi.setApiId(transactionResult.getId());
                     reportCollectionCaseApi.setApiName(transactionResult.getName());
                     reportCollectionCaseApi.setApiPath(transactionResult.getContent());
+                    reportCollectionCaseApi.setDescription(transactionResult.getDescription());
                     reportCollectionCaseApi.setExecLog(transactionResult.getLog());
                     reportCollectionCaseApi.setDuring(transactionResult.getDuring());
                     reportCollectionCaseApi.setStatus(getStatusByIndex(transactionResult.getStatus()));
                     reportCollectionCaseApiList.add(reportCollectionCaseApi);
                 }
                 reportCollectionCaseApiMapper.batchAddReportCollectionCaseApi(reportCollectionCaseApiList);
-            }else {
+            }else if(caseResult.getCaseType().equals("WEB")){
                 List<ReportCollectionCaseWeb> reportCollectionCaseWebList = new ArrayList<>();
                 for(int index=1; index <= caseResult.getTransactionList().size(); index++){
                     TransResultRequest transactionResult =caseResult.getTransactionList().get(index-1);
@@ -110,10 +117,17 @@ public class ReportUpdateService {
                     reportCollectionCaseWeb.setOperationId(transactionResult.getId());
                     reportCollectionCaseWeb.setOperationName(transactionResult.getName());
                     reportCollectionCaseWeb.setOperationElement(transactionResult.getContent());
+                    reportCollectionCaseWeb.setDescription(transactionResult.getDescription());
                     reportCollectionCaseWeb.setExecLog(transactionResult.getLog());
                     List<String> screenshot = new ArrayList<>();
                     for(String screenshotId:transactionResult.getScreenShotList()){
-                        String url = downloadUrl + "/" + screenshotId + ".png";
+                        String url;
+                        if(cloudStorage.equals("on")){
+                            url = downloadUrl + "/" + screenshotId + ".png";
+                        }else {
+                            url = "/openapi/screenshot/" + screenshotId.split("_")[0] +
+                                    "/" + screenshotId.split("_")[1] + ".png";
+                        }
                         screenshot.add(url);
                     }
                     reportCollectionCaseWeb.setScreenshot(JSONArray.toJSONString(screenshot));
@@ -121,6 +135,35 @@ public class ReportUpdateService {
                     reportCollectionCaseWebList.add(reportCollectionCaseWeb);
                 }
                 reportCollectionCaseWebMapper.batchAddReportCollectionCaseWeb(reportCollectionCaseWebList);
+            }else {
+                List<ReportCollectionCaseApp> reportCollectionCaseAppList = new ArrayList<>();
+                for(int index=1; index <= caseResult.getTransactionList().size(); index++){
+                    TransResultRequest transactionResult =caseResult.getTransactionList().get(index-1);
+                    ReportCollectionCaseApp reportCollectionCaseApp = new ReportCollectionCaseApp();
+                    reportCollectionCaseApp.setId(UUID.randomUUID().toString());
+                    reportCollectionCaseApp.setReportCollectionCaseId(reportCollectionCase.getId());
+                    reportCollectionCaseApp.setCaseAppIndex(index);
+                    reportCollectionCaseApp.setOperationId(transactionResult.getId());
+                    reportCollectionCaseApp.setOperationName(transactionResult.getName());
+                    reportCollectionCaseApp.setOperationElement(transactionResult.getContent());
+                    reportCollectionCaseApp.setDescription(transactionResult.getDescription());
+                    reportCollectionCaseApp.setExecLog(transactionResult.getLog());
+                    List<String> screenshot = new ArrayList<>();
+                    for(String screenshotId:transactionResult.getScreenShotList()){
+                        String url;
+                        if(cloudStorage.equals("on")){
+                            url = downloadUrl + "/" + screenshotId + ".png";
+                        }else {
+                            url = "/openapi/screenshot/" + screenshotId.split("_")[0] +
+                                    "/" + screenshotId.split("_")[1] + ".png";
+                        }
+                        screenshot.add(url);
+                    }
+                    reportCollectionCaseApp.setScreenshot(JSONArray.toJSONString(screenshot));
+                    reportCollectionCaseApp.setStatus(getStatusByIndex(transactionResult.getStatus()));
+                    reportCollectionCaseAppList.add(reportCollectionCaseApp);
+                }
+                reportCollectionCaseAppMapper.batchAddReportCollectionCaseApp(reportCollectionCaseAppList);
             }
         }
         // 更新报告时间

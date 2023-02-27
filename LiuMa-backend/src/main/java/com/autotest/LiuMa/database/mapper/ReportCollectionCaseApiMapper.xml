@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.ReportCollectionCaseApiMapper">
   <insert id="batchAddReportCollectionCaseApi" parameterType="java.util.List">
-    insert into report_collection_case_api (id, report_collection_case_id, case_api_index, api_id, api_name, api_path, exec_log, during, status)
+    insert into report_collection_case_api (id, report_collection_case_id, case_api_index, api_id, api_name, api_path, description, exec_log, during, status)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id}, #{item.reportCollectionCaseId}, #{item.caseApiIndex}, #{item.apiId}, #{item.apiName}, #{item.apiPath}, #{item.execLog},
+      (#{item.id}, #{item.reportCollectionCaseId}, #{item.caseApiIndex}, #{item.apiId}, #{item.apiName}, #{item.apiPath},  #{item.description}, #{item.execLog},
       #{item.during}, #{item.status})
     </foreach>
   </insert>
   <select id="getReportCaseActionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionCaseTransDTO">
-    select status, api_id as transId, api_name as transName, api_path as content, exec_log, concat(during, 'ms') as during from report_collection_case_api
+    select status, api_id as transId, api_name as transName, api_path as content, description, exec_log, concat(during, 'ms') as during from report_collection_case_api
     where report_collection_case_id = #{reportCaseId} order by case_api_index
   </select>
   <select id="getLastApiReport" parameterType="java.lang.String" resultType="java.lang.String">

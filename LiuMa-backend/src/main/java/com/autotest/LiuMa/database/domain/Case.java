@@ -26,6 +26,8 @@ public class Case implements Serializable {
 
     private String environmentIds;
 
+    private String system;
+
     private String commonParam;
 
     private Long createTime;

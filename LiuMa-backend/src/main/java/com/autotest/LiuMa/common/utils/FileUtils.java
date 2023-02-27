@@ -8,8 +8,10 @@ import com.autotest.LiuMa.common.exception.LMException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 
@@ -99,15 +101,30 @@ public class FileUtils {
         return uploadFile(uploadFile, path, uploadFile.getOriginalFilename());
     }
 
-    public static ResponseEntity<byte[]> downloadFile(String path) {
+    public static void downloadFile(String path, HttpServletResponse response) {
+        File file = new File(path);
+        if (!file.isFile()) {
+            throw new LMException("文件不存在");
+        }
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(response.getOutputStream());
+            FileCopyUtils.copy(bufferedInputStream, bufferedOutputStream);
+        } catch(Exception e){
+            throw new LMException("文件下载失败");
+        }
+    }
+
+    public static ResponseEntity<byte[]> previewImage(String path) {
         File file = new File(path);
         byte[] fileByte= FileUtils.fileToByte(file);
         if(fileByte == null){
             return null;
         }
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .contentType(MediaType.IMAGE_PNG)
                 .body(fileByte);
     }
 

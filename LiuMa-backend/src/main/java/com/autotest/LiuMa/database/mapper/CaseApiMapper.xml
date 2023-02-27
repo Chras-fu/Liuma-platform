@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.autotest.LiuMa.database.mapper.CaseApiMapper">
   <insert id="addCaseApi" parameterType="java.util.List">
-    insert into case_api (id, `index`, case_id, api_id, header, body, query, rest, assertion, relation, controller) values
+    insert into case_api (id, `index`, case_id, api_id, description, header, body, query, rest, assertion, relation, controller) values
     <foreach collection="list" item="item" separator=",">
-      (#{item.id}, #{item.index}, #{item.caseId}, #{item.apiId}, #{item.header}, #{item.body}, #{item.query},
+      (#{item.id}, #{item.index}, #{item.caseId}, #{item.apiId}, #{item.description}, #{item.header}, #{item.body}, #{item.query},
       #{item.rest}, #{item.assertion}, #{item.relation}, #{item.controller})
     </foreach>
   </insert>
@@ -12,7 +12,7 @@
     delete from case_api where case_id = #{caseId}
   </delete>
   <select id="getCaseApiList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CaseApiDTO">
-    select ca.id, ca.index, ca.case_id, ca.api_id, ca.header, ca.body, ca.query, ca.rest, ca.assertion, ca.relation, ca.controller,
+    select ca.id, ca.index, ca.case_id, ca.api_id, ca.description, ca.header, ca.body, ca.query, ca.rest, ca.assertion, ca.relation, ca.controller,
     api.name as apiName, api.path as apiPath, api.method as apiMethod, api.protocol as apiProtocol, api.domain_sign as apiDomainSign from case_api ca
     left join api on api.id = ca.api_id
     where ca.case_id = #{caseId} order by ca.index

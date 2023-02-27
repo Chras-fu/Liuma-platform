@@ -17,6 +17,8 @@ public class CaseApiRequest {
 
     private String apiId;
 
+    private String description;
+
     private JSONArray header;
 
     private JSONObject body;

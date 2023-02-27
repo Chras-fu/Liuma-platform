@@ -5,7 +5,7 @@
     <div>
         <el-form :inline="true" :model="searchForm">
             <el-form-item label="" prop="condition">
-                <el-input size="small" style="width:180px" v-model="searchForm.condition" prefix-icon="el-icon-search" placeholder="请输入用例名称、地址"/>
+                <el-input size="small" style="width:180px" v-model="searchForm.condition" prefix-icon="el-icon-search" placeholder="请输入用例NO、名称"/>
             </el-form-item>
             <el-form-item label="" prop="caseType">
                 <el-select size="small" clearable style="width:100px" v-model="searchForm.caseType" placeholder="用例类型">
@@ -68,7 +68,7 @@ export default {
             },
             modules: [],
             caseListData: [],
-            caseTypes: ["API", "WEB"],
+            caseTypes: ["API", "WEB", "APP"],
         }
     },
     created(){

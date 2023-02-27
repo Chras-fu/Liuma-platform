@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.NotificationMapper">
+    <insert id="saveNotification" parameterType="com.autotest.LiuMa.database.domain.Notification">
+        insert into `notification` (id, name, `type`, params, webhook_url, status, project_id, create_time, update_time) values
+        (#{id}, #{name}, #{type}, #{params},  #{webhookUrl}, #{status}, #{projectId}, #{createTime}, #{updateTime})
+        ON DUPLICATE KEY UPDATE
+        update_time = #{updateTime},
+        name = #{name},
+        `type` = #{type},
+        `params` = #{params},
+        webhook_url = #{webhookUrl},
+        `status` = #{status}
+    </insert>
+    <delete id="deleteNotification" parameterType="java.lang.String">
+        delete from `notification` where id=#{id}
+    </delete>
+    <select id="getNotificationById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">
+        select * from `notification` where id = #{id}
+    </select>
+    <select id="getNotificationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Notification">
+        select * from `notification` where project_id = #{projectId}
+        <if test="condition != null and condition != ''">
+            and `name` like #{condition}
+        </if>
+        order by create_time desc
+    </select>
+</mapper>

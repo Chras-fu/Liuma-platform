@@ -5,7 +5,9 @@ import java.util.List;
 
 public enum OperationType {
     BROWSER("browser", "浏览器"),
+    SYSTEM("system", "系统"),
     PAGE("page", "网页"),
+    VIEW("view", "视图"),
     RELATION("relation", "关联"),
     ASSERTION("assertion", "断言"),
     CONDITION("condition", "条件"),
@@ -28,10 +30,15 @@ public enum OperationType {
         return this.label;
     }
 
-    public static List<String> enumList(){
+    public static List<String> enumList(String type){
         List<String> enumList = new ArrayList<>();
-        enumList.add(BROWSER.name);
-        enumList.add(PAGE.name);
+        if(type.equals("web")){
+            enumList.add(BROWSER.name);
+            enumList.add(PAGE.name);
+        }else {
+            enumList.add(SYSTEM.name);
+            enumList.add(VIEW.name);
+        }
         enumList.add(RELATION.name);
         enumList.add(ASSERTION.name);
         enumList.add(CONDITION.name);

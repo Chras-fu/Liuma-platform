@@ -6,21 +6,31 @@
     <page-header title="编辑集合" :cancel="cancelAdd" :save="saveAdd"/>
     <el-form ref="collectionForm" :rules="rules" :model="collectionForm" label-width="80px">
         <el-row :gutter="40">
-            <el-col :span="15">
+            <el-col :span="10">
                 <el-form-item size="small" label="集合名称" prop="name">
                     <el-input style="width: 100%" v-model="collectionForm.name" placeholder="请输入集合名称"/>
                 </el-form-item>
             </el-col>
-            <el-col :span="9">
-                <el-form-item size="small" label="版本" prop="versionId">
+            <el-col :span="6">
+                <el-form-item size="small" label="迭代版本" prop="versionId">
                     <el-select style="width: 100%" v-model="collectionForm.versionId" placeholder="请选择版本">
                         <el-option v-for="item in versionList" :key="item.id" :label="item.name" :value="item.id"/>
                     </el-select>
                 </el-form-item>
             </el-col>
+            <el-col :span="8">
+                <el-form-item size="small" label="执行设备" prop="deviceId">
+                    <el-select style="width: 90%" v-model="collectionForm.deviceId" clearable placeholder="请选择执行设备">
+                        <el-option v-for="item in deviceList" :key="item.id" :label="item.name" :value="item.id"/>
+                    </el-select>
+                    <el-tooltip style="width:5%" content="当前集合包含APP测试时 执行设备必选" placement="bottom">
+                        <i class="el-icon-info"></i>
+                    </el-tooltip>
+                </el-form-item>
+            </el-col>
         </el-row>
         <el-row :gutter="40">
-            <el-col :span="15">
+            <el-col :span="16">
                 <el-form-item size="small" label="集合描述" style="margin-bottom:0px">
                     <el-input style="width: 100%" :autosize="{ minRows: 4}" type="textarea" clearable placeholder="请输入集合描述" v-model="collectionForm.description" maxlength="200" show-word-limit/>
                 </el-form-item>
@@ -74,11 +84,13 @@ export default {
             collectionForm: {
                 id: "",
                 name: "",
+                deviceId: null,
                 versionId: "",
                 description: "",
                 collectionCases:[]
             },
             versionList: [],
+            deviceList: [],
             rules: {
                 name: [{ required: true, message: '集合名称不能为空', trigger: 'blur' }],
                 versionId: [{ required: true, message: '版本不能为空', trigger: 'blur' }],
@@ -91,8 +103,15 @@ export default {
         this.$root.Bus.$emit('initBread', ["计划中心", "测试集合", "集合编辑"]);
         this.getDetail(this.$route.params);
         this.getVersion();
+        this.getDevice();
     },
     methods: {
+        getDevice(){
+            let url = "/autotest/device/list";
+            this.$post(url, {projectId: this.$store.state.projectId}, response => {
+                this.deviceList = response.data;
+            });
+        },
         // 行拖拽
         rowDrop () {
             // 此时找到的元素是要拖拽元素的父容器

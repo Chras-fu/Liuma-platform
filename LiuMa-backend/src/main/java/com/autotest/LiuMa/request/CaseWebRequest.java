@@ -17,6 +17,8 @@ public class CaseWebRequest {
 
     private String operationId;
 
+    private String description;
+
     private JSONArray element;
 
     private JSONArray data;

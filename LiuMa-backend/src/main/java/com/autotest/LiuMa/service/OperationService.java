@@ -34,10 +34,10 @@ public class OperationService {
             JSONArray data = JSONArray.parseArray(operation.getData());
             operation.setData(data.toJSONString());
         }
-        if(operation.getId().equals("") || operation.getId() == null){ // 新增控件
-            Operation oldOperation = operationMapper.getOperationByName(operation.getName(), operation.getProjectId());
+        if(operation.getId().equals("") || operation.getId() == null){ // 新增操作
+            Operation oldOperation = operationMapper.getOperationByName(operation.getName(), operation.getProjectId(), operation.getUiType(), operation.getSystem());
             if(oldOperation != null){
-                throw new DuplicateContentException("函数名称重复");
+                throw new DuplicateContentException("操作名称重复");
             }
             operation.setId(UUID.randomUUID().toString());
             operation.setCreateTime(System.currentTimeMillis());
@@ -50,22 +50,22 @@ public class OperationService {
         }
     }
 
-    public void deleteOperation(String id) {
-        operationMapper.deleteOperation(id);
+    public void deleteOperation(String id, String uiType) {
+        operationMapper.deleteOperation(id, uiType);
     }
 
-    public Operation getOperationDetail(String operationId) {
-        return operationMapper.getOperationDetail(operationId);
+    public Operation getOperationDetail(String operationId, String uiType) {
+        return operationMapper.getOperationDetail(operationId, uiType);
     }
 
-    public List<OperationGroupDTO> getGroupOperationList(String projectId) {
+    public List<OperationGroupDTO> getGroupOperationList(String uiType, String system, String projectId) {
         List<OperationGroupDTO> operationGroupDTOList = new ArrayList<>();
-        List<String> operationTypeList = OperationType.enumList();
+        List<String> operationTypeList = OperationType.enumList(uiType);
         for(String operationType:operationTypeList){
             OperationGroupDTO operationGroup = new OperationGroupDTO();
             operationGroup.setId(operationType);
             operationGroup.setName(OperationType.valueOf(operationType.toUpperCase(Locale.ROOT)).toLabel());
-            List<OperationDTO> operationList = operationMapper.getGroupOperationList(projectId, operationType);
+            List<OperationDTO> operationList = operationMapper.getGroupOperationList(projectId, uiType, system, operationType);
             for (OperationDTO operation:operationList){
                 JSONArray elements = (JSONArray) JSONArray.parse(operation.getElement());
                 for(int i=0; i< elements.size(); i++){
@@ -92,7 +92,7 @@ public class OperationService {
         if(request.getCondition() != null && !request.getCondition().equals("")){
             request.setCondition("%"+request.getCondition()+"%");
         }
-        return operationMapper.getOperationList(request.getProjectId(), request.getOperationType(), request.getCondition());
+        return operationMapper.getOperationList(request);
     }
 
 }

@@ -18,6 +18,8 @@ public class ReportCollectionCaseWeb implements Serializable {
 
     private String operationElement;
 
+    private String description;
+
     private String screenshot;
 
     private String execLog;

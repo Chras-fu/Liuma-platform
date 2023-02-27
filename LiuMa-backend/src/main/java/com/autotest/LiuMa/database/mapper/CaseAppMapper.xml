@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.CaseAppMapper">
+  <insert id="addCaseApp" parameterType="java.util.List">
+    insert into case_app (id, `index`, case_id, operation_id, description, element, data) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.id}, #{item.index}, #{item.caseId}, #{item.operationId}, #{item.description}, #{item.element}, #{item.data})
+    </foreach>
+  </insert>
+  <delete id="deleteCaseApp" parameterType="java.lang.String">
+    delete from case_app where case_id = #{caseId}
+  </delete>
+  <select id="getCaseAppList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CaseAppDTO">
+    select cw.id, cw.index, cw.case_id, cw.operation_id, cw.description, cw.element, cw.data, op.name as operationName, op.type as operationType
+    from case_app cw left join operation_${caseType} op on op.id = cw.operation_id
+    where cw.case_id = #{caseId} order by cw.index
+  </select>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ControlMapper">
+  <insert id="addControl" parameterType="com.autotest.LiuMa.database.domain.Control">
+    insert into control (id, name, `system`, module_id, project_id, `by`, expression, description,
+    create_time, update_time, create_user, update_user, status) values
+    ( #{id}, #{name}, #{system}, #{moduleId}, #{projectId}, #{by}, #{expression}, #{description},
+    #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+  </insert>
+  <update id="updateControl" parameterType="com.autotest.LiuMa.database.domain.Control">
+    update control set name=#{name}, `system`=#{system}, module_id=#{moduleId}, `by`=#{by}, expression=#{expression},
+    description=#{description}, update_time=#{updateTime}, update_user=#{updateUser}
+    where id=#{id}
+  </update>
+  <delete id="deleteControl" parameterType="java.lang.String">
+    update control set status = 'Trash' where id = #{id}
+  </delete>
+  <select id="getModuleControlList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Control">
+    select * from control where project_id = #{projectId} and module_id = #{moduleId} and `system`=#{system} and status != 'Trash'
+  </select>
+  <select id="getControlList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.ControlDTO">
+    select control.id, control.num, control.name, control.`system`, control.module_id, control.project_id, vm.name as moduleName,
+    control.by, control.expression, control.description,
+    control.create_user, control.update_user, control.create_time, control.update_time, u.username as username from control
+    left join view_module vm on vm.id = control.module_id
+    left join user u on u.id = control.create_user
+    where control.status != 'Trash' and control.project_id = #{projectId}
+    <if test="moduleId != null and moduleId != ''">
+      and control.module_id = #{moduleId}
+    </if>
+    <if test="system != null and system != ''">
+      and control.`system` = #{system}
+    </if>
+    <if test="createUser != null and createUser != ''">
+      and control.create_user = #{createUser}
+    </if>
+    <if test="condition != null and condition != ''">
+      and ((control.name like #{condition}) or (control.num like #{condition}))
+    </if>
+    order by control.update_time desc
+  </select>
+  <select id="getControlById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ControlDTO">
+    select con.id, con.name, con.`system`, con.module_id, con.by, con.expression, vm.name as moduleName
+    from control con
+    left join view_module vm on vm.id = con.module_id
+    where con.id = #{id}
+  </select>
+  <select id="getControlByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Control">
+    select * from control where module_id = #{moduleId} and name = #{name} and `system`=#{system} limit 1
+  </select>
+</mapper>

@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.service;
 
 import com.autotest.LiuMa.common.constants.PermissionEnum;
+import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.CommonParamMapper;
 import com.autotest.LiuMa.database.mapper.ProjectMapper;
@@ -62,6 +63,10 @@ public class ProjectService {
     }
 
     public void saveProject(Project project){
+        Project oldProject = projectMapper.getProjectByName(project.getName());
+        if(oldProject != null){
+            throw new LMException("项目重名");
+        }
         // 新增项目
         project.setId(UUID.randomUUID().toString());
         project.setCreateTime(System.currentTimeMillis());

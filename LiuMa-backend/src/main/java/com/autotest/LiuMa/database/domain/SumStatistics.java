@@ -18,9 +18,9 @@ public class SumStatistics implements Serializable {
 
     private Integer webCaseNewWeek=0;
 
-    private Integer planRunTotal=0;
+    private Integer appCaseTotal=0;
 
-    private Integer planRunToday=0;
+    private Integer appCaseNewWeek=0;
 
     private Integer caseRunTotal=0;
 

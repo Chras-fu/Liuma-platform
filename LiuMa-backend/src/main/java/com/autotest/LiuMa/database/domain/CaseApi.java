@@ -14,6 +14,8 @@ public class CaseApi implements Serializable {
 
     private String apiId;
 
+    private String description;
+
     private String header;
 
     private String body;

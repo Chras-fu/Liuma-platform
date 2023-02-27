@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.autotest</groupId>
 	<artifactId>LiuMa</artifactId>
-	<version>1.0.3</version>
+	<version>1.1.0</version>
 	<name>LiuMa</name>
 	<description>autotest</description>
 	<properties>
@@ -34,6 +34,15 @@
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>4.1.2</version>
+        </dependency>
 		<!-- flyway sql初始化-->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -43,7 +52,6 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 	    <!--	日志插件	-->
 		<dependency>
@@ -68,17 +76,6 @@
 			<groupId>com.github.pagehelper</groupId>
 			<artifactId>pagehelper</artifactId>
 			<version>5.0.3</version>
-		</dependency>
-		<!--	阿里云邮件	-->
-		<dependency>
-			<groupId>com.aliyun</groupId>
-			<artifactId>aliyun-java-sdk-core</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aliyun</groupId>
-			<artifactId>aliyun-java-sdk-dm</artifactId>
-			<version>3.1.0</version>
 		</dependency>
 		<!--	七牛云存储	-->
 		<dependency>
@@ -109,6 +106,18 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
+		</dependency>
+		<!-- swagger3 解析 -->
+		<dependency>
+			<groupId>io.swagger.parser.v3</groupId>
+			<artifactId>swagger-parser</artifactId>
+			<version>2.1.2</version>
+		</dependency>
+		<!--	jsonpath	-->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
 		</dependency>
 	</dependencies>
 	<build>

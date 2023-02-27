@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.ApplicationMapper">
+  <insert id="saveApplication" parameterType="com.autotest.LiuMa.database.domain.Application">
+    insert into `application` (id, name, `system`, app_id, main_activity, description, project_id, create_time, update_time)
+    values (#{id}, #{name}, #{system}, #{appId}, #{mainActivity}, #{description}, #{projectId}, #{createTime}, #{updateTime})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="appId != null and appId != ''">
+      ,app_id = #{appId}
+    </if>
+    <if test="mainActivity != null and mainActivity != ''">
+      ,main_activity = #{mainActivity}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+  </insert>
+  <delete id="deleteApplication" parameterType="java.lang.String">
+    delete from `application` where id = #{id}
+  </delete>
+  <select id="getApplicationByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
+    select * from `application` where project_id = #{projectId} and name = #{name}
+  </select>
+  <select id="getApplicationById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
+    select * from `application` where id = #{id}
+  </select>
+  <select id="getApplicationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Application">
+    select * from `application` where project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and name like #{condition}
+    </if>
+    <if test="system != null and system != ''">
+      and `system` = #{system}
+    </if>
+    order by create_time desc
+  </select>
+</mapper>

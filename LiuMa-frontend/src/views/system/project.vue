@@ -32,7 +32,7 @@
         <el-table-column fixed="right" align="operation" label="操作" width="100px">
             <template slot-scope="scope">
                 <el-button v-if="scope.row.status === 'Trash'" type="text" size="mini" @click="recoverProject(scope.row.id)">恢复</el-button>
-                <el-button v-else type="text" size="mini" @click="deleteProject(scope.row.id)">删除</el-button>
+                <el-button v-else type="text" size="mini" @click="deleteProject(scope.row.id)">停用</el-button>
             </template>
         </el-table-column>
     </el-table>

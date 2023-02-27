@@ -2,9 +2,8 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.common.constants.ReportSourceType;
-import com.autotest.LiuMa.common.constants.ReportStatus;
-import com.autotest.LiuMa.common.constants.TaskType;
+import com.autotest.LiuMa.common.constants.*;
+import com.autotest.LiuMa.common.utils.HttpUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.StatisticsDTO;
@@ -44,19 +43,45 @@ public class ScheduleJobService {
     @Resource
     private ProjectMapper projectMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
+    @Resource
+    private RunService runService;
+
     public void updateLostHeartbeatEngine(){
         Long minLastHeartbeatTime = System.currentTimeMillis() - 3*60*1000; // 三分钟没有心跳监控则离线
         engineMapper.updateLostHeartbeatEngine(minLastHeartbeatTime);
     }
 
     public void updateTimeoutTask(){
-        Long minLastUploadTime = System.currentTimeMillis() - 30*60*1000;   // 半小时内没有结果返回则任务超时
+        Long minLastUploadTime = System.currentTimeMillis() - 10*60*1000;   // 十分钟内没有结果返回则任务超时
         Long minLastToRunTime = System.currentTimeMillis() - 2*60*60*1000;   // 两小时内没有执行则任务超时
         List<Report> reports = reportMapper.selectTimeoutReport(minLastUploadTime, minLastToRunTime);
         for(Report report:reports){
             reportMapper.updateReportStatus(ReportStatus.DISCONTINUE.toString(), report.getId());
             taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), report.getTaskId());
             reportMapper.updateReportEndTime(report.getId(), System.currentTimeMillis(), System.currentTimeMillis());
+            // 释放设备
+            runService.stopDeviceWhenRunEnd(report.getTaskId());
+        }
+    }
+
+    public void updateTimeoutDevice(){
+        List<Device> devices = deviceMapper.selectTimeoutDevice();
+        for (Device device:devices){
+            JSONObject sources = JSONObject.parseObject(device.getSources());
+            device.setStatus(DeviceStatus.COLDING.toString());
+            device.setUpdateTime(System.currentTimeMillis());
+            device.setSources("{}");
+            device.setUser("");
+            device.setTimeout(0);
+            deviceMapper.updateDevice(device);
+            new Thread(() -> {
+                // 调用设备冷却接口
+                String url = sources.getString("url");
+                HttpUtils.post(url + "/cold?serial=" + device.getSerial(), null);
+            }).start();
         }
     }
 
@@ -67,7 +92,7 @@ public class ScheduleJobService {
         List<PlanSchedule> planSchedules = planScheduleMapper.getToRunPlanScheduleList(minNextRunTime, maxNextRunTime);
         for(PlanSchedule planSchedule: planSchedules){
             Plan plan = planMapper.getPlanDetail(planSchedule.getPlanId());
-            String runName = plan.getName() +"-"+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            String runName = "【定时执行】" + plan.getName() +"-"+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             Task task = new Task();
             task.setId(UUID.randomUUID().toString());
             task.setName(runName);
@@ -86,6 +111,7 @@ public class ScheduleJobService {
             report.setName(runName);
             report.setTaskId(task.getId());
             report.setEnvironmentId(plan.getEnvironmentId());
+            report.setDeviceId(null);
             report.setSourceType(ReportSourceType.PLAN.toString());
             report.setSourceId(plan.getId());
             report.setStatus(ReportStatus.PREPARED.toString());
@@ -106,7 +132,9 @@ public class ScheduleJobService {
             reportStatistics.setTotal(total);
             reportMapper.addReportStatistics(reportStatistics);
             // 回写定时任务表下次执行时间
-            planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
+            while (!planSchedule.getFrequency().equals(PlanFrequency.ONLY_ONE.toString()) && planSchedule.getNextRunTime() < System.currentTimeMillis()){ // 找到大于当前时间的日期
+                planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
+            }
             planScheduleMapper.updatePlanSchedule(planSchedule);
         }
     }
@@ -153,9 +181,12 @@ public class ScheduleJobService {
             if(statisticsDTO.getName().equals("API")){
                 sum.setApiCaseTotal(statisticsDTO.getCount());
                 daily.setApiCaseSum(statisticsDTO.getCount());
-            }else {
+            }else if(statisticsDTO.getName().equals("WEB")){
                 sum.setWebCaseTotal(statisticsDTO.getCount());
                 daily.setWebCaseSum(statisticsDTO.getCount());
+            }else {
+                sum.setAppCaseTotal(statisticsDTO.getCount());
+                daily.setAppCaseSum(statisticsDTO.getCount());
             }
         }
         List<StatisticsDTO> caseNewToday = statisticsMapper.getCaseTodayNewCountByProject();
@@ -163,8 +194,10 @@ public class ScheduleJobService {
             DailyStatistics daily = dailyStatisticsMap.get(statisticsDTO.getProjectId());
             if(statisticsDTO.getName().equals("API")){
                 daily.setApiCaseNew(statisticsDTO.getCount());
-            }else {
+            }else if(statisticsDTO.getName().equals("WEB")){
                 daily.setWebCaseNew(statisticsDTO.getCount());
+            }else {
+                daily.setAppCaseNew(statisticsDTO.getCount());
             }
         }
         List<StatisticsDTO> caseNewWeek = statisticsMapper.getCaseWeekNewCountByProject();
@@ -172,8 +205,10 @@ public class ScheduleJobService {
             SumStatistics sum = sumStatisticsMap.get(statisticsDTO.getProjectId());
             if (statisticsDTO.getName().equals("API")){
                 sum.setApiCaseNewWeek(statisticsDTO.getCount());
-            }else {
+            }else if(statisticsDTO.getName().equals("WEB")){
                 sum.setWebCaseNewWeek(statisticsDTO.getCount());
+            }else {
+                sum.setAppCaseNewWeek(statisticsDTO.getCount());
             }
         }
         List<StatisticsDTO> caseRunToday = statisticsMapper.getCaseTodayRunCountByProject();
@@ -182,20 +217,13 @@ public class ScheduleJobService {
             if (statisticsDTO.getName().equals("API")){
                 daily.setApiCaseRun(statisticsDTO.getCount());
                 daily.setApiCasePassRate(statisticsDTO.getPassRate());
-            }else {
+            }else if(statisticsDTO.getName().equals("WEB")){
                 daily.setWebCaseRun(statisticsDTO.getCount());
                 daily.setWebCasePassRate(statisticsDTO.getPassRate());
+            }else {
+                daily.setAppCaseRun(statisticsDTO.getCount());
+                daily.setAppCasePassRate(statisticsDTO.getPassRate());
             }
-        }
-        List<StatisticsDTO> planRunTotal = statisticsMapper.getPlanRunCountByProject();
-        for (StatisticsDTO statisticsDTO: planRunTotal){
-            SumStatistics sum = sumStatisticsMap.get(statisticsDTO.getProjectId());
-            sum.setPlanRunTotal(statisticsDTO.getCount());
-        }
-        List<StatisticsDTO> planRunToday = statisticsMapper.getPlanTodayRunCountByProject();
-        for (StatisticsDTO statisticsDTO: planRunToday){
-            SumStatistics sum = sumStatisticsMap.get(statisticsDTO.getProjectId());
-            sum.setPlanRunToday(statisticsDTO.getCount());
         }
         List<StatisticsDTO> caseRunTotal = statisticsMapper.getCaseTotalRunCountByProject();
         for (StatisticsDTO statisticsDTO: caseRunTotal){

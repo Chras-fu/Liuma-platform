@@ -14,6 +14,8 @@ public class CaseWeb implements Serializable {
 
     private String operationId;
 
+    private String description;
+
     private String element;
 
     private String data;

@@ -1,12 +1,15 @@
 package com.autotest.LiuMa.controller;
 
+import com.autotest.LiuMa.dto.ReportDTO;
 import com.autotest.LiuMa.request.EngineRequest;
+import com.autotest.LiuMa.request.RunRequest;
 import com.autotest.LiuMa.response.TaskResponse;
 import com.autotest.LiuMa.service.OpenApiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/openapi")
@@ -51,12 +54,32 @@ public class OpenApiController {
     }
 
     @GetMapping("/task/file/download/{taskId}")
-    public ResponseEntity<byte[]> downloadTaskFile(@PathVariable String taskId) {
-        return openApiService.downTaskFile(taskId);
+    public void downloadTaskFile(@PathVariable String taskId, HttpServletResponse response) {
+        openApiService.downTaskFile(taskId, response);
     }
 
-    @GetMapping("/test/file/download/{fileId}")
-    public ResponseEntity<byte[]> downloadTestFile(@PathVariable String fileId) {
-        return openApiService.downTestFile(fileId);
+    @GetMapping("/download/test/file/{fileId}")
+    public void downloadTestFile(@PathVariable String fileId, HttpServletResponse response) {
+        openApiService.downloadTestFile(fileId, response);
+    }
+
+    @GetMapping("/download/package/{date}/{fileId}/{packageName}")
+    public void downloadAppPackage(@PathVariable String date, @PathVariable String fileId,  @PathVariable String packageName, HttpServletResponse response) {
+        openApiService.downloadAppPackage(date, fileId, packageName, response);
+    }
+
+    @GetMapping("/screenshot/{date}/{imageId}")
+    public ResponseEntity<byte[]> previewImage(@PathVariable String date, @PathVariable String imageId) {
+        return openApiService.previewImage(date, imageId);
+    }
+
+    @PostMapping("/exec/test/plan")
+    public String execTestPlan(@RequestBody RunRequest request) {
+        return openApiService.execTestPlan(request);
+    }
+
+    @PostMapping("/exec/result/{taskId}")
+    public ReportDTO getPlanReport(@PathVariable String taskId) {
+        return openApiService.getPlanReport(taskId);
     }
 }

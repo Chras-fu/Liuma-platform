@@ -64,7 +64,8 @@
     <!-- 分页组件 -->
     <Pagination v-bind:child-msg="pageparam" @callFather="collectionCallFather"/>
     <!-- 集合执行选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showEnvironment="showEnvironment" :showDevice="showDevice" 
+        :deviceSystem="deviceSystem" @closeRun="closeRun" @run="run($event)"/>
   </div>
 </template>
 
@@ -92,9 +93,13 @@ export default {
                 total: 0
             },
             runVisible: false,
+            showEnvironment: false,
+            showDevice: false,
+            deviceSystem: null,
             runForm: {
                 engineId: "",
-                environmentId: ""
+                environmentId: null,
+                deviceId: null
             },
         }
     },
@@ -201,14 +206,27 @@ export default {
             this.$router.push({path: '/planManage/testCollection/add'})
         },
         runCollection(row){
-            this.runForm.engineId = 'system';
-            this.runForm.environmentId = "";
-            this.runForm.sourceType = "collection";
-            this.runForm.sourceId = row.id;
-            this.runForm.sourceName = row.name;
-            this.runForm.taskType = "run";
-            this.runForm.projectId = this.$store.state.projectId;
-            this.runVisible = true;
+            let url = "/autotest/collection/types/" + row.id;
+            this.$get(url, response =>{
+                this.showEnvironment = response.data.needEnvironment;
+                this.showDevice = response.data.hasAndroid || response.data.hasApple;
+                if(response.data.hasAndroid){
+                    this.deviceSystem = "android";
+                }
+                if(response.data.hasApple){
+                    this.deviceSystem = "apple";
+                }
+
+                this.runForm.engineId = 'system';
+                this.runForm.environmentId = null;
+                this.runForm.deviceId = null;
+                this.runForm.sourceType = "collection";
+                this.runForm.sourceId = row.id;
+                this.runForm.sourceName = row.name;
+                this.runForm.taskType = "run";
+                this.runForm.projectId = this.$store.state.projectId;
+                this.runVisible = true;
+            });
         },
         closeRun(){
             this.runVisible = false;
@@ -217,10 +235,7 @@ export default {
             let url = '/autotest/run';
             this.$post(url, runForm, response =>{
                 this.$message.success("执行成功 执行结果请查看报告");
-                let taskId = response.data.id;
-                // 执行结果框
             });
-
             this.runVisible = false;
         },
         // 编辑集合
