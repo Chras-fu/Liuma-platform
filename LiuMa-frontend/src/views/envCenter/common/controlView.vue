@@ -165,7 +165,7 @@ export default {
         drawAllNodeFromSource(source) {
             let tree = [];
             let that = this;
-            if(typeof source === 'object'){
+            if(this.system === 'android'){
                 source._type = this.packageName;
                 source.name = this.activity;
                 tree.push(this.sourceToTree(source));
@@ -191,7 +191,7 @@ export default {
                 return nodes;
             }
             let nodes = [];
-            if(typeof source === 'object'){
+            if(this.system === 'android'){
                 nodes = sourceToNodes(source);
             }else{
                 source.forEach(function(s){
