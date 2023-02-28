@@ -168,8 +168,14 @@ export default {
     components:{PageHeader, BaseInfo, RunForm, SelectTree, RunResult},
     name: 'AppCaseEdit',
     props:{
-        caseId: String,
-        system: String
+        caseId: {
+          type: String,
+          default: null
+        },
+        system: {
+          type: String,
+          default: null
+        }
     },
     data() {
         return{
