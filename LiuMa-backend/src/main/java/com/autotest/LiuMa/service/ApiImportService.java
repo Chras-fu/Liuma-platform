@@ -3,6 +3,7 @@ package com.autotest.LiuMa.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.domain.Api;
 import com.autotest.LiuMa.dto.JsonSchemaItemDTO;
 import com.autotest.LiuMa.database.mapper.ApiMapper;
@@ -15,8 +16,12 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 @Service
@@ -26,254 +31,244 @@ public class ApiImportService {
 
     private Components components;
 
-    // api file is valid ?
-    public boolean verifyApi(String data, String platformType) {
-        JSONObject jsonObject = JSON.parseObject(data);
-        if (platformType.equals("postman")) {
-            Object info = jsonObject.get("info");
+    public void importApi(MultipartFile file,String sourceType, String projectId, String moduleId, String userId){
+        try {
+            StringBuilder stringBuilder ;
+            InputStream bb = file.getInputStream();
+            InputStreamReader streamReader = new InputStreamReader(bb);
+            BufferedReader reader = new BufferedReader(streamReader);
+            String line;
+            stringBuilder = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            reader.close();
+            bb.close();
+            if (this.verifyApi(stringBuilder.toString(), sourceType)){
+                if(sourceType.equals("postman")){
+                    this.savePostmanApi(stringBuilder.toString(), projectId, moduleId, userId);
+                }else if(sourceType.equals("swagger")){
+                    this.saveSwaggerApi(stringBuilder.toString(), projectId, moduleId, userId);
+                }
+            }else{
+                throw new LMException("格式校验错误 请检查文件");
+            }
+        } catch (Exception e) {
+            throw new LMException(e.getMessage());
+        }
+    }
+
+    private boolean verifyApi(String data, String sourceType) {
+        JSONObject json = JSONObject.parseObject(data);
+        if (sourceType.equals("postman")) {
+            JSONObject info = json.getJSONObject("info");
             if (info == null) {
-                System.out.println("postman_file missing info");
                 return false;
             } else {
-                JSONObject jsonObject1 = JSON.parseObject(info.toString());
-                if (jsonObject1.get("_postman_id") == null) {
-                    System.out.println("postman_file missing postman_id");
-                    return false;
-                }
+                return info.getString("_postman_id") != null;
             }
-            return true;
-        } else {
+        } else if(sourceType.equals("swagger")){
             //swagger3格式文件的基本校验
-            return jsonObject.get("openapi") != null && jsonObject.get("servers") != null && jsonObject.get("paths") != null && jsonObject.get("components") != null;
+            return json.get("openapi") != null && json.get("servers") != null && json.get("paths") != null && json.get("components") != null;
+        }
+        return false;
+    }
+
+    private void savePostmanApi(String data, String projectId, String moduleId, String userId){
+        JSONObject requestJsonObject = JSON.parseObject(data);
+        LinkedList<JSONObject> apiInfoList = new LinkedList<>();  //存放每个api信息的列表
+        List<Object> apiList = requestJsonObject.getJSONArray("item");
+        for (Object anApiList : apiList) {
+            JSONObject json = JSONObject.parseObject(anApiList.toString());
+            //处理含有文件夹的情况(目前仅支持单层文件夹)
+            if (json.getJSONArray("item") != null){
+                for (int k = 0; k < json.getJSONArray("item").size(); k++) {
+                    apiInfoList.add((JSONObject)json.getJSONArray("item").get(k));
+                }
+                continue;
+            }
+            apiInfoList.add(json);
+        }
+        for (JSONObject jsonObject: apiInfoList){
+            Api postmanApi = new Api();
+            Map apiInfoMap = JSONObject.parseObject(jsonObject.toJSONString());
+            Map requestMap = (Map) apiInfoMap.get("request");
+            Map urlMap = (Map) requestMap.get("url");
+            List apiPathList = (List) urlMap.get("path");
+            String apiPath = String.format("/%s", String.join("/", apiPathList));
+            List headerList = (List) requestMap.get("header");
+
+            //组装header的存储数据
+            ArrayList headerSaveList = new ArrayList();
+            for (Object tmpHeaderList : headerList) {
+                HashMap headerMap = new HashMap(); //final save map
+                Map headerTmpMap = JSON.parseObject(tmpHeaderList + "", Map.class);
+                headerMap.put("name", headerTmpMap.get("key") + "");
+                headerMap.put("value", headerTmpMap.get("value") + "");
+                JSONObject headerJsonObject = new JSONObject(headerMap);
+
+                headerSaveList.add(JSON.toJSONString(headerJsonObject));
+            }
+
+            //query参数的提取 + 组装
+            JSONArray querySaveArray = new JSONArray(); //final save Array
+            List<Map<String, String>> queryList = (List) urlMap.get("query");  //postman api query param
+            if (queryList != null) {
+                for (Map<String, String> queryJsonMap : queryList
+                ) {
+                    JSONObject tmpQueryObject = new JSONObject();
+                    tmpQueryObject.put("name", queryJsonMap.get("key"));
+                    tmpQueryObject.put("value", queryJsonMap.get("value"));
+                    tmpQueryObject.put("required", true);
+                    querySaveArray.add(tmpQueryObject);
+                }
+            }
+            //body的提取 + 组装数据 逻辑
+            Map bodyMap = (Map) requestMap.get("body");
+            JSONObject bodySaveObject = new JSONObject();  //final save body data
+            if (bodyMap != null) {
+                JSONArray tmpEmptyArray = new JSONArray();
+                if (bodyMap.get("options") != null && bodyMap.get("mode").equals("raw")) {  //json格式
+                    bodySaveObject.put("raw", "");
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpEmptyArray);
+                    bodySaveObject.put("json", bodyMap.get("raw"));
+                    bodySaveObject.put("type", "json");
+                } else if (bodyMap.get("mode").equals("raw")) {    //text格式
+                    bodySaveObject.put("raw", bodyMap.get("raw"));
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpEmptyArray);
+                    bodySaveObject.put("json", "");
+                    bodySaveObject.put("type", "raw");
+                } else if (bodyMap.get("mode").equals("formdata")) {  //formdata格式
+                    JSONArray tmpDataArray = new JSONArray(); // use for form behind
+                    List<Map<String, String>> postmanFormList = (List) bodyMap.get("formdata");
+                    for (Map<String, String> tmpPostmanFormList : postmanFormList) {
+                        tmpDataArray.add(packageData(tmpPostmanFormList.get("key"), tmpPostmanFormList.get("type"), tmpPostmanFormList.get("value")));
+                    }
+
+                    bodySaveObject.put("raw", "");
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpDataArray);//todo
+                    bodySaveObject.put("json", "");
+                    bodySaveObject.put("type", "form-data");
+                } else if (bodyMap.get("mode").equals("urlencoded")) {  //urlencoded格式
+                    JSONArray tmpDataArray = new JSONArray(); // use for form behind
+                    List<Map<String, String>> postmanFormList = (List) bodyMap.get("urlencoded");
+                    for (Map<String, String> aPostmanFormList : postmanFormList) {
+                        tmpDataArray.add(packageData(aPostmanFormList.get("key"), aPostmanFormList.get("type"), aPostmanFormList.get("value")));
+                    }
+                    bodySaveObject.put("raw", "");
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpDataArray);//todo
+                    bodySaveObject.put("json", "");
+                    bodySaveObject.put("type", "form-urlencoded");
+                }
+            }
+
+            postmanApi.setId(UUID.randomUUID() + "");
+            postmanApi.setName(((JSONObject) apiInfoMap).getString("name"));
+            postmanApi.setLevel("P0");
+            postmanApi.setModuleId(moduleId);
+            postmanApi.setProjectId(projectId);
+            postmanApi.setHeader(headerSaveList.toString());
+            postmanApi.setBody(bodySaveObject.toJSONString());
+            postmanApi.setQuery(querySaveArray.toString());
+            postmanApi.setRest("[]"); //postman暂不涉及rest参数的存储
+            postmanApi.setMethod(requestMap.get("method").toString());
+            postmanApi.setPath(apiPath);
+            postmanApi.setProtocol((urlMap.get("protocol").toString()).toUpperCase());
+            postmanApi.setDomainSign("");
+            postmanApi.setDescription("postman_api");
+
+            postmanApi.setCreateTime(System.currentTimeMillis());
+            postmanApi.setUpdateTime(System.currentTimeMillis());
+            postmanApi.setUpdateUser(userId);
+            postmanApi.setCreateUser(userId);
+            postmanApi.setStatus("Normal");
+
+            apiMapper.addApi(postmanApi);
         }
     }
 
-    //处理api组成的List, 依次提取api的信息, 然后存数据库; 主方法是Map存储的信息, 这里提取出来具体的参数
-    private void handleApiList(List<JSONObject> apiInfoList, String platformType, String projectId, String moduleId, String userId){
-        if (platformType.equals("postman")){
-            for (JSONObject jsonObject: apiInfoList){
-                Api postmanApi = new Api();
-                Map apiInfoMap = JSONObject.parseObject(jsonObject.toJSONString());
-                Map requestMap = (Map) apiInfoMap.get("request");
-                Map urlMap = (Map) requestMap.get("url");
-                List apiPathList = (List) urlMap.get("path");
-                String apiPath = String.format("/%s", String.join("/", apiPathList));
-                List headerList = (List) requestMap.get("header");
-                System.out.println("apiHeader: " + headerList);
+    private void saveSwaggerApi(String data, String projectId, String moduleId, String userId){
+        SwaggerParseResult result = new OpenAPIParser().readContents(data,null,null);
+        //获取方法swagger对象
+        OpenAPI openAPI = result.getOpenAPI();
+        //获取方法对象集合
+        Paths paths = openAPI.getPaths();
+        // 获取所有方法路径
+        Set<String> pathNames = paths.keySet();
+        // 获取实体类对象集合
+        this.components = openAPI.getComponents();
+        for (String pathName : pathNames) {
+            Api swaggerApi = new Api();
+            PathItem pathItem = paths.get(pathName);
+            swaggerApi.setId(UUID.randomUUID().toString());
+            swaggerApi.setLevel("P0");
+            swaggerApi.setModuleId(moduleId);
+            swaggerApi.setProjectId(projectId);
+            JSONObject bodySaveObject = new JSONObject();  //保存body参数
+            JSONArray tmpDataArray = new JSONArray(); // /保存form参数
+            Map<String, Object> tmpJsonDateObject = new HashMap<>();  //保存json参数
+            JSONArray tmpRawDataArray = new JSONArray();  //保存raw参数
 
-                //组装header的存储数据
-                ArrayList headerSaveList = new ArrayList();
-                for (Object tmpHeaderList : headerList) {
-                    HashMap headerMap = new HashMap(); //final save map
-                    Map headerTmpMap = JSON.parseObject(tmpHeaderList + "", Map.class);
-                    headerMap.put("name", headerTmpMap.get("key") + "");
-                    headerMap.put("value", headerTmpMap.get("value") + "");
-                    JSONObject headerJsonObject = new JSONObject(headerMap);
+            swaggerApi.setHeader("[]");   //一般不涉及header数据的提取
+            if (pathItem.getPost() != null){
+                Operation operation = pathItem.getPost();
+                swaggerApi.setName(pathItem.getPost().getSummary());
+                //解析api请求对象body
+                parseRequestBody(operation, tmpJsonDateObject,tmpDataArray,tmpRawDataArray);
+                JSONArray tmpEmptyArray = new JSONArray();
+                if (!tmpDataArray.isEmpty()){
+                    bodySaveObject.put("raw", "");
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpDataArray);//todo
+                    bodySaveObject.put("json", "");
+                    bodySaveObject.put("type", "form-data");
 
-                    headerSaveList.add(JSON.toJSONString(headerJsonObject));
+                } else if (!tmpJsonDateObject.isEmpty()) {
+                    bodySaveObject.put("raw", "");
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpEmptyArray);
+                    bodySaveObject.put("json", JSONObject.toJSONString(tmpJsonDateObject));
+                    bodySaveObject.put("type", "json");
+
+                } else if (!tmpRawDataArray.isEmpty()) {
+                    bodySaveObject.put("raw", tmpRawDataArray);
+                    bodySaveObject.put("file", tmpEmptyArray);
+                    bodySaveObject.put("form", tmpEmptyArray);
+                    bodySaveObject.put("json", "");
+                    bodySaveObject.put("type", "raw");
                 }
-
-                //query参数的提取 + 组装
-                JSONArray querySaveArray = new JSONArray(); //final save Array
-                List<Map<String, String>> queryList = (List) urlMap.get("query");  //postman api query param
-                if (queryList != null) {
-                    for (Map<String, String> queryJsonMap : queryList
-                    ) {
-                        JSONObject tmpQueryObject = new JSONObject();
-                        tmpQueryObject.put("name", queryJsonMap.get("key"));
-                        tmpQueryObject.put("value", queryJsonMap.get("value"));
-                        tmpQueryObject.put("required", true);
-                        querySaveArray.add(tmpQueryObject);
-                    }
-                }
-                //body的提取 + 组装数据 逻辑
-                Map bodyMap = (Map) requestMap.get("body");
-                JSONObject bodySaveObject = new JSONObject();  //final save body data
-                if (bodyMap != null) {
-                    JSONArray tmpEmptyArray = new JSONArray();
-                    if (bodyMap.get("options") != null && bodyMap.get("mode").equals("raw")) {  //json格式
-                        bodySaveObject.put("raw", "");
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpEmptyArray);
-                        bodySaveObject.put("json", bodyMap.get("raw"));
-                        bodySaveObject.put("type", "json");
-                    } else if (bodyMap.get("mode").equals("raw")) {    //text格式
-                        bodySaveObject.put("raw", bodyMap.get("raw"));
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpEmptyArray);
-                        bodySaveObject.put("json", "");
-                        bodySaveObject.put("type", "raw");
-                    } else if (bodyMap.get("mode").equals("formdata")) {  //formdata格式
-                        JSONArray tmpDataArray = new JSONArray(); // use for form behind
-                        List<Map<String, String>> postmanFormList = (List) bodyMap.get("formdata");
-                        for (Map<String, String> tmpPostmanFormList : postmanFormList) {
-                            tmpDataArray.add(packageData(tmpPostmanFormList.get("key"), tmpPostmanFormList.get("type"), tmpPostmanFormList.get("value")));
-                        }
-
-                        bodySaveObject.put("raw", "");
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpDataArray);//todo
-                        bodySaveObject.put("json", "");
-                        bodySaveObject.put("type", "form-data");
-                    } else if (bodyMap.get("mode").equals("urlencoded")) {  //urlencoded格式
-                        JSONArray tmpDataArray = new JSONArray(); // use for form behind
-                        List<Map<String, String>> postmanFormList = (List) bodyMap.get("urlencoded");
-                        for (Map<String, String> aPostmanFormList : postmanFormList) {
-                            tmpDataArray.add(packageData(aPostmanFormList.get("key"), aPostmanFormList.get("type"), aPostmanFormList.get("value")));
-                        }
-                        bodySaveObject.put("raw", "");
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpDataArray);//todo
-                        bodySaveObject.put("json", "");
-                        bodySaveObject.put("type", "form-urlencoded");
-                    } else {  //其它未知格式
-                        System.out.println("import api mode: " + bodyMap.get("mode"));
-                    }
-                }
-
-                postmanApi.setId(UUID.randomUUID() + "");
-                postmanApi.setName(((JSONObject) apiInfoMap).getString("name"));
-                postmanApi.setLevel("P0");
-                postmanApi.setModuleId(moduleId);
-                postmanApi.setProjectId(projectId);
-                postmanApi.setHeader(headerSaveList + "");
-                postmanApi.setBody(bodySaveObject + "");
-                postmanApi.setQuery(querySaveArray + "");
-//                postmanApi.setRest("tmp rest"); //postman暂不涉及rest参数的存储
-                postmanApi.setMethod(requestMap.get("method") + "");
-                postmanApi.setPath(apiPath);
-                postmanApi.setProtocol((urlMap.get("protocol") + "").toUpperCase());
-                postmanApi.setDomainSign("");
-                postmanApi.setDescription("postman_api");
-
-                postmanApi.setCreateTime(System.currentTimeMillis());
-                postmanApi.setUpdateTime(System.currentTimeMillis());
-                postmanApi.setUpdateUser(userId);
-                postmanApi.setCreateUser(userId);
-                postmanApi.setStatus("Normal");
-
-                apiMapper.addApi(postmanApi);
-                System.out.println("Postman入库的api对象: " + postmanApi);
-                System.out.println("postman api save succ");
+                swaggerApi.setBody(bodySaveObject.toJSONString());
+                swaggerApi.setMethod("POST");
             }
-        }else { //swagger
+            if (pathItem.getGet() != null){
+                Operation operation = pathItem.getGet();
+                swaggerApi.setName(pathItem.getGet().getSummary());
+                swaggerApi.setMethod("GET");
+                //解析api请求对象参数
+                parseParameters(operation, swaggerApi);
+            }
+            swaggerApi.setRest("[]"); //swagger暂不涉及rest参数的存储
+            swaggerApi.setPath(pathName);  //   /api/add的接口path
+            swaggerApi.setProtocol("HTTP");
+            swaggerApi.setDomainSign("");
+            swaggerApi.setDescription("swagger_api");
 
+            swaggerApi.setCreateTime(System.currentTimeMillis());
+            swaggerApi.setUpdateTime(System.currentTimeMillis());
+            swaggerApi.setUpdateUser(userId);
+            swaggerApi.setCreateUser(userId);
+            swaggerApi.setStatus("Normal");
+
+            apiMapper.addApi(swaggerApi);
         }
     }
 
-    //postman or swagger
-    public boolean saveImportApi(String data, String platformType, Map<String, String> apiMap){
-        if (platformType.equals("postman")) {
-            JSONObject requestJsonObject = JSON.parseObject(data);
-            LinkedList<JSONObject> fileApiList = new LinkedList<>();  //存放每个api信息的列表
-            List apiList = requestJsonObject.getJSONArray("item");
-            for (Object anApiList : apiList) {
-                JSONObject jsonObject = JSONObject.parseObject(anApiList + "");
-
-                //处理含有文件夹的情况(目前仅支持单层文件夹)
-                if (jsonObject.getJSONArray("item") != null){
-                    for (int k = 0; k < jsonObject.getJSONArray("item").size(); k++) {
-                        fileApiList.add((JSONObject)jsonObject.getJSONArray("item").get(k));
-                    }
-                    continue;
-                }
-
-                fileApiList.add(jsonObject);
-            }
-            //调用处理apiInfo列表的方法
-            handleApiList(fileApiList, platformType, apiMap.get("projectId"), apiMap.get("moduleId"), apiMap.get("userId"));
-            return true;
-        } else if (platformType.equals("swagger")){
-            //todo 解析swagger3逻辑
-            SwaggerParseResult result = new OpenAPIParser().readContents(data,null,null);
-            //获取方法swagger对象
-            OpenAPI openAPI = result.getOpenAPI();
-            //获取方法对象集合
-            Paths paths = openAPI.getPaths();
-            // 获取所以方法路径
-            Set<String> pathNames = paths.keySet();
-            // 获取实体类对象集合
-            this.components = openAPI.getComponents();
-            for (String pathName : pathNames) {
-                Api swaggerApi = new Api();
-                PathItem pathItem = paths.get(pathName);
-                swaggerApi.setId(UUID.randomUUID() + "");
-
-                swaggerApi.setLevel("P0");
-                swaggerApi.setModuleId(apiMap.get("moduleId"));
-                swaggerApi.setProjectId(apiMap.get("projectId"));
-                JSONObject bodySaveObject = new JSONObject();  //保存body参数
-                JSONArray tmpDataArray = new JSONArray(); // /保存form参数
-                Map<String,Object> tmpJsonDateObject = new HashMap<>();  //保存json参数
-                JSONArray tmpRawDataArray = new JSONArray();  //保存raw参数
-
-//              swaggerApi.setHeader("");   //一般不涉及header数据的提取
-                if (pathItem.getPost() != null){
-                    Operation operation = pathItem.getPost();
-                    swaggerApi.setName(pathItem.getPost().getSummary() + "");
-                    //解析api请求对象body
-                    parseRequestBody(operation, tmpJsonDateObject,tmpDataArray,tmpRawDataArray);
-                    JSONArray tmpEmptyArray = new JSONArray();
-                    if (!tmpDataArray.isEmpty()){
-                        bodySaveObject.put("raw", "");
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpDataArray);//todo
-                        bodySaveObject.put("json", "");
-                        bodySaveObject.put("type", "form-data");
-
-                    } else if (!tmpJsonDateObject.isEmpty()) {
-                        bodySaveObject.put("raw", "");
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpEmptyArray);
-                        bodySaveObject.put("json", JSONObject.toJSONString(tmpJsonDateObject));
-                        bodySaveObject.put("type", "json");
-
-                    } else if (!tmpRawDataArray.isEmpty()) {
-                        bodySaveObject.put("raw", tmpRawDataArray);
-                        bodySaveObject.put("file", tmpEmptyArray);
-                        bodySaveObject.put("form", tmpEmptyArray);
-                        bodySaveObject.put("json", "");
-                        bodySaveObject.put("type", "raw");
-
-                    }
-                    swaggerApi.setBody(bodySaveObject + "");
-                    swaggerApi.setMethod("POST");
-                }
-                if (pathItem.getGet() != null){
-                    Operation operation = pathItem.getGet();
-                    swaggerApi.setName(pathItem.getGet().getSummary() + "");
-                    swaggerApi.setMethod("GET");
-                    //解析api请求对象参数
-                    parseParameters(operation, swaggerApi);
-                }
-//                swaggerApi.setRest("tmp rest"); //swagger暂不涉及rest参数的存储
-                swaggerApi.setPath(pathName+ "");  //   /api/add的接口path
-                swaggerApi.setProtocol("HTTP");
-                swaggerApi.setDomainSign("");
-                swaggerApi.setDescription("swagger_api");
-
-                swaggerApi.setCreateTime(System.currentTimeMillis());
-                swaggerApi.setUpdateTime(System.currentTimeMillis());
-                swaggerApi.setUpdateUser(apiMap.get("userId"));
-                swaggerApi.setCreateUser(apiMap.get("userId"));
-                swaggerApi.setStatus("Normal");
-
-                apiMapper.addApi(swaggerApi);
-                System.out.println("Swagger入库的api对象: " + swaggerApi);
-                System.out.println("swagger api save succ");
-            }
-            return true;
-        }else {
-            System.out.println("不支持的文件导入格式!");
-            return false;
-        }
-    }
     /**
      * 解析body参数
-     * @param operation
-     * @param tmpJsonDateObject
-     * @param tmpDataArray
-     * @param tmpRawDataArray
      */
     private void parseRequestBody(Operation operation,Map<String,Object> tmpJsonDateObject, JSONArray tmpDataArray,JSONArray tmpRawDataArray) {
         if (operation.getRequestBody() == null) {
@@ -287,8 +282,6 @@ public class ApiImportService {
 
     /**
      * 解析 form表单参数
-     * @param operation
-     * @param tmpDataArray
      */
     private void parseFromBody(Operation operation, JSONArray tmpDataArray){
         List<Parameter> parameters = operation.getParameters();
@@ -305,10 +298,6 @@ public class ApiImportService {
 
     /**
      * 解析body参数
-     * @param operation
-     * @param tmpJsonDateObject
-     * @param tmpDataArray
-     * @param tmpRawDataArray
      */
     private void parseBody(Operation operation, Map<String,Object> tmpJsonDateObject, JSONArray tmpDataArray , JSONArray tmpRawDataArray) {
         Content content = operation.getRequestBody().getContent();
@@ -364,9 +353,6 @@ public class ApiImportService {
     }
     /**
      * 解析属性转api实体类，生成随机参数
-     * @param infoMap
-     * @param tmpJsonDateObject
-     * @param jsonSchemaItemMap
      */
     private void parseSchemaToApi(Map<String, String> infoMap,Map<String,Object> tmpJsonDateObject,Map<String, JsonSchemaItemDTO> jsonSchemaItemMap) {
         //解析swagger对象成json对象，并且随机生成值
@@ -410,16 +396,12 @@ public class ApiImportService {
                 }
             });
         }catch (Exception e){
-            System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
     }
     /**
      * 解析属性类型
-     * @param schema
-     * @param refSet
-     * @return
      */
     private JsonSchemaItemDTO parseSchema(Schema schema, Set<String> refSet) {
         if (schema == null) return null;
@@ -475,10 +457,6 @@ public class ApiImportService {
     }
     /**
      * 解析属性转json类型
-     * @param schema
-     * @param refSet
-     * @param infoMap
-     * @return
      */
     private Object parseSchemaToJson(Schema schema, Set<String> refSet, Map<String, Schema> infoMap) {
         if (schema == null) {
@@ -514,8 +492,6 @@ public class ApiImportService {
 
     /**
      * 根据类型获取默认值
-     * @param value
-     * @return
      */
     private Object getDefaultValueByPropertyType(Schema value) {
         Object example = value.getExample();
@@ -532,9 +508,6 @@ public class ApiImportService {
 
     /**
      * 解析key-value类型body参数
-     * @param schema
-     * @param tmpDataArray
-     * @param data
      */
     private void parseKvBody(Schema schema, JSONArray tmpDataArray, Object data) {
         if (data instanceof JSONObject) {
@@ -559,8 +532,6 @@ public class ApiImportService {
     }
     /**
      * 获取包装类型实体类
-     * @param ref
-     * @return
      */
     private Schema getModelByRef(String ref) {
         if (StringUtils.isBlank(ref)) {
@@ -575,9 +546,6 @@ public class ApiImportService {
     }
     /**
      * 解析key-value类型参数
-     * @param schemaObject
-     * @param tmpDataArray
-     * @param name
      */
     private void parseKvBodyItem(Object schemaObject, JSONArray tmpDataArray, String name) {
         Schema schema = (Schema) schemaObject;
@@ -585,12 +553,9 @@ public class ApiImportService {
         //添加key-value类型参数
         tmpDataArray.add(packageData(name, schema.getType(), String.valueOf(schema.getExample() == null ? "" : schema.getExample())));
     }
+
     /**
      * 解析属性转json类型
-     * @param schema
-     * @param refSet
-     * @param infoMap
-     * @return
      */
     private Object parseSchemaPropertiesToJson(Schema schema, Set<String> refSet, Map<String, Schema> infoMap) {
         if (schema == null) return null;
@@ -602,10 +567,9 @@ public class ApiImportService {
         });
         return jsonObject;
     }
+
     /**
      * 解析参数
-     * @param operation
-     * @param api
      */
     private void parseParameters(Operation operation, Api api) {
         List<Parameter> parameters = operation.getParameters();
@@ -624,8 +588,6 @@ public class ApiImportService {
 
     /**
      * 解析From参数，返回json数组结果
-     * @param fromParameter
-     * @param fromSaveArray
      */
     private void parseFromParameters(Parameter fromParameter,JSONArray fromSaveArray) {
         //解析成{name：”123“，value：”123“，required：”true“}
@@ -638,8 +600,6 @@ public class ApiImportService {
 
     /**
      * 解析Query参数，返回json数组结果
-     * @param parameter
-     * @param querySaveArray
      */
     private void parseQueryParameters(Parameter parameter,JSONArray querySaveArray) {
         //解析成{name：”123“，value：”123“，required：”true“}

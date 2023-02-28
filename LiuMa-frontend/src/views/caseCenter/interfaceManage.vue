@@ -49,10 +49,10 @@
     <!--上传文件的弹窗-->
     <el-dialog title="上传文件" :visible.sync="uploadFileVisible" width="600px" destroy-on-close>
       <el-form label-width="120px" style="padding-right: 30px;" :model="uploadFileForm" :rules="rules" ref="uploadFileForm">
-        <el-form-item label="文件来源" prop="apiSource">
-          <el-radio-group v-model="uploadFileForm.apiSource">
-            <el-radio label="1">postman</el-radio>
-            <el-radio label="2">swagger</el-radio>
+        <el-form-item label="文件来源" prop="sourceType">
+          <el-radio-group v-model="uploadFileForm.sourceType">
+            <el-radio label="postman">postman</el-radio>
+            <el-radio label="swagger">swagger3</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="选择模块" prop="moduleId">
@@ -101,15 +101,15 @@ export default {
     },
     data() {
         return{
-            uploadFileVisible: false, //控制上传api的dialog
-            uploadFileForm : {  //上传api信息的dict
-              apiSource: "",  //导入api的来源   1:postman  2:swagger
+            uploadFileVisible: false,
+            uploadFileForm : { 
+              sourceType: "",
               fileList: [],
-              moduleId:"",   //用于import_api的dialog 中的下拉选择框
-              moduleName:""  //用于import_api的dialog 中的下拉选择框
+              moduleId:"",  
+              moduleName:""
             },
             rules:{
-              apiSource:[{ required: true, message: '文件来源不能为空', trigger: 'blur' }],
+              sourceType:[{ required: true, message: '文件来源不能为空', trigger: 'blur' }],
               fileList: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
               moduleId: [{ required: true, message: '导入模块不能为空', trigger: 'blur' }]
             },
@@ -179,36 +179,25 @@ export default {
         this.uploadFileForm.moduleName = data.label;
 
       },
-      submitFileForm(confirm, form){   //上传文件dialog中保存file中api的调用方法
+      submitFileForm(confirm, form){ 
         this.$refs[confirm].validate(valid => {
           if (valid) {
               let url = '/autotest/import/api';
-              let platformType;
-              if (this.uploadFileForm.apiSource === "1"){
-                platformType = "postman"
-              } else {
-                platformType = "swagger"
-              }
               let data = {
-                project_id: this.$store.state.projectId,
-                module_id: this.uploadFileForm.moduleId,
-                platformType
+                projectId: this.$store.state.projectId,
+                moduleId: form.moduleId,
+                sourceType: sourceType
               };
-            this.searchForm.module_id = this.uploadFileForm.moduleId  //更新查询module接口的参数
-            let file = form.fileList[0];
+              let file = form.fileList[0];
               this.$fileUpload(url, file, null, data, response =>{
-                this.$message.success("上传成功");
-                this.getdata(this.searchForm);
+                  this.$message.success("上传成功");
+                  this.getdata(this.searchForm);
               });
-            this.uploadFileVisible = false; //关闭弹窗
+              this.uploadFileVisible = false; 
           }else{
-            this.$message({
-              message: "请检查必填项是否完整!",
-              type: "error",
-              duration: 1500
-            })
-            }
-          });
+              return false;
+          }
+        });
       },
         // 点击模块
         clickModule(data){
