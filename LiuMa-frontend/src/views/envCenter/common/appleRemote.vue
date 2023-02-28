@@ -190,10 +190,10 @@ export default {
                 }
                 data.sources = JSON.parse(data.sources);
                 this.device = data;
+                // 动态计算屏幕区域高度
+                this.getScreenHeight(data.size);
                 // 等待渲染完成
                 this.$nextTick(() => {
-                    // 动态计算屏幕区域高度
-                    this.getScreenHeight(data.size);
                     // 初始化canvas
                     this.canvas.bg = this.$refs.screenCanvas;
                     // 开启投屏

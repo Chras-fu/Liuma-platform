@@ -718,7 +718,7 @@ export default {
 </script>
 <style scoped>
 .image-body{
-    background-color: rgb(120, 120, 120);
+    background-color: white;
 }
 
 .canvas-fg {
