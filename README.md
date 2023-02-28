@@ -15,12 +15,12 @@
 
 ## 二、功能介绍
 
-![system](https://user-images.githubusercontent.com/96771570/182859649-bf10af76-16ce-4961-bab6-a8ec36111daa.png)
+![system](https://user-images.githubusercontent.com/96771570/221833391-9d35308a-3f90-47c7-9e9d-e62fc1201f18.png)
 
 1. API测试
 ```
 (1) 支持单接口测试和链路测试。
-(2) 支持接口统一管理，支持swagger导入。
+(2) 支持接口统一管理，支持postman/swagger导入。
 (3) 支持一键生成字段校验的接口健壮性用例。
 (4) 支持全局变量、关联、断言、内置函数、自定义函数。
 (5) 支持前后置脚本、失败继续、超时时间、等待/条件/循环等逻辑控制器。
@@ -36,7 +36,7 @@
 (5) 支持与API用例在同一用例集合顺序执行。
 ```
 
-3. AppUI测试(1.1版本上线)
+3. AppUI测试
 ```
 (1) 支持WebUI同等用例编写和执行能力
 (2) 支持安卓和苹果系统
@@ -76,7 +76,7 @@ Step3: 新建数据库名: liuma
 
 Step4: 配置application.properties数据库连接
 
-Step5: 配置阿里云邮件和七牛云存储相关信息(配置见4，可跳过)
+Step5: 配置七牛云存储截图 也可以将云存储开关关闭使用服务器存储
 
 Step6: 启动LiuMaApplication文件
 ```
@@ -89,20 +89,7 @@ Step6: 启动LiuMaApplication文件
 
 4. 第三方服务
 
-（一）阿里云邮件
-
-主要用于计划执行后发送邮件，不配置不影响平台运行
-```
-Step1: 注册阿里云账号，申请开通邮件服务
-
-Step2: 按照指引配置邮箱服务的相关配置
-
-Step3: 获取accessKey/accessSecret和邮箱地址
-
-Step4: 将以上信息填写在文件~/application.properties对应位置
-```
-
-（二）七牛云存储
+（一）七牛云存储
 
 主要用于存放UI测试执行截图，不配置不影响平台运行
 ```
