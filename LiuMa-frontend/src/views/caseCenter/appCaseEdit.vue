@@ -227,7 +227,8 @@ export default {
             runVisible: false,
             runForm: {
                 engineId: "",
-                environmentId: []
+                environmentId: [],
+                deviceId: ""
             },
             resultVisable: false,
             taskId: "",
