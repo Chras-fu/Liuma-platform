@@ -50,7 +50,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="响应时长" prop="during" v-if="caseType ==='API'" width="80px"/>
-                <el-table-column label="执行截图" prop="screenshotList" v-else width="80px">
+                <el-table-column label="执行截图" prop="screenshotList" v-if="caseType !=='API'" width="80px">
                     <template slot-scope="scope">
                         <el-button v-if="scope.row.screenshotList.length !== 0" size="small" type="text" @click="viewImage(scope.row)">查看</el-button>
                         <el-image-viewer :z-index="imageZindex" v-if="scope.row.showViewer" :on-close="()=>{scope.row.showViewer=false}" :url-list="scope.row.screenshotList"/>
@@ -116,14 +116,15 @@ export default {
             let url = "/autotest/report/debug/" + this.taskId;
             this.$get(url, response => {
                 if(response.data){
-                    this.result = response.data;
+                    let data = response.data;
                     if(this.caseType !== 'API'){
-                        for(let i=0;i<this.result.transList.length;i++){
-                            let trans = this.result.transList[i];
+                        for(let i=0;i<data.transList.length;i++){
+                            let trans = data.transList[i];
                             trans.screenshotList = JSON.parse(trans.screenshotList);
                             trans.showViewer = false;
                         }
                     }
+                    this.result = data;
                     this.loading = false;
                     window.clearInterval(this.timer);
                     this.$emit("endRun");
