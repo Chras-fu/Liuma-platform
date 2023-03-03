@@ -10,7 +10,6 @@ import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.PlanCollectionDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
 import com.autotest.LiuMa.request.RunRequest;
-import com.google.gson.JsonObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,7 +129,7 @@ public class RunService {
             Device device = deviceService.getDeviceDetail(task.getDeviceId());
             if(!(device.getStatus().equals(DeviceStatus.USING.toString())
                     && task.getCreateUser().equals(device.getUser()))){
-                deviceService.stopUseDevice(task.getDeviceId());    // 非占用中状态调试则释放设备
+                deviceService.coldDevice(device);    // 非占用中状态调试则释放设备
             }
         }else {
             if(task.getSourceType().equals(ReportSourceType.COLLECTION.toString())){
@@ -139,7 +138,7 @@ public class RunService {
                     Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                     if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
                             task.getId().equals(device.getUser())){
-                        deviceService.stopUseDevice(device.getId());//当前设备使用者仍然是该任务才会停用
+                        deviceService.coldDevice(device); //当前设备使用者仍然是该任务才会停用
                     }
                 }
             }else if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
@@ -150,7 +149,7 @@ public class RunService {
                         Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                         if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
                                 task.getId().equals(device.getUser())){
-                            deviceService.stopUseDevice(device.getId());
+                            deviceService.coldDevice(device); //当前设备使用者仍然是该任务才会停用
                         }
                     }
                 }

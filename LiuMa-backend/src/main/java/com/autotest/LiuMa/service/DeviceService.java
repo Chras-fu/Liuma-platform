@@ -2,12 +2,14 @@ package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.DeviceStatus;
-import com.autotest.LiuMa.common.utils.HttpUtils;
 import com.autotest.LiuMa.database.domain.Device;
 import com.autotest.LiuMa.database.mapper.DeviceMapper;
 import com.autotest.LiuMa.request.QueryRequest;
+import com.autotest.LiuMa.websocket.config.WsSessionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -24,20 +26,25 @@ public class DeviceService {
         return deviceMapper.getDeviceById(deviceId);
     }
 
-    public void stopUseDevice(String deviceId) {
+    public void stopUseDevice(String deviceId){
         Device device = deviceMapper.getDeviceById(deviceId);
-        JSONObject sources = JSONObject.parseObject(device.getSources());
+        this.coldDevice(device);
+    }
+
+    public void coldDevice(Device device) {
         device.setStatus(DeviceStatus.COLDING.toString());
         device.setUpdateTime(System.currentTimeMillis());
         device.setSources("{}");
         device.setUser("");
         device.setTimeout(0);
         deviceMapper.updateDevice(device);
-        new Thread(() -> {
-            // 调用设备冷却接口
-            String url = sources.getString("url");
-            HttpUtils.post(url + "/cold?serial=" + device.getSerial(), null);
-        }).start();
+        // 调用ws通知客户端冷却设备
+        try {
+            WebSocketSession session = WsSessionManager.get(device.getAgent());
+            session.sendMessage(new TextMessage("cold@"+device.getSerial()));
+        }catch (Exception ignored){
+
+        }
     }
 
     public Boolean activeDevice(String deviceId, String user) {

@@ -3,7 +3,6 @@ package com.autotest.LiuMa.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.*;
-import com.autotest.LiuMa.common.utils.HttpUtils;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.StatisticsDTO;
@@ -49,6 +48,9 @@ public class ScheduleJobService {
     @Resource
     private RunService runService;
 
+    @Resource
+    private DeviceService deviceService;
+
     public void updateLostHeartbeatEngine(){
         Long minLastHeartbeatTime = System.currentTimeMillis() - 3*60*1000; // 三分钟没有心跳监控则离线
         engineMapper.updateLostHeartbeatEngine(minLastHeartbeatTime);
@@ -70,18 +72,7 @@ public class ScheduleJobService {
     public void updateTimeoutDevice(){
         List<Device> devices = deviceMapper.selectTimeoutDevice();
         for (Device device:devices){
-            JSONObject sources = JSONObject.parseObject(device.getSources());
-            device.setStatus(DeviceStatus.COLDING.toString());
-            device.setUpdateTime(System.currentTimeMillis());
-            device.setSources("{}");
-            device.setUser("");
-            device.setTimeout(0);
-            deviceMapper.updateDevice(device);
-            new Thread(() -> {
-                // 调用设备冷却接口
-                String url = sources.getString("url");
-                HttpUtils.post(url + "/cold?serial=" + device.getSerial(), null);
-            }).start();
+            deviceService.coldDevice(device);
         }
     }
 

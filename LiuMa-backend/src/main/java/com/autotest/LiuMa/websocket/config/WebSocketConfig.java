@@ -19,8 +19,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry
-                .addHandler(deviceHeartBeatHandler, "/websocket/heartbeat")
+        registry.addHandler(deviceHeartBeatHandler, "/websocket/heartbeat")
                 .addInterceptors(wsInterceptor)
                 .setAllowedOrigins("*"); // 解决跨域问题
     }
