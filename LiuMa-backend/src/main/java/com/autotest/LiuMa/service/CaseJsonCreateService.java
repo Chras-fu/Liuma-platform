@@ -661,6 +661,7 @@ public class CaseJsonCreateService {
                 TaskTestCollectionResponse taskTestCollection = new TaskTestCollectionResponse();
                 taskTestCollection.setCollectionId(planCollectionDTO.getCollectionId());
                 Collection collection = collectionMapper.getCollectionDetail(planCollectionDTO.getCollectionId());
+                if(collection==null) return taskTestCollectionList;
                 if(this.getDeviceCouldUsing(collection.getDeviceId(), task.getCreateUser(), task.getId())){
                     taskTestCollection.setDeviceId(collection.getDeviceId());
                 }else {
@@ -675,6 +676,7 @@ public class CaseJsonCreateService {
             TaskTestCollectionResponse taskTestCollection = new TaskTestCollectionResponse();
             taskTestCollection.setCollectionId(task.getSourceId());
             Collection collection = collectionMapper.getCollectionDetail(task.getSourceId());
+            if(collection==null) return taskTestCollectionList;
             if(this.getDeviceCouldUsing(collection.getDeviceId(), task.getCreateUser(), task.getId())){
                 taskTestCollection.setDeviceId(collection.getDeviceId());
             }else {
