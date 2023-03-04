@@ -32,6 +32,9 @@ public class OpenApiService {
     @Value("${app.package.path}")
     private String APP_PACKAGE_PATH;
 
+    @Value("${spring.mail.on-off}")
+    private String MAIL_ON_OFF;
+
     @Value("${spring.mail.username}")
     private String MAIL_SENDER;
     
@@ -222,12 +225,14 @@ public class OpenApiService {
 
             if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
                 try {
-                    // 邮件推送
-                    User user = userMapper.getUserInfo(task.getCreateUser());
-                    String title = "测试任务执行完成通知";
-                    String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
-                            + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
-                    sendMailService.sendReportMail(MAIL_SENDER, user.getEmail(), title, content);
+                    if("on".equals(MAIL_ON_OFF)) {
+                        // 邮件推送
+                        User user = userMapper.getUserInfo(task.getCreateUser());
+                        String title = "测试任务执行完成通知";
+                        String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
+                                + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
+                        sendMailService.sendReportMail(MAIL_SENDER, user.getEmail(), title, content);
+                    }
                 }catch (Exception ignored){
                 }
                 // 计划执行需要走群消息通知
