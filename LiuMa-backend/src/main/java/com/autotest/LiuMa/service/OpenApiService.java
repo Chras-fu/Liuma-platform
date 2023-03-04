@@ -31,6 +31,9 @@ public class OpenApiService {
 
     @Value("${app.package.path}")
     private String APP_PACKAGE_PATH;
+
+    @Value("${spring.mail.username}")
+    private String MAIL_SENDER;
     
     @Value("${cloud.storage.on-off}")
     private String cloudStorage;  // 云存储开关
@@ -88,6 +91,9 @@ public class OpenApiService {
 
     @Resource
     private ReportService reportService;
+
+    @Resource
+    private SendMailService sendMailService;
 
     public String applyEngineToken(EngineRequest request) {
         Engine engine = engineMapper.getEngineById(request.getEngineCode());
@@ -215,6 +221,15 @@ public class OpenApiService {
             FileUtils.deleteFile(taskZipPath);
 
             if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
+                try {
+                    // 邮件推送
+                    User user = userMapper.getUserInfo(task.getCreateUser());
+                    String title = "测试任务执行完成通知";
+                    String content = user.getUsername() + ", 您好!<br><br>您执行的任务: \""
+                            + task.getName() + "\" 已执行完毕，请登录平台查看结果。<br><br>谢谢！";
+                    sendMailService.sendReportMail(MAIL_SENDER, user.getEmail(), title, content);
+                }catch (Exception ignored){
+                }
                 // 计划执行需要走群消息通知
                 PlanNotice planNotice = planNoticeMapper.getPlanNotice(task.getSourceId());
                 if(planNotice == null){
