@@ -78,7 +78,9 @@ Step4: 配置application.properties数据库连接
 
 Step5: 配置七牛云存储截图 也可以将云存储开关关闭使用服务器存储
 
-Step6: 启动LiuMaApplication文件
+Step6: 配置邮箱服务 支持163/qq等各类邮箱的smtp协议 默认关闭邮件通知
+
+Step7: 启动LiuMaApplication文件
 ```
 
 3. 验证启动成功
@@ -97,7 +99,17 @@ Step1: 注册七牛云账号，开通空间存储服务
 
 Step2: 创建存储空间bucket，获取ak/sk信息，同时获取加速域名和上传域名
 
-Step3: 将以上信息填写在文件~/application.properties对应位置
+Step3: 配置文件打开云存储开关，将以上信息填写在文件~/application.properties对应位置
+```
+（二）邮件服务
+
+主要用于计划执行完成后的结果通知，不配置不影响平台运行，下面以163邮箱为例
+```
+Step1: 登录163邮箱，在设置中开启SMTP服务，保存秘钥token
+
+Step2: 获取邮箱SMTP服务地址: smtp.163.com、邮箱地址、秘钥token
+
+Step3: 配置文件打开邮件服务开关，将以上信息填写在文件~/application.properties对应位置
 ```
 
 
