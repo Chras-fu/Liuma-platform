@@ -55,6 +55,7 @@
     <if test="condition != null and condition != ''">
       and (u.username like #{condition} or u.account like #{condition})
     </if>
+    order by u.create_time desc
   </select>
   <select id="getProjectRoleList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Role">
     select * from `role` where project_id = #{projectId}
