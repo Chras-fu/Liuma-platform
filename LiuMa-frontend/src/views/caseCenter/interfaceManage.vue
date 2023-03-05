@@ -103,7 +103,7 @@ export default {
         return{
             uploadFileVisible: false,
             uploadFileForm : { 
-              sourceType: "",
+              sourceType: "postman",
               fileList: [],
               moduleId:"",  
               moduleName:""
@@ -186,14 +186,14 @@ export default {
               let data = {
                 projectId: this.$store.state.projectId,
                 moduleId: form.moduleId,
-                sourceType: sourceType
+                sourceType: form.sourceType
               };
               let file = form.fileList[0];
               this.$fileUpload(url, file, null, data, response =>{
                   this.$message.success("上传成功");
+                  this.uploadFileVisible = false; 
                   this.getdata(this.searchForm);
               });
-              this.uploadFileVisible = false; 
           }else{
               return false;
           }
