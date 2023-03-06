@@ -134,6 +134,7 @@ public class RunService {
         }else {
             if(task.getSourceType().equals(ReportSourceType.COLLECTION.toString())){
                 Collection collection = collectionMapper.getCollectionDetail(task.getSourceId());
+                if(collection == null) return;
                 if(collection.getDeviceId() != null){
                     Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                     if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
@@ -145,6 +146,7 @@ public class RunService {
                 List<PlanCollectionDTO> planCollections = planCollectionMapper.getPlanCollectionList(task.getSourceId());
                 for(PlanCollectionDTO planCollectionDTO:planCollections){
                     Collection collection = collectionMapper.getCollectionDetail(planCollectionDTO.getCollectionId());
+                    if(collection==null) return;
                     if(collection.getDeviceId() != null){
                         Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                         if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
