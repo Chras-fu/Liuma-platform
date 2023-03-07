@@ -32,7 +32,7 @@ public class OpenApiService {
     @Value("${app.package.path}")
     private String APP_PACKAGE_PATH;
 
-    @Value("${spring.mail.on-off}")
+    @Value("${mail.sender.on-off}")
     private String MAIL_ON_OFF;
 
     @Value("${spring.mail.username}")
