@@ -87,7 +87,7 @@
             </el-table-column>
             <el-table-column label="操作" width="100px">
                 <template slot-scope="scope">
-                    <el-button size="mini" type="text" @click="deletePlanCollection(scope.row)">删除</el-button>
+                    <el-button size="mini" type="text" @click="deletePlanCollection(scope.$index)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
