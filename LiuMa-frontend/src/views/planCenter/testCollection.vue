@@ -34,7 +34,7 @@
                         <el-table-column label="用例总条数" prop="total"/>
                         <el-table-column label="成功条数" prop="passCount"/>
                         <el-table-column label="成功率" prop="passRate"/>
-                        <el-table-column label="执行时间" prop="createTime" width="150px"/>
+                        <el-table-column label="创建时间" prop="createTime" width="150px"/>
                         <el-table-column fixed="right" align="center"  label="操作" width="150px">
                             <template slot-scope="scope">
                                 <el-button type="text" size="mini" @click="viewReport(scope.row)">查看</el-button>

@@ -105,7 +105,7 @@
                     <span v-if="scope.row.type==='schedule'">定时任务</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="执行时间" width="150px"/>
+            <el-table-column prop="createTime" label="创建时间" width="150px"/>
             <el-table-column prop="username" label="创建人"/>
             <el-table-column fixed="right" align="operation" label="操作" width="100px">
               <template slot-scope="scope">
