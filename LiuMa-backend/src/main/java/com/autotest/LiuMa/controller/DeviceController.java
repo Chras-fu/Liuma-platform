@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.controller;
 
 import com.autotest.LiuMa.database.domain.Device;
+import com.autotest.LiuMa.dto.DeviceDTO;
 import com.autotest.LiuMa.request.QueryRequest;
 import com.autotest.LiuMa.service.DeviceService;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +53,7 @@ public class DeviceController {
     }
 
     @PostMapping("/list")
-    public List<Device> getDeviceList( @RequestBody QueryRequest queryRequest,  HttpServletRequest request){
+    public List<DeviceDTO> getDeviceList(@RequestBody QueryRequest queryRequest, HttpServletRequest request){
         String user = request.getSession().getAttribute("userId").toString();
         return deviceService.getDeviceList(queryRequest, user);
     }

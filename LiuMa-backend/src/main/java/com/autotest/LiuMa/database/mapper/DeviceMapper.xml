@@ -45,34 +45,35 @@
   <select id="selectTimeoutDevice" resultType="com.autotest.LiuMa.database.domain.Device">
     select * from device where `status` = 'using' and (update_time+timeout*1000) &lt; REPLACE(unix_timestamp(current_timestamp(3)),'.','')
   </select>
-  <select id="getDeviceList" resultType="com.autotest.LiuMa.database.domain.Device">
-    select * from device where (`owner` = #{owner} or `owner` = 'system') and (`project_id` = #{projectId} or `project_id` = 'system')
+  <select id="getDeviceList" resultType="com.autotest.LiuMa.dto.DeviceDTO">
+    select d.*,u.username from device d left join `user` u on d.user = u.id
+    where (d.`owner` = #{owner} or d.`owner` = 'system') and (d.`project_id` = #{projectId} or d.`project_id` = 'system')
     <if test="condition != null and condition != ''">
-      and `name` like #{condition}
+      and d.`name` like #{condition}
     </if>
     <if test="status != null and status != ''">
-      and `status` = #{status}
+      and d.`status` = #{status}
     </if>
     <if test="brand != null and brand.size() > 0">
-      and brand in
+      and d.brand in
       <foreach collection="brand" open="(" separator="," close=")" item="item" index="index">
         #{item}
       </foreach>
     </if>
     <if test="android != null and android.size() > 0">
-      and `system` = 'android' and version in
+      and d.`system` = 'android' and d.version in
       <foreach collection="android" open="(" separator="," close=")" item="item" index="index">
         #{item}
       </foreach>
     </if>
     <if test="apple != null and apple.size() > 0">
-      and `system` = 'apple' and version in
+      and d.`system` = 'apple' and d.version in
       <foreach collection="apple" open="(" separator="," close=")" item="item" index="index">
         #{item}
       </foreach>
     </if>
     <if test="size != null and size.size() > 0">
-      and size in
+      and d.size in
       <foreach collection="size" open="(" separator="," close=")" item="item" index="index">
         #{item}
       </foreach>

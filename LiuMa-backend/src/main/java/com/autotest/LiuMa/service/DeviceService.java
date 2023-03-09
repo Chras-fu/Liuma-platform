@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.DeviceStatus;
 import com.autotest.LiuMa.database.domain.Device;
 import com.autotest.LiuMa.database.mapper.DeviceMapper;
+import com.autotest.LiuMa.dto.DeviceDTO;
 import com.autotest.LiuMa.request.QueryRequest;
 import com.autotest.LiuMa.websocket.config.WsSessionManager;
 import org.springframework.stereotype.Service;
@@ -75,7 +76,7 @@ public class DeviceService {
         return true;
     }
 
-    public List<Device> getDeviceList(QueryRequest request, String owner) {
+    public List<DeviceDTO> getDeviceList(QueryRequest request, String owner) {
         if(request.getCondition() != null && !request.getCondition().equals("")){
             request.setCondition("%"+request.getCondition()+"%");
         }
