@@ -23,6 +23,13 @@ module.exports = {
                 pathRewrite: { // 路径重写，
                     '^/openapi': '/openapi'
                 }
+            },
+            '/websocket': {
+                target: 'http://127.0.0.1:8080', // 你请求的第三方接口
+                changeOrigin: true, 
+                pathRewrite: { // 路径重写，
+                    '^/websocket': '/websocket'
+                }
             }
         },
         // Various Dev Server settings
