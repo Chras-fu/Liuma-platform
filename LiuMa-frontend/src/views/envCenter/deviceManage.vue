@@ -28,7 +28,7 @@
                 </template>
             </el-table-column>
             <el-table-column prop="conditions">
-                <template slot-scope="scope" style="dispaly: flex">
+                <template slot-scope="scope">
                     <el-checkbox-group v-model="scope.row.selected" @change="handleCheckedChange(scope.row)">
                         <el-checkbox :style="'width:'+filterWidth+'px; float:left'" v-for="condition in scope.row.conditions" :label="condition" :key="condition">{{condition}}</el-checkbox>
                     </el-checkbox-group>
@@ -56,7 +56,7 @@
                                 </span>
                                 <el-button style="float: right" size="mini" v-if="device.status==='online'" type="primary" @click="useDevice(device)">立即使用</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user===currentUser" type="danger" @click="releaseDevice(device)">停用</el-button>
-                                <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user!==currentUser" type="info" disabled><i class="el-icon-s-custom"> {{device.user}}</i></el-button>
+                                <el-button style="float: right" size="mini" v-if="device.status==='using' && device.user!==currentUser" type="info" disabled><i class="el-icon-s-custom long-user"> {{device.username}}</i></el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='testing' && currentUser === 'system_admin_user'" type="danger" @click="releaseDevice(device)">停止测试</el-button>
                                 <el-button style="float: right" size="mini" v-if="device.status==='testing'" type="primary" @click="viewDevice(device)">查看</el-button>
                             </div>
@@ -390,5 +390,11 @@ export default {
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.long-user{
+  width: 80px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
