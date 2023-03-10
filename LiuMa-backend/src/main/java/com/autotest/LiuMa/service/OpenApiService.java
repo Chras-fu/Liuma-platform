@@ -13,6 +13,7 @@ import com.autotest.LiuMa.request.CaseResultRequest;
 import com.autotest.LiuMa.request.EngineRequest;
 import com.autotest.LiuMa.request.RunRequest;
 import com.autotest.LiuMa.response.*;
+import org.mybatis.logging.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -248,7 +249,10 @@ public class OpenApiService {
                 if(notification.getStatus().equals(NotificationStatus.DISABLE.toString())){
                     return; // 通知禁用不通知
                 }
-                notificationService.sendNotification(notification, task);   // 发送通知
+                try {
+                    notificationService.sendNotification(notification, task);   // 发送通知
+                }catch (Exception ignored){
+                }
             }
         }else {
             Report report = reportMapper.getReportDetail(task.getReportId());
