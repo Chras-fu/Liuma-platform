@@ -148,7 +148,7 @@
         </div>
     </el-dialog>
     <!-- 用例调试选择引擎和环境 -->
-    <run-form :runForm="runForm" :runVisible="runVisible" :showDevice="true" @closeRun="closeRun" @run="run($event)"/>
+    <run-form :runForm="runForm" :runVisible="runVisible" :showDevice="true" :deviceSystem="caseForm.system" @closeRun="closeRun" @run="run($event)"/>
     <!-- 用例执行结果展示 -->
     <run-result :taskId="taskId" :caseType="caseForm.type" :resultVisable="resultVisable" @closeResult="closeResult"/>
   </div>
