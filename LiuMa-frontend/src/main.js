@@ -5,6 +5,7 @@ import Vue from 'vue';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);
+import editor from 'vue2-ace-editor'
 // 引入App
 import App from './App';
 // 引入路由

@@ -1,8 +1,8 @@
 {
-  "name": "vue-ele-project",
-  "version": "1.0.0",
-  "description": "vue-ele-project",
-  "author": "lidonghui",
+  "name": "liuma",
+  "version": "1.1.1",
+  "description": "liuma frontend",
+  "author": "Chras fu",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
