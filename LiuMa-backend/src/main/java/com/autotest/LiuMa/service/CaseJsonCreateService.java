@@ -212,7 +212,7 @@ public class CaseJsonCreateService {
                 }
             }
             // 组装操作
-            List<CaseAppDTO> caseApps = caseAppMapper.getCaseAppList(taskTestCase.getCaseId(), taskTestCase.getCaseType());
+            List<CaseAppDTO> caseApps = caseAppMapper.getCaseAppList(taskTestCase.getCaseId(), taskTestCase.getCaseType().toLowerCase(Locale.ROOT));
             List<TestCaseAppDataResponse> optList = new ArrayList<>();
             for (CaseAppDTO caseAppDTO:caseApps){
                 TestCaseAppDataResponse optData = new TestCaseAppDataResponse();
