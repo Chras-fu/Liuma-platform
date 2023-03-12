@@ -38,6 +38,8 @@
                 <template slot-scope="scope">
                     <span v-if="scope.row.by ==='PROP'">属性定位</span>
                     <span v-if="scope.row.by ==='XPATH'">Xpath定位</span>
+                    <span v-if="scope.row.by ==='PRED'">Predicate定位</span>
+                    <span v-if="scope.row.by ==='CLASS'">ClassChain定位</span>
                 </template>
             </el-table-column>
             <el-table-column prop="expressionText" label="表达式" min-width="120"/>
