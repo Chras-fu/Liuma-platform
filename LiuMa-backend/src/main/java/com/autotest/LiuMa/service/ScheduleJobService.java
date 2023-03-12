@@ -123,7 +123,7 @@ public class ScheduleJobService {
             reportStatistics.setTotal(total);
             reportMapper.addReportStatistics(reportStatistics);
             // 回写定时任务表下次执行时间
-            while (!planSchedule.getFrequency().equals(PlanFrequency.ONLY_ONE.toString()) && planSchedule.getNextRunTime() < (System.currentTimeMillis()+maxNextRunTime)){ // 找到大于当前时间的日期
+            while (!planSchedule.getFrequency().equals(PlanFrequency.ONLY_ONE.toString()) && planSchedule.getNextRunTime() < maxNextRunTime){ // 找到大于当前时间的日期
                 planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
             }
             planScheduleMapper.updatePlanSchedule(planSchedule);
