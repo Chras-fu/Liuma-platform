@@ -215,15 +215,15 @@ export default {
             this.$post(url, param, response => {
                 let data = response.data;
                 for(let i=0;i<data.list.length;i++){
-                    if(data.list[i].by === "XPATH"){
-                        data.list[i].expressionText = data.list[i].expression;
-                    }else{
+                    if(data.list[i].by === "PROP"){
                         let expressions = JSON.parse(data.list[i].expression);
                         let text = "";
                         for(let j=0;j<expressions.length;j++){
                             text = text + expressions[j].propName + ": " + expressions[j].propValue + ";\n";
                         }
                         data.list[i].expressionText = text;
+                    }else{
+                        data.list[i].expressionText = data.list[i].expression;
                     }
                     
                     data.list[i].updateTime = timestampToTime(data.list[i].updateTime);
