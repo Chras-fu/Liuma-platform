@@ -136,6 +136,14 @@ export default {
             this.$emit("closeResult");
         },
         viewLog(log){
+            let req = log.substring(log.indexOf("<span>请求体: ")+11, log.indexOf("</span><br>"));
+            if(req){
+                log = log.replace(req, req.replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+            }
+            let res = log.substring(log.indexOf("<br><b>响应体: ")+12, log.indexOf("</b><br><br>"));
+            if(res){
+                log = log.replace(res, res.replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+            }
             this.log = log;
             this.logVisable = true;
         },
