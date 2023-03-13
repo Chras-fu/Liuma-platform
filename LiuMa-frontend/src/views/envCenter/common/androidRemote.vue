@@ -639,7 +639,7 @@ export default {
 }
 
 .long-text {
-    width: 50px;
+    width: 100px;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
