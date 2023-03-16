@@ -344,7 +344,7 @@ export default {
           createUser: row.createUser,
           createTime: row.createTime
         };
-        this.editDomainVisible = true;
+        this.editDatabaseVisible = true;
       }
     },
     // 删除域名或数据库
