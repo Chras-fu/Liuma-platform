@@ -287,7 +287,7 @@ export default {
     },
     created() {
         this.getAssertion();
-        // this.getDbList();
+        this.getDbList();
     },
     methods: {
         getAssertion(){
@@ -297,7 +297,7 @@ export default {
             });
         },
         getDbList(){
-            let url = '/autotest/db/name/list/' + this.$store.state.projectId;
+            let url = '/autotest/database/name/list/' + this.$store.state.projectId;
             this.$get(url, response =>{
                 this.dbList = response.data;
             })
