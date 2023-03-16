@@ -29,9 +29,11 @@
                     </el-select>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="60px">
+            <el-table-column label="操作" width="120px">
                 <template slot-scope="scope">
                     <el-button size="mini" type="text" @click="remove(scope.$index)">删除</el-button>
+                    <el-button v-if="scope.$index!==0" size="mini" type="text" icon="el-icon-top" @click="up(scope.$index)"/>
+                    <el-button v-if="scope.$index!==(controller.length-1)" size="mini" type="text" icon="el-icon-bottom" @click="down(scope.$index)"/>
                 </template>
             </el-table-column>
         </el-table>
@@ -87,7 +89,7 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col v-if="sql.sqlType==='query'" :span="12">
                         <el-form-item prop="names">
                             <el-input size="small" style="width: 100%" v-model="sql.names" placeholder="保存变量名, 多个变量名以','隔开, 确保个数与查询结果相匹配"/>
                         </el-form-item>
@@ -304,6 +306,18 @@ export default {
         },
         add(){
             this.controller.push({name:"", value:null });
+        },
+        up(index){
+            this.controller[index-1]=this.controller.splice(index,1,this.controller[index-1])[0];
+            // let old = this.controller[index-1];
+            // this.controller[index-1] = this.controller[index];
+            // this.controller[index] = old;
+        },
+        down(index){
+            this.controller[index]=this.controller.splice(index+1,1,this.controller[index])[0];
+            // let old = this.controller[index+1];
+            // this.controller[index+1] = this.controller[index];
+            // this.controller[index] = old;
         },
         remove(index){
             this.controller.splice(index, 1);
