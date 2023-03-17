@@ -309,15 +309,9 @@ export default {
         },
         up(index){
             this.controller[index-1]=this.controller.splice(index,1,this.controller[index-1])[0];
-            // let old = this.controller[index-1];
-            // this.controller[index-1] = this.controller[index];
-            // this.controller[index] = old;
         },
         down(index){
             this.controller[index]=this.controller.splice(index+1,1,this.controller[index])[0];
-            // let old = this.controller[index+1];
-            // this.controller[index+1] = this.controller[index];
-            // this.controller[index] = old;
         },
         remove(index){
             this.controller.splice(index, 1);
