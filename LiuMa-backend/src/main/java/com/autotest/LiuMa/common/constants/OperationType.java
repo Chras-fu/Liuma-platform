@@ -11,6 +11,7 @@ public enum OperationType {
     RELATION("relation", "关联"),
     ASSERTION("assertion", "断言"),
     CONDITION("condition", "条件"),
+    LOOPER("looper", "循环"),
     SCENARIO("scenario", "场景");
 
     private final String name;
@@ -42,6 +43,7 @@ public enum OperationType {
         enumList.add(RELATION.name);
         enumList.add(ASSERTION.name);
         enumList.add(CONDITION.name);
+        enumList.add(LOOPER.name);
         enumList.add(SCENARIO.name);
         return enumList;
     }
