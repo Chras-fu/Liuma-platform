@@ -91,6 +91,9 @@ public class CaseJsonCreateService {
     private ApplicationMapper applicationMapper;
 
     @Resource
+    private DriverMapper driverMapper;
+
+    @Resource
     private DatabaseMapper databaseMapper;
 
     public String getDownloadUrl(TaskDTO task, List<TaskTestCollectionResponse> testCollectionList){
@@ -257,6 +260,8 @@ public class CaseJsonCreateService {
             // 组装浏览器开关配置
             testCaseWeb.setStartDriver(caseRequest.getCommonParam().getBoolean("startDriver"));
             testCaseWeb.setCloseDriver(caseRequest.getCommonParam().getBoolean("closeDriver"));
+            // 组装浏览器driver配置
+            testCaseWeb.setDriverSetting(this.getDriverSetting(caseRequest.getCommonParam()));
             // 组装操作
             List<CaseWebRequest> caseWebs = caseRequest.getCaseWebs();
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
@@ -292,6 +297,8 @@ public class CaseJsonCreateService {
             // 组装浏览器开关配置
             testCaseWeb.setStartDriver(commonParam.getBoolean("startDriver"));
             testCaseWeb.setCloseDriver(commonParam.getBoolean("closeDriver"));
+            // 组装浏览器driver配置
+            testCaseWeb.setDriverSetting(this.getDriverSetting(commonParam));
             // 组装操作
             List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(taskTestCase.getCaseId(), taskTestCase.getCaseType().toLowerCase(Locale.ROOT));
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
@@ -453,6 +460,18 @@ public class CaseJsonCreateService {
             }
         }
         return dataObj;
+    }
+
+    public JSONObject getDriverSetting(JSONObject commonParam){
+        if(!commonParam.containsKey("driverSetting")){
+            return new JSONObject();
+        }
+        String driverId = commonParam.getString("driverSetting");
+        Driver driver = driverMapper.getDriverById(driverId);
+        if(driver == null){
+            return new JSONObject();
+        }
+        return JSONObject.parseObject(driver.getSetting());
     }
 
     public JSONObject getWebElement(JSONArray elements){

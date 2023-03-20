@@ -182,7 +182,7 @@ export default {
         this.applicationVisible = true;
       },
       deleteApplication(row){
-        let text = "迭代应用删除后 集合和计划无法标识所属应用 确定要删除迭代应用吗";
+        let text = "应用删除后 APP用例无法使用该应用 影响用例执行 确定要删除应用吗";
         let url = "/autotest/application/delete";
         this.$confirm(text, '删除提示', {
             confirmButtonText: '确定',
