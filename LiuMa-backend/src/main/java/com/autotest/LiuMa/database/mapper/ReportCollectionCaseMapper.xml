@@ -37,7 +37,7 @@
     ) order by rcc.collection_case_index
   </select>
   <delete id="deleteByReportId" parameterType="java.lang.String">
-    delete from report_collection_case rcc
+    delete rcc from report_collection_case rcc
     left join report_collection rc on rc.id = rcc.report_collection_id
     where rc.report_id = #{reportId}
   </delete>
