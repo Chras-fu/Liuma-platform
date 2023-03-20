@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.service;
 
 import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.mapper.ModuleMapper;
 import com.autotest.LiuMa.dto.ModuleDTO;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,11 @@ public class ModuleService {
     }
 
     public void delete(ModuleDTO module) {
-        moduleMapper.deleteModule(module.getModuleType(), module.getId());
-        if(module.getChildren() != null) {
-            for (ModuleDTO moduleDTO : module.getChildren()) {
-                this.delete(moduleDTO);
-            }
+        Integer count = moduleMapper.getModuleDataById(module.getModuleType(), module.getId());
+        if(count>0){
+            throw new LMException("当前模块下已有相关数据，无法删除！");
         }
+        moduleMapper.deleteModule(module.getModuleType(), module.getId());
     }
 
     public List<ModuleDTO> getModuleList(String moduleType, String projectId){
