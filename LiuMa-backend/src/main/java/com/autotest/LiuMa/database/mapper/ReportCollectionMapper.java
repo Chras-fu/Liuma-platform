@@ -14,4 +14,6 @@ public interface ReportCollectionMapper {
     List<ReportCollectionDTO> getReportCollectionList(String reportId);
 
     void addReportCollection(ReportCollection reportCollection);
+
+    void deleteByReportId(String reportId);
 }

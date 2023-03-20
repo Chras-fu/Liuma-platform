@@ -17,4 +17,6 @@ public interface ReportCollectionCaseMapper {
     ReportCollectionCaseDTO getCaseReportByTaskId(String taskId);
 
     List<ReportCollectionCaseDTO> getReportCollectionCaseList(String reportCollectionId);
+
+    void deleteByReportId(String reportId);
 }

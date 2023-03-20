@@ -11,4 +11,6 @@ public interface ReportCollectionCaseAppMapper {
     void batchAddReportCollectionCaseApp(List<ReportCollectionCaseApp> reportCollectionCaseApps);
 
     List<ReportCollectionCaseTransDTO> getReportCaseActionList(String reportCaseId);
+
+    void deleteByReportId(String reportId);
 }

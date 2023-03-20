@@ -18,4 +18,10 @@
     left join report_collection_case rcc on rcc.id = rcca.report_collection_case_id
     where rcca.api_id = #{apiId} and rcca.status = 'success' order by rcc.end_time desc limit 1
   </select>
+  <delete id="deleteByReportId" parameterType="java.lang.String">
+    delete from report_collection_case_api rcca
+    left join report_collection_case rcc on rcc.id = rcca.report_collection_case_id
+    left join report_collection rc on rc.id = rcc.report_collection_id
+    where rc.report_id = #{reportId}
+  </delete>
 </mapper>

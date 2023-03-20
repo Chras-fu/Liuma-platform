@@ -11,4 +11,7 @@
   <select id="getReportCollectionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ReportCollectionDTO">
     select * from report_collection where report_id = #{reportId}
   </select>
+  <delete id="deleteByReportId" parameterType="java.lang.String">
+    delete from report_collection where report_id = #{reportId}
+  </delete>
 </mapper>

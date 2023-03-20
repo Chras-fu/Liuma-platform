@@ -11,4 +11,6 @@ public interface ReportCollectionCaseWebMapper {
     void batchAddReportCollectionCaseWeb(List<ReportCollectionCaseWeb> reportCollectionCaseWebs);
 
     List<ReportCollectionCaseTransDTO> getReportCaseActionList(String reportCaseId);
+
+    void deleteByReportId(String reportId);
 }
