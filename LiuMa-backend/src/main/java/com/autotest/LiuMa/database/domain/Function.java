@@ -30,4 +30,6 @@ public class Function implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

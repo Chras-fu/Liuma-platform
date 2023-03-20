@@ -6,7 +6,7 @@
     values (#{id}, #{name}, #{filePath}, #{description}, #{projectId}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
   </insert>
   <select id="getAllTestFile" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.TestFile">
-    select * from test_file where project_id = #{projectId}
+    select * from test_file where project_id = #{projectId} and `status`=1
   </select>
   <select id="getTestFile" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.TestFile">
     select * from test_file where id = #{id}
@@ -19,9 +19,10 @@
     <if test="condition != null and condition != ''">
       and tf.name like #{condition} or tf.id like #{condition}
     </if>
+    and tf.`status`=1
     order by tf.create_time desc
   </select>
-  <delete id="deleteTestFile" parameterType="java.lang.String">
-    delete from test_file where id = #{id}
-  </delete>
+  <update id="deleteTestFile" parameterType="java.lang.String">
+    update test_file set `status`=0 where id = #{id}
+  </update>
 </mapper>

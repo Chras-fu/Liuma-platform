@@ -13,4 +13,6 @@ public interface ReportCollectionCaseApiMapper {
     List<ReportCollectionCaseTransDTO> getReportCaseActionList(String reportCaseId);
 
     String getLastApiReport(String apiId);
+
+    void deleteByReportId(String reportId);
 }

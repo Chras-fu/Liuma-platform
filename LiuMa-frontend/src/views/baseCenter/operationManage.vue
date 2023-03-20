@@ -23,7 +23,7 @@
         <el-button size="small" @click="reset">重置</el-button>
       </el-form-item>
       <el-form-item style="float: right">
-        <el-button size="small" type="primary" icon="el-icon-plus" @click="addOperation">新增操作</el-button>
+        <el-button v-if="activeName!=='looper'" size="small" type="primary" icon="el-icon-plus" @click="addOperation">新增操作</el-button>
       </el-form-item>
     </el-form>
     <el-tabs v-model="activeName" @tab-click="handleClick">
@@ -44,6 +44,10 @@
           @callFather="callFather($event)" @deleteOperation="deleteOperation($event)" />
       </el-tab-pane>
       <el-tab-pane label="条件" name="condition">
+        <operation-table :operationData="operationData" :loading="loading" :pageparam="pageparam" :uiType="searchForm.uiType" 
+          @callFather="callFather($event)" @deleteOperation="deleteOperation($event)" />
+      </el-tab-pane>
+      <el-tab-pane label="循环" name="looper">
         <operation-table :operationData="operationData" :loading="loading" :pageparam="pageparam" :uiType="searchForm.uiType" 
           @callFather="callFather($event)" @deleteOperation="deleteOperation($event)" />
       </el-tab-pane>

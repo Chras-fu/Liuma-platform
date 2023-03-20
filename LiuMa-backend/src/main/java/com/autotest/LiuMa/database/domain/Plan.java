@@ -32,4 +32,6 @@ public class Plan implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

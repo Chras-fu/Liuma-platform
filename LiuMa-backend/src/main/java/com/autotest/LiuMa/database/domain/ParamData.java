@@ -26,4 +26,6 @@ public class ParamData implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

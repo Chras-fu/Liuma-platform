@@ -26,12 +26,14 @@
     <if test="uiType == 'app'">
       and `system` = #{system}
     </if>
+    and `status`=1
   </select>
   <select id="getGroupOperationList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.OperationDTO">
     select * from `operation_${uiType}` where (project_id = #{projectId} or project_id = 'system') and `type` = #{operationType}
     <if test="uiType == 'app'">
       and (`system` = #{system} or `system` = 'common')
     </if>
+    and `status`=1
   </select>
   <select id="getOperationList" parameterType="com.autotest.LiuMa.request.QueryRequest" resultType="com.autotest.LiuMa.dto.OperationDTO">
     select op.id, op.`name`, op.type, op.`from`,
@@ -47,9 +49,10 @@
     <if test="uiType == 'app' and system != null and system != ''">
       and op.`system` = #{system}
     </if>
+    and op.`status`=1
     order by op.create_time desc, op.name
   </select>
-  <delete id="deleteOperation" parameterType="java.lang.String">
-    delete from `operation_${uiType}` where id = #{id}
-  </delete>
+  <update id="deleteOperation" parameterType="java.lang.String">
+    update `operation_${uiType}` set status=0 where id = #{id}
+  </update>
 </mapper>

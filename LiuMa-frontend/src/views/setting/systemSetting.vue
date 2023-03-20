@@ -16,6 +16,9 @@
       <el-tab-pane label="通知配置" name="notification">
         <notification-setting :showOpt="showOpt" :activeName="activeName"></notification-setting>
       </el-tab-pane>
+      <el-tab-pane label="驱动配置" name="driver">
+        <driver-setting :showOpt="showOpt" :activeName="activeName"></driver-setting>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -25,10 +28,11 @@ import VersionSetting from './common/versionSetting'
 import DomainSignSetting from './common/domainSignSetting'
 import ApplicationSetting from './common/applicationSetting'
 import NotificationSetting from './common/notificationSetting'
+import DriverSetting from './common/driverSetting'
 
 export default {
     components: {
-      VersionSetting, DomainSignSetting, ApplicationSetting, NotificationSetting
+      VersionSetting, DomainSignSetting, ApplicationSetting, NotificationSetting, DriverSetting
     },
     data() {
         return{

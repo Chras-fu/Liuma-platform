@@ -34,7 +34,7 @@
         modes: {
           type: Array,
           default() {
-            return ['text', 'xml', 'html', 'python'];
+            return ['text', 'xml', 'html', 'python', 'sql'];
           }
         }
       },

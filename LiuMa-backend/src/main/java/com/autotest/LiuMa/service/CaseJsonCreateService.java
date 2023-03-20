@@ -90,6 +90,12 @@ public class CaseJsonCreateService {
     @Resource
     private ApplicationMapper applicationMapper;
 
+    @Resource
+    private DriverMapper driverMapper;
+
+    @Resource
+    private DatabaseMapper databaseMapper;
+
     public String getDownloadUrl(TaskDTO task, List<TaskTestCollectionResponse> testCollectionList){
         String taskFilePath = TASK_FILE_PATH+"/"+task.getProjectId()+"/"+task.getId();
         String taskZipPath = TASK_FILE_PATH+"/"+task.getProjectId();
@@ -254,6 +260,8 @@ public class CaseJsonCreateService {
             // 组装浏览器开关配置
             testCaseWeb.setStartDriver(caseRequest.getCommonParam().getBoolean("startDriver"));
             testCaseWeb.setCloseDriver(caseRequest.getCommonParam().getBoolean("closeDriver"));
+            // 组装浏览器driver配置
+            testCaseWeb.setDriverSetting(this.getDriverSetting(caseRequest.getCommonParam()));
             // 组装操作
             List<CaseWebRequest> caseWebs = caseRequest.getCaseWebs();
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
@@ -289,6 +297,8 @@ public class CaseJsonCreateService {
             // 组装浏览器开关配置
             testCaseWeb.setStartDriver(commonParam.getBoolean("startDriver"));
             testCaseWeb.setCloseDriver(commonParam.getBoolean("closeDriver"));
+            // 组装浏览器driver配置
+            testCaseWeb.setDriverSetting(this.getDriverSetting(commonParam));
             // 组装操作
             List<CaseWebDTO> caseWebs = caseWebMapper.getCaseWebList(taskTestCase.getCaseId(), taskTestCase.getCaseType().toLowerCase(Locale.ROOT));
             List<TestCaseWebDataResponse> optList = new ArrayList<>();
@@ -354,7 +364,7 @@ public class CaseJsonCreateService {
                 apiData.setRelations(caseApiRequest.getRelation());
                 apiData.setAssertions(caseApiRequest.getAssertion());
                 // 组装controller
-                apiData.setController(this.getApiController(caseApiRequest.getController()));
+                apiData.setController(this.getApiController(environmentId, caseApiRequest.getController()));
                 apiList.add(apiData);
             }
             testCaseApi.setApiList(apiList);
@@ -394,7 +404,7 @@ public class CaseJsonCreateService {
                 apiData.setRelations(JSONArray.parseArray(caseApiDTO.getRelation()));
                 apiData.setAssertions(JSONArray.parseArray(caseApiDTO.getAssertion()));
                 // 组装controller
-                apiData.setController(this.getApiController(JSONArray.parseArray(caseApiDTO.getController())));
+                apiData.setController(this.getApiController(environmentId, JSONArray.parseArray(caseApiDTO.getController())));
                 apiList.add(apiData);
             }
             testCaseApi.setApiList(apiList);
@@ -450,6 +460,18 @@ public class CaseJsonCreateService {
             }
         }
         return dataObj;
+    }
+
+    public JSONObject getDriverSetting(JSONObject commonParam){
+        if(!commonParam.containsKey("driverSetting")){
+            return new JSONObject();
+        }
+        String driverId = commonParam.getString("driverSetting");
+        Driver driver = driverMapper.getDriverById(driverId);
+        if(driver == null){
+            return new JSONObject();
+        }
+        return JSONObject.parseObject(driver.getSetting());
     }
 
     public JSONObject getWebElement(JSONArray elements){
@@ -514,14 +536,42 @@ public class CaseJsonCreateService {
         return dataObj;
     }
 
-    public JSONObject getApiController(JSONArray controller){
+    public JSONObject getApiController(String environmentId, JSONArray controller){
         JSONObject controllerObj = new JSONObject();
         if(controller == null){
             return controllerObj;
         }
+        JSONArray pre = new JSONArray();    // 前置脚本和sql
+        JSONArray post = new JSONArray();   // 后置脚本和sql
         for(int i =0; i<controller.size(); i++) {
             JSONObject controllerData = controller.getJSONObject(i);
-            controllerObj.put(controllerData.getString("name"), controllerData.getString("value"));
+            String controllerName = controllerData.getString("name");
+            String controllerValue = controllerData.getString("value");
+            if(controllerName.contains("Sql") && !controllerValue.equals("{}")){ // 处理sql中的数据库连接信息
+                JSONObject value = JSONObject.parseObject(controllerValue);
+                Database database = databaseMapper.getDatabaseByName(environmentId, value.getString("db"));
+                JSONObject db = new JSONObject();
+                if(database != null){
+                    db = JSONObject.parseObject(database.getConnectInfo());
+                    db.put("tpz", database.getDatabaseType());
+                    db.put("db", database.getDatabaseKey());
+                }
+                value.put("db", db);
+                controllerData.put("value", value.toJSONString());
+            }
+            if(controllerName.startsWith("pre")){
+                pre.add(controllerData);
+            }else if(controllerName.startsWith("post")){
+                post.add(controllerData);
+            }else {
+                controllerObj.put(controllerName, controllerData.getString("value"));
+            }
+        }
+        if(pre.size()>0){
+            controllerObj.put("pre", pre);
+        }
+        if(post.size()>0){
+            controllerObj.put("post", post);
         }
         return controllerObj;
     }

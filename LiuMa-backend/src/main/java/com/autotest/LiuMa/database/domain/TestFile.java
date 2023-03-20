@@ -24,4 +24,6 @@ public class TestFile implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

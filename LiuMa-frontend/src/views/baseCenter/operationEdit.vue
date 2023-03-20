@@ -59,26 +59,26 @@
         <el-table :data="operationForm.data">
             <el-table-column label="数据名称" prop="paramName">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请定义数据名称" v-model="operationForm.data[scope.$index].paramName"
-                    :disabled="operationForm.data[scope.$index].paramName ==='assertion'|| operationForm.data[scope.$index].paramName ==='expect' || operationForm.data[scope.$index].paramName ==='continue' || operationForm.data[scope.$index].paramName ==='save_name' || operationForm.data[scope.$index].paramName ==='true' || operationForm.data[scope.$index].paramName ==='false'"/>
+                    <el-input size="small" style="width: 90%" placeholder="请定义数据名称" v-model="scope.row.paramName"
+                    :disabled="getDisabled('paramName', scope.row.paramName)"/>
                 </template>
             </el-table-column>
             <el-table-column label="数据类型" prop="type">
                 <template slot-scope="scope">
-                    <el-select size="small" style="width: 90%" v-model="operationForm.data[scope.$index].type" 
-                    :disabled="operationForm.data[scope.$index].paramName==='assertion' || operationForm.data[scope.$index].paramName ==='continue' || operationForm.data[scope.$index].paramName==='save_name' || operationForm.data[scope.$index].paramName==='true' || operationForm.data[scope.$index].paramName==='false'">
+                    <el-select size="small" style="width: 90%" v-model="scope.row.type" 
+                    :disabled="getDisabled('type', scope.row.paramName)">
                         <el-option v-for="item in dataTypes" :key="item" :label="item" :value="item"/>
                     </el-select>
                 </template>
             </el-table-column>
             <el-table-column label="数据说明" prop="description">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请输入数据说明" v-model="operationForm.data[scope.$index].description"/>
+                    <el-input size="small" style="width: 90%" placeholder="请输入数据说明" v-model="scope.row.description"/>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="100px">
                 <template slot-scope="scope">
-                    <el-button size="mini" v-if="operationForm.data[scope.$index].paramName!=='assertion' && operationForm.data[scope.$index].paramName!=='expect' && operationForm.data[scope.$index].paramName!=='continue' && operationForm.data[scope.$index].paramName!=='save_name' && operationForm.data[scope.$index].paramName!=='true' && operationForm.data[scope.$index].paramName!=='false'" 
+                    <el-button size="mini" v-if="!getDisabled('operation', scope.row.paramName)" 
                         type="text" @click="removeData(scope.$index)">删除</el-button>
                 </template>
             </el-table-column>
@@ -218,6 +218,40 @@ export default {
         deleteAllElement(){
             this.operationForm.element.splice(0, this.operationForm.element.length);
         },
+        getDisabled(field, paramName){
+            switch(this.operationForm.type) {
+                case 'assertion':
+                    if(field !== 'type'){
+                        if(paramName === "assertion" | paramName === "expect" | paramName === "continue"){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }else{
+                        if(paramName === "assertion" | paramName === "continue"){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }
+                case 'relation':
+                    if(paramName === 'save_name'){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                case 'condition':
+                    if(paramName === 'true' | paramName === 'false'){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                case 'looper':
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
     
 }

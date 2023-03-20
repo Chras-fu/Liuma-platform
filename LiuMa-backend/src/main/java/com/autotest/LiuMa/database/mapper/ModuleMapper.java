@@ -14,4 +14,6 @@ public interface ModuleMapper {
     ModuleDTO getModuleByParentAndName(String moduleType, String name, String parentId);
 
     List<ModuleDTO> getModuleList(String moduleType, String projectId);
+
+    Integer getModuleDataById(String moduleType, String moduleId);
 }

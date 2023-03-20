@@ -22,4 +22,20 @@
   <delete id="deleteModule" parameterType="java.lang.String">
     delete from ${moduleType} where id = #{id}
   </delete>
+  <select id="getModuleDataById" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(id) from
+    <if test="moduleType == 'api_module'">
+      `api`
+    </if>
+    <if test="moduleType == 'case_module'">
+      `case`
+    </if>
+    <if test="moduleType == 'page_module'">
+      `element`
+    </if>
+    <if test="moduleType == 'view_module'">
+      `control`
+    </if>
+    where module_id = #{moduleId}
+  </select>
 </mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autotest.LiuMa.database.mapper.DriverMapper">
+  <insert id="saveDriver" parameterType="com.autotest.LiuMa.database.domain.Driver">
+    insert into `driver` (id, name, setting, description, project_id, create_time, update_time)
+    values (#{id}, #{name}, #{setting}, #{description}, #{projectId}, #{createTime}, #{updateTime})
+    ON DUPLICATE KEY UPDATE
+    update_time = #{updateTime}
+    <if test="name != null and name != ''">
+      ,name = #{name}
+    </if>
+    <if test="setting != null and setting != ''">
+      ,setting = #{setting}
+    </if>
+    <if test="description != null and description != ''">
+      ,description = #{description}
+    </if>
+  </insert>
+  <delete id="deleteDriver" parameterType="java.lang.String">
+    delete from `driver` where id = #{id}
+  </delete>
+  <select id="getDriverByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Driver">
+    select * from `driver` where project_id = #{projectId} and name = #{name}
+  </select>
+  <select id="getDriverById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Driver">
+    select * from `driver` where id = #{id}
+  </select>
+  <select id="getDriverList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Driver">
+    select * from `driver` where project_id = #{projectId}
+    <if test="condition != null and condition != ''">
+      and name like #{condition}
+    </if>
+    order by create_time desc
+  </select>
+</mapper>

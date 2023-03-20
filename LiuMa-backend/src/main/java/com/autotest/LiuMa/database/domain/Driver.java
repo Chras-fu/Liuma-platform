@@ -5,23 +5,19 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Environment implements Serializable {
+public class Driver implements Serializable {
     private String id;
 
     private String name;
 
-    private String projectId;
+    private String setting;
 
     private String description;
+
+    private String projectId;
 
     private Long createTime;
 
     private Long updateTime;
-
-    private String createUser;
-
-    private String updateUser;
-
-    private Integer status;
 
 }

@@ -39,6 +39,11 @@ public class ReportService {
     private ReportCollectionCaseAppMapper reportCollectionCaseAppMapper;
 
     public void deleteReport(Report report) {
+        reportCollectionCaseAppMapper.deleteByReportId(report.getId());
+        reportCollectionCaseApiMapper.deleteByReportId(report.getId());
+        reportCollectionCaseWebMapper.deleteByReportId(report.getId());
+        reportCollectionCaseMapper.deleteByReportId(report.getId());
+        reportCollectionMapper.deleteByReportId(report.getId());
         reportMapper.deleteReport(report.getId());
     }
 

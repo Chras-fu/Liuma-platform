@@ -9,9 +9,9 @@
     update collection set name=#{name}, device_id=#{deviceId}, version_id=#{versionId}, description=#{description},
     update_time=#{updateTime}, update_user=#{updateUser} where id=#{id}
   </update>
-  <delete id="deleteCollection" parameterType="java.lang.String">
-    delete from collection where id = #{id}
-  </delete>
+  <update id="deleteCollection" parameterType="java.lang.String">
+    update collection set `status`=0 where id = #{id}
+  </update>
   <select id="getCollectionDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CollectionDTO">
     select col.id, col.name, col.device_id, col.version_id, col.description, col.project_id, col.create_time, col.update_time,
     col.create_user, col.update_user, v.name as versionName from collection col
@@ -25,6 +25,7 @@
     <if test="condition != null and condition != ''">
       and col.name like #{condition}
     </if>
+    and col.`status`=1
     order by col.update_time desc
   </select>
 </mapper>

@@ -36,4 +36,6 @@ public class Operation implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

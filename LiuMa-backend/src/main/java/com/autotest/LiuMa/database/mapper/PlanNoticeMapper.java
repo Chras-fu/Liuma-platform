@@ -10,7 +10,5 @@ public interface PlanNoticeMapper {
 
     void updatePlanNotice(PlanNotice planNotice);
 
-    void deletePlanNotice(String planId);
-
     PlanNotice getPlanNotice(String planId);
 }

@@ -5,14 +5,16 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Environment implements Serializable {
+public class Database implements Serializable {
     private String id;
 
-    private String name;
+    private String databaseType;
 
-    private String projectId;
+    private String databaseKey;
 
-    private String description;
+    private String connectInfo;
+
+    private String environmentId;
 
     private Long createTime;
 
@@ -23,5 +25,4 @@ public class Environment implements Serializable {
     private String updateUser;
 
     private Integer status;
-
 }

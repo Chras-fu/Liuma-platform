@@ -7,9 +7,9 @@
         <el-row :gutter="10">
             <el-col :span="6">
                 <div class="screen-header">
-                    <div style="float:left; margin:12px 4px">
+                    <div style="float:left; margin:12px 4px" class="long-text">
                         <el-tooltip :content="device.serial" placement="bottom">
-                            <span class="long-text">{{device.name}}</span>
+                            <span>{{device.name}}</span>
                         </el-tooltip>
                     </div>
                     <div style="float:right; margin: 7px 3px">
@@ -673,7 +673,7 @@ export default {
 }
 
 .long-text {
-    width: 50px;
+    width: 100px;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

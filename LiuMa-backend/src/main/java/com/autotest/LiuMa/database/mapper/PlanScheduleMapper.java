@@ -14,8 +14,6 @@ public interface PlanScheduleMapper {
 
     void updatePlanSchedule(PlanSchedule planSchedule);
 
-    void deletePlanSchedule(String planId);
-
     PlanSchedule getPlanSchedule(String planId);
 
     List<PlanSchedule> getToRunPlanScheduleList(Long minNextRunTime, Long maxNextRunTime);

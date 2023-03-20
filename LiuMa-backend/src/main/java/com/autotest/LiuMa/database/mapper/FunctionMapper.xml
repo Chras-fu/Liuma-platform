@@ -16,10 +16,10 @@
     select * from `function` where id = #{id}
   </select>
   <select id="getFunctionByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
-    select * from `function` where name = #{name} and (project_id=#{projectId} or project_id='system')
+    select * from `function` where name = #{name} and (project_id=#{projectId} or project_id='system') and `status`=1
   </select>
   <select id="getCustomFunctionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Function">
-    select * from `function` where `from` = 'custom' and project_id = #{projectId}
+    select * from `function` where `from` = 'custom' and project_id = #{projectId} and `status`=1
   </select>
   <select id="getFunctionList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.FunctionDTO">
     select fc.id, fc.`name`, fc.`from`, fc.expression, fc.description, fc.project_id, fc.create_time, fc.update_time,
@@ -29,9 +29,10 @@
     <if test="condition != null and condition != ''">
       and fc.name like #{condition}
     </if>
+    and fc.`status`=1
     order by fc.create_time desc, fc.name
   </select>
-  <delete id="deleteFunction" parameterType="java.lang.String">
-    delete from `function` where id = #{id}
-  </delete>
+  <update id="deleteFunction" parameterType="java.lang.String">
+    update `function` set `status`=0 where id = #{id}
+  </update>
 </mapper>

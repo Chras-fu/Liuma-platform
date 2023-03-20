@@ -13,4 +13,10 @@
     select status, operation_id as transId, operation_name as transName, operation_element as content, description, exec_log, screen_shot as screenshotList from report_collection_case_app
     where report_collection_case_id = #{reportCaseId} order by case_app_index
   </select>
+  <delete id="deleteByReportId" parameterType="java.lang.String">
+    delete from report_collection_case_app rcca
+    left join report_collection_case rcc on rcc.id = rcca.report_collection_case_id
+    left join report_collection rc on rc.id = rcc.report_collection_id
+    where rc.report_id = #{reportId}
+  </delete>
 </mapper>
