@@ -22,4 +22,6 @@ public class Environment implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

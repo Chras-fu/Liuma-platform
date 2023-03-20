@@ -20,7 +20,7 @@
     </if>
   </insert>
   <select id="getParamByGroupAndName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamData">
-    select * from param_data where group_id = #{groupId} and name = #{name}
+    select * from param_data where group_id = #{groupId} and name = #{name} and `status`=1
   </select>
   <select id="getParamById" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.ParamData">
     select * from param_data where id = #{id}
@@ -32,7 +32,7 @@
     select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
     pd.create_user, pd.update_user
     from param_data pd left join param_group pg on pg.id = pd.group_id
-    where pg.param_type = 'custom' and pg.project_id = #{projectId}
+    where pg.param_type = 'custom' and pg.project_id = #{projectId} and pd.`status`=1
   </select>
   <select id="getParamDataList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ParamDataDTO">
     select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
@@ -42,16 +42,17 @@
     <if test="condition != null and condition != ''">
       and pd.name like #{condition}
     </if>
+    and pd.`status`=1
     order by pd.update_time desc
   </select>
   <select id="getParamDataListByGroupName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.ParamDataDTO">
     select pd.id, pd.name, pd.param_data, pd.group_id, pd.data_type, pd.description, pd.create_time, pd.update_time,
     pd.create_user, pd.update_user from param_data pd left join param_group pg on pg.id = pd.group_id
-    where pg.name = #{groupName} and pg.project_id = #{projectId} order by pd.update_time desc
+    where pg.name = #{groupName} and pg.project_id = #{projectId} and pd.`status`=1 order by pd.update_time desc
   </select>
-  <delete id="deleteParamData" parameterType="java.lang.String">
-    delete from param_data where id = #{id}
-  </delete>
+  <update id="deleteParamData" parameterType="java.lang.String">
+    update param_data set `status`=0 where id = #{id}
+  </update>
   <insert id="insertParamGroup" parameterType="com.autotest.LiuMa.database.domain.ParamGroup">
     insert into param_group (id, name, param_type, description, project_id, update_user, create_user, create_time, update_time)
     values

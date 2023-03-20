@@ -14,10 +14,10 @@
     </if>
   </insert>
   <select id="getEnvironmentByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Environment">
-    select * from environment where project_id = #{projectId} and name = #{name}
+    select * from environment where project_id = #{projectId} and name = #{name} and `status`=1
   </select>
   <select id="getAllEnvironment" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Environment">
-    select * from environment where project_id = #{projectId}
+    select * from environment where project_id = #{projectId} and `status`=1
   </select>
   <select id="getEnvironmentList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.EnvironmentDTO">
     select env.id, env.name, env.description, env.project_id, env.create_time, env.update_time,
@@ -27,9 +27,10 @@
     <if test="condition != null and condition != ''">
       and env.name like #{condition}
     </if>
+    and env.`status`=1
     order by env.update_time desc
   </select>
-  <delete id="deleteEnvironment" parameterType="java.lang.String">
-    delete from environment where id = #{id}
-  </delete>
+  <update id="deleteEnvironment" parameterType="java.lang.String">
+    update environment set `status`=0 where id = #{id}
+  </update>
 </mapper>

@@ -108,9 +108,6 @@ public class PlanService {
     }
 
     public void deletePlan(Plan plan) {
-        planCollectionMapper.deletePlanCollection(plan.getId());
-        planScheduleMapper.deletePlanSchedule(plan.getId());
-        planNoticeMapper.deletePlanNotice(plan.getId());
         planMapper.deletePlan(plan.getId());
     }
 

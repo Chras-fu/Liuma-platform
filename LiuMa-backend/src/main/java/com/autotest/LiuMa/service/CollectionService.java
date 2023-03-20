@@ -106,7 +106,6 @@ public class CollectionService {
     }
 
     public void deleteCollection(Collection collection) {
-        collectionCaseMapper.deleteCollectionCase(collection.getId());
         collectionMapper.deleteCollection(collection.getId());
     }
 

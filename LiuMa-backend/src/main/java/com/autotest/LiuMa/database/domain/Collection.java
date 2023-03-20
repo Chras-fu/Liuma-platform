@@ -26,4 +26,6 @@ public class Collection implements Serializable {
 
     private String updateUser;
 
+    private Integer status;
+
 }

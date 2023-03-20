@@ -12,9 +12,9 @@
     retry=#{retry}, engine_id=#{engineId}, description=#{description},
     update_time=#{updateTime}, update_user=#{updateUser} where id=#{id}
   </update>
-  <delete id="deletePlan" parameterType="java.lang.String">
-    delete from plan where id = #{id}
-  </delete>
+  <update id="deletePlan" parameterType="java.lang.String">
+    update plan set `status`=0 where id = #{id}
+  </update>
   <select id="getPlanDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.PlanDTO">
     select p.*, ps.start_time, ps.frequency from plan p
     left join plan_schedule ps on ps.plan_id = p.id
@@ -30,6 +30,7 @@
     <if test="condition != null and condition != ''">
       and pl.name like #{condition}
     </if>
+    and pl.`status`=1
     order by pl.update_time desc
   </select>
 </mapper>

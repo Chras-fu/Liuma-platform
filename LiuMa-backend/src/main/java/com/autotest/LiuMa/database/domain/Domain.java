@@ -23,4 +23,6 @@ public class Domain implements Serializable {
     private String createUser;
 
     private String updateUser;
+
+    private Integer status;
 }
