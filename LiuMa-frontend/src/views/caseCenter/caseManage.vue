@@ -170,6 +170,10 @@ export default {
         removeModule(args) {
             let node = args[0];
             let data = args[1];
+            if(data.children.length != 0){
+                this.$message.warning("当前模块有子模块, 无法删除");
+                return;
+            }
             let url = '/autotest/module/delete';
             this.$post(url, data, response =>{
                 const parent = node.parent;
