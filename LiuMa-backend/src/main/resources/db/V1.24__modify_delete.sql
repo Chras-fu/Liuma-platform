@@ -6,6 +6,10 @@ ALTER TABLE `environment` DROP INDEX `project_id`;
 ALTER TABLE `collection` DROP INDEX `project_id`;
 ALTER TABLE `plan` DROP INDEX `project_id`;
 ALTER TABLE `param_data` DROP INDEX `group_id`;
+ALTER TABLE `view_module` DROP INDEX `parent_id`;
+ALTER TABLE `page_module` DROP INDEX `project_id`;
+ALTER TABLE `case_module` DROP INDEX `project_id`;
+ALTER TABLE `api_module` DROP INDEX `project_id`;
 
 ALTER TABLE `function` ADD `status` int(1) DEFAULT 1 COMMENT '状态 0: 删除 1: 正常' after `update_time`;
 ALTER TABLE `operation_web` ADD `status` int(1) DEFAULT 1 COMMENT '状态 0: 删除 1: 正常' after `update_time`;

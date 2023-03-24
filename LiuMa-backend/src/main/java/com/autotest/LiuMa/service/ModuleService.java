@@ -20,7 +20,8 @@ public class ModuleService {
     private ModuleMapper moduleMapper;
 
     public ModuleDTO save(ModuleDTO module) {
-        ModuleDTO oldModule = moduleMapper.getModuleByParentAndName(module.getModuleType(), module.getName(), module.getParentId());
+        ModuleDTO oldModule = moduleMapper.getModuleByParentAndName(module.getModuleType(),
+                module.getName(), module.getParentId(), module.getProjectId());
         if(oldModule != null){
             throw new DuplicateContentException("当前父模块下已有重名模块");
         }
