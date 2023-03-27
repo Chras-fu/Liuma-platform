@@ -184,11 +184,14 @@ export default {
         },
         viewCase(row){
             if (row.caseType == "API"){
-              this.$router.push({path: '/caseCenter/caseManage/apiCase/edit/' + row.caseId})
+              this.$router.push({path: '/caseCenter/caseManage/apiCase/edit/' + row.caseId});
             }else if (row.caseType == "WEB"){
-              this.$router.push({path: '/caseCenter/caseManage/webCase/edit/' + row.caseId})
+              this.$router.push({path: '/caseCenter/caseManage/webCase/edit/' + row.caseId});
             }else{
-              this.$router.push({path: '/caseCenter/caseManage/appCase/edit/' + row.caseId})
+                this.$get("/autotest/case/system/" + row.caseId, response =>{
+                    let system = response.data;
+                    this.$router.push({path: '/caseCenter/caseManage/appCase/'+ system +'/edit/' + row.caseId});
+                });
             }
         },
         viewLog(log){
