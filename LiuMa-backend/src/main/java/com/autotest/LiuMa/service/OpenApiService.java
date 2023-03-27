@@ -143,6 +143,9 @@ public class OpenApiService {
                 return null;
             }
         }
+        if(task.getSourceId() == null){
+            return null;
+        }
         // 获取本任务需要测试的用例列表
         List<TaskTestCollectionResponse> testCollectionList = caseJsonCreateService.getTaskTestCollectionList(task);
         if(testCollectionList.size()==0) return null;
