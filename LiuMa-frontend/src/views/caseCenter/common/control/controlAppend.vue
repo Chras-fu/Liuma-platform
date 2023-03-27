@@ -77,8 +77,11 @@ export default {
                 { label: "苹果", value: "apple" },
             ],
             rules: {
-                name: [{ required: true, message: '模块名称不能为空', trigger: 'blur' }],
-                parentName: [{ required: true, message: '所属父级不能为空', trigger: 'blur' }]
+                name: [{ required: true, message: '元素名称不能为空', trigger: 'blur' }],
+                system: [{ required: true, message: '所属系统不能为空', trigger: 'blur' }],
+                by: [{ required: true, message: '定位方式不能为空', trigger: 'blur' }],
+                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }],
+                moduleId: [{ required: true, message: '所属页面不能为空', trigger: 'blur' }]
             },
         }
     },
