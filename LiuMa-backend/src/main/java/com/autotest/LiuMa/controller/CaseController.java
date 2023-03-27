@@ -49,6 +49,11 @@ public class CaseController {
         return caseService.getCaseDetail(caseType, caseId);
     }
 
+    @GetMapping("/system/{caseId}")
+    public String getCaseSystem(@PathVariable String caseId){
+        return caseService.getCaseSystem(caseId);
+    }
+
     @PostMapping("/list/{goPage}/{pageSize}")
     public Pager<List<CaseDTO>> getCaseList(@PathVariable int goPage, @PathVariable int pageSize,
                                            @RequestBody QueryRequest request) {

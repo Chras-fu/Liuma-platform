@@ -15,6 +15,8 @@ public interface CaseMapper {
 
     void deleteCase(String id);
 
+    String getCaseSystem(String id);
+
     CaseDTO getCaseDetail(String id);
 
     List<CaseDTO> getCaseList(QueryRequest request);

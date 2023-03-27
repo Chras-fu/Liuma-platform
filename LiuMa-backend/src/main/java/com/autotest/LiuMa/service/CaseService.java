@@ -153,6 +153,10 @@ public class CaseService {
         caseMapper.deleteCase(caseRequest.getId());
     }
 
+    public String getCaseSystem(String caseId){
+        return caseMapper.getCaseSystem(caseId);
+    }
+
     public CaseDTO getCaseDetail(String caseType, String caseId) {
         CaseDTO caseDTO = caseMapper.getCaseDetail(caseId);
         if(caseType.equalsIgnoreCase("API")){

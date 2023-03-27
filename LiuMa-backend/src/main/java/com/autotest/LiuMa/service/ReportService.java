@@ -3,7 +3,6 @@ package com.autotest.LiuMa.service;
 import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.ReportStatus;
 import com.autotest.LiuMa.database.domain.Report;
-import com.autotest.LiuMa.database.domain.ReportCollectionCase;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.ReportCollectionCaseDTO;
 import com.autotest.LiuMa.dto.ReportCollectionCaseTransDTO;

@@ -16,6 +16,9 @@
   <delete id="deleteCase" parameterType="java.lang.String">
     update `case` set status = 'Trash' where id = #{id}
   </delete>
+  <select id="getCaseSystem" parameterType="java.lang.String" resultType="java.lang.String">
+    select `system` from `case` where id = #{id}
+  </select>
   <select id="getCaseDetail" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CaseDTO">
     select case.id, case.num, case.name, case.level, case.module_id as moduleId, case.project_id, cm.name as moduleName,
     case.type, case.third_party, case.description, case.environment_ids, case.system, case.common_param,
