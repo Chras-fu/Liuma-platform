@@ -63,7 +63,7 @@
                                     </template>
                                 </el-table-column>
                                 <el-table-column label="响应时长" prop="during" v-if="caseData.row.caseType ==='API'" width="120px"/>
-                                <el-table-column label="执行截图" prop="screenshotList" v-if="caseData.row.caseType ==='WEB'" width="120px">
+                                <el-table-column label="执行截图" prop="screenshotList" v-else width="120px">
                                     <template slot-scope="scope">
                                         <el-button v-if="scope.row.screenshotList.length !== 0" size="small" type="text" @click="scope.row.showViewer=true">查看</el-button>
                                         <el-image-viewer v-if="scope.row.showViewer" :on-close="()=>{scope.row.showViewer=false}" :url-list="scope.row.screenshotList"/>
