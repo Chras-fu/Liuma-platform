@@ -50,9 +50,7 @@
 
 ## 三、开发环境
 
-环境依赖: nodejs 14、java 1.8、mysql 8
-
-IDE推荐: vue使用VSCode、java使用IDEA
+环境依赖: nodejs 14、java 1.8、mysql 8、maven 3.6+
 
 1. 前端启动
 ```
@@ -68,19 +66,19 @@ npm run dev
 
 2. 后端启动
 ```
-Step1: IDEA打开目录 Liuma-platform/LiuMa-backend
+# 切换目录
+cd Liuma-platform/LiuMa-backend
 
-Step2: maven安装依赖
+# 配置数据库
+1. 新建数据库名liuma
+2. 配置application.properties数据库连接
 
-Step3: 新建数据库名: liuma
+# 配置第三方服务
+1. 配置七牛云存储截图 也可以将云存储开关关闭使用服务器存储
+2. 配置邮箱服务 支持163/qq等各类邮箱的smtp协议 默认关闭邮件通知
 
-Step4: 配置application.properties数据库连接
-
-Step5: 配置七牛云存储截图 也可以将云存储开关关闭使用服务器存储
-
-Step6: 配置邮箱服务 支持163/qq等各类邮箱的smtp协议 默认关闭邮件通知
-
-Step7: 启动LiuMaApplication文件
+# 启动项目
+mvn spring-boot:run
 ```
 
 3. 验证启动成功
