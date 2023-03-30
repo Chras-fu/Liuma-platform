@@ -124,7 +124,7 @@ public class ApiImportService {
             //rest参数
             JSONArray rest = new JSONArray();   // 目前postman没有rest参数 todo
             //body参数
-            JSONObject body = new JSONObject();
+            JSONObject body = this.getRequestBody("json", "", new JSONArray(), new JSONArray(), new JSONObject());
             if(request.containsKey("body")){
                 JSONObject bodyData = request.getJSONObject("body");
                 JSONArray tmpParams = new JSONArray();
