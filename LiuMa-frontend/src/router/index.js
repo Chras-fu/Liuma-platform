@@ -2,91 +2,91 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 // 登录
-import login from '@/views/login';
+const login= () => import('@/views/login');
 // 首页
-import index from '@/views/index';
+const index= () => import('@/views/index');
 // 主页
-import Homepage from '@/views/home/dashboard';
+const Homepage= () => import('@/views/home/dashboard');
 
 /**
  * 公共组件
  */
 // 文件管理
-import FileManage from '@/views/baseCenter/fileManage';
+const FileManage= () => import('@/views/baseCenter/fileManage');
 // 公共参数
-import CommonParam from '@/views/baseCenter/commonParam';
+const CommonParam= () => import('@/views/baseCenter/commonParam');
 // 函数管理
-import FuncManage from '@/views/baseCenter/funcManage';
+const FuncManage= () => import('@/views/baseCenter/funcManage');
 // 函数编辑
-import FuncEdit from '@/views/baseCenter/funcEdit';
+const FuncEdit= () => import('@/views/baseCenter/funcEdit');
 // 操作管理
-import OperationManage from '@/views/baseCenter/operationManage';
+const OperationManage= () => import('@/views/baseCenter/operationManage');
 // 操作编辑
-import OperationEdit from '@/views/baseCenter/operationEdit';
+const OperationEdit= () => import('@/views/baseCenter/operationEdit');
 /**
  * 环境中心
  */
 // 环境管理
-import EnvManage from '@/views/envCenter/envManage';
+const EnvManage= () => import('@/views/envCenter/envManage');
 // 引擎管理
-import EngineManage from '@/views/envCenter/engineManage';
+const EngineManage= () => import('@/views/envCenter/engineManage');
 // 设备管理
-import DeviceManage from '@/views/envCenter/deviceManage';
+const DeviceManage= () => import('@/views/envCenter/deviceManage');
 // 设备控制
-import DeviceControl from '@/views/envCenter/deviceControl';
+const DeviceControl= () => import('@/views/envCenter/deviceControl');
 /**
  * 用例中心
  */
 // 接口管理
-import InterfaceManage from '@/views/caseCenter/interfaceManage';
+const InterfaceManage= () => import('@/views/caseCenter/interfaceManage');
 // 接口编辑
-import InterfaceEdit from '@/views/caseCenter/interfaceEdit';
+const InterfaceEdit= () => import('@/views/caseCenter/interfaceEdit');
 // 元素管理
-import ElementManage from '@/views/caseCenter/elementManage';
+const ElementManage= () => import('@/views/caseCenter/elementManage');
 // 控件管理
-import ControlManage from '@/views/caseCenter/controlManage';
+const ControlManage= () => import('@/views/caseCenter/controlManage');
 // 用例管理
-import CaseManage from '@/views/caseCenter/caseManage';
+const CaseManage= () => import('@/views/caseCenter/caseManage');
 // API用例
-import ApiCaseEdit from '@/views/caseCenter/apiCaseEdit';
+const ApiCaseEdit= () => import('@/views/caseCenter/apiCaseEdit');
 // WEB用例
-import WebCaseEdit from '@/views/caseCenter/webCaseEdit';
+const WebCaseEdit= () => import('@/views/caseCenter/webCaseEdit');
 // APP用例
-import AppCaseEdit from '@/views/caseCenter/appCaseEdit';
+const AppCaseEdit= () => import('@/views/caseCenter/appCaseEdit');
 /**
  * 计划管理
  */
 // 测试集合
-import TestCollection from '@/views/planCenter/testCollection';
+const TestCollection= () => import('@/views/planCenter/testCollection');
 // 测试集合编辑
-import CollectionEdit from '@/views/planCenter/collectionEdit';
+const CollectionEdit= () => import('@/views/planCenter/collectionEdit');
 // 测试计划
-import TestPlan from '@/views/planCenter/testPlan';
+const TestPlan= () => import('@/views/planCenter/testPlan');
 // 测试计划编辑
-import PlanEdit from '@/views/planCenter/planEdit';
+const PlanEdit= () => import('@/views/planCenter/planEdit');
 /**
  * 测试追踪
  */
 // 测试报告
-import TestReport from '@/views/report/testReport';
+const TestReport= () => import('@/views/report/testReport');
 // 引擎管理
-import ReportDetail from '@/views/report/reportDetail';
+const ReportDetail= () => import('@/views/report/reportDetail');
 /**
  * 配置中心
  */
 // 系统配置
-import SystemSetting from '@/views/setting/systemSetting';
+const SystemSetting= () => import('@/views/setting/systemSetting');
 // 个人信息
-import UserSetting from '@/views/setting/userSetting';
+const UserSetting= () => import('@/views/setting/userSetting');
 /**
  * 系统管理
  */
 // 项目管理
-import projectManage from '@/views/system/project';
+const projectManage= () => import('@/views/system/project');
 // 角色管理
-import RoleManage from '@/views/system/role';
+const RoleManage= () => import('@/views/system/role');
 // 用户管理
-import userManage from '@/views/system/user';
+const userManage= () => import('@/views/system/user');
 
 
 // 启用路由
