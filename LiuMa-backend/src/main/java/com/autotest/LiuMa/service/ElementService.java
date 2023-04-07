@@ -22,11 +22,7 @@ public class ElementService {
     private ElementMapper elementMapper;
 
     public void saveElement(Element element) {
-        Element old = elementMapper.getElementByName(element.getModuleId(), element.getName());
         if(element.getId().equals("") || element.getId() == null){ // 新增元素
-            if (old != null){
-                throw new DuplicateContentException("同页面下元素重名");
-            }
             element.setId(UUID.randomUUID().toString());
             element.setCreateTime(System.currentTimeMillis());
             element.setUpdateTime(System.currentTimeMillis());
@@ -34,9 +30,6 @@ public class ElementService {
             element.setStatus("Normal");
             elementMapper.addElement(element);
         }else{ // 修改元素
-            if (old != null && !old.getId().equals(element.getId())){
-                throw new DuplicateContentException("同页面下元素重名");
-            }
             element.setUpdateTime(System.currentTimeMillis());
             elementMapper.updateElement(element);
         }

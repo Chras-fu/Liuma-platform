@@ -20,6 +20,4 @@ public interface ControlMapper {
     List<ControlDTO> getControlList(QueryRequest request);
 
     ControlDTO getControlById(String id);
-
-    Control getControlByName(String moduleId, String name, String system);
 }

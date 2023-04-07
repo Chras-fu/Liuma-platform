@@ -45,7 +45,4 @@
     left join view_module vm on vm.id = con.module_id
     where con.id = #{id}
   </select>
-  <select id="getControlByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Control">
-    select * from control where module_id = #{moduleId} and name = #{name} and `system`=#{system} limit 1
-  </select>
 </mapper>

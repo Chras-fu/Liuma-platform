@@ -42,7 +42,4 @@
     left join page_module pm on pm.id = ele.module_id
     where ele.id = #{id}
   </select>
-  <select id="getElementByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Element">
-    select * from element where module_id = #{moduleId} and name = #{name} limit 1
-  </select>
 </mapper>
