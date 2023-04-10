@@ -36,6 +36,6 @@
     <if test="moduleType == 'view_module'">
       `control`
     </if>
-    where module_id = #{moduleId}
+    where module_id = #{moduleId} and status = 'Normal'
   </select>
 </mapper>
