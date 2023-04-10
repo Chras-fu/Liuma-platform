@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Driver;
 import com.autotest.LiuMa.database.mapper.DriverMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class DriverService {
     public void saveDriver(Driver driver) {
         Driver oldDriver = driverMapper.getDriverByName(driver.getProjectId(), driver.getName());
         if(oldDriver != null && !Objects.equals(oldDriver.getId(), driver.getId())){
-            throw new DuplicateContentException("当前项目已有重名驱动配置");
+            throw new DuplicateException("当前项目已有重名驱动配置");
         }
         if(driver.getId() == null || driver.getId().equals("")){
             //新增版本

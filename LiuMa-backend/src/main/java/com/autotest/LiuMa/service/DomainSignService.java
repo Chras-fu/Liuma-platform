@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.DomainSign;
 import com.autotest.LiuMa.database.mapper.DomainSignMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class DomainSignService {
     public void saveDomainSign(DomainSign domainSign) {
         DomainSign oldDomainSign = domainSignMapper.getDomainSignByName(domainSign.getProjectId(), domainSign.getName());
         if(oldDomainSign != null && !Objects.equals(oldDomainSign.getId(), domainSign.getId())){
-            throw new DuplicateContentException("当前项目已有重名域名标识");
+            throw new DuplicateException("当前项目已有重名域名标识");
         }
         if(domainSign.getId() == null || domainSign.getId().equals("")){
             //新增域名标识

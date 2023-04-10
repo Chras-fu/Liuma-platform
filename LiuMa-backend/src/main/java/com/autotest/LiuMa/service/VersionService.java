@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Version;
 import com.autotest.LiuMa.database.mapper.VersionMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class VersionService {
     public void saveVersion(Version version) {
         Version oldVersion = versionMapper.getVersionByName(version.getProjectId(), version.getName());
         if(oldVersion != null && !Objects.equals(oldVersion.getId(), version.getId())){
-            throw new DuplicateContentException("当前项目已有重名版本");
+            throw new DuplicateException("当前项目已有重名版本");
         }
         if(version.getId() == null || version.getId().equals("")){
             //新增版本

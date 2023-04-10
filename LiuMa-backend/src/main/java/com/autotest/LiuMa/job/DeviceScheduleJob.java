@@ -1,4 +1,4 @@
-package com.autotest.LiuMa.common.job;
+package com.autotest.LiuMa.job;
 
 import com.autotest.LiuMa.service.ScheduleJobService;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Environment;
 import com.autotest.LiuMa.database.mapper.EnvironmentMapper;
 import com.autotest.LiuMa.dto.EnvironmentDTO;
@@ -22,7 +22,7 @@ public class EnvironmentService {
     public void saveEnvironment(Environment environment) {
         Environment oldEnvironment = environmentMapper.getEnvironmentByName(environment.getProjectId(), environment.getName());
         if(oldEnvironment != null && !Objects.equals(oldEnvironment.getId(), environment.getId())){
-            throw new DuplicateContentException("当前项目已有重名环境");
+            throw new DuplicateException("当前项目已有重名环境");
         }
         if(environment.getId() == null || environment.getId().equals("")){
             //新增环境

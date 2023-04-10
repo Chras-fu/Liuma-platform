@@ -1,6 +1,7 @@
-package com.autotest.LiuMa.common.interceptor;
+package com.autotest.LiuMa.common.request;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.autotest.LiuMa.common.constants.RequestPath;
 import com.autotest.LiuMa.common.exception.TokenEmptyException;
 import com.autotest.LiuMa.common.utils.JwtUtils;
 import com.autotest.LiuMa.database.domain.User;
@@ -22,12 +23,12 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String path = request.getServletPath();
-        if (path.matches(Constant.LOGIN_PATH) || path.matches(Constant.ENGINE_TOKEN_PATH)
-                || path.matches(Constant.REGISTER_PATH) || path.matches(Constant.SCREENSHOT_PATH)
-                || path.matches(Constant.DOWNLOAD_PATH) || path.matches(Constant.RUN_PATH)) {
+        if (path.matches(RequestPath.LOGIN_PATH.path) || path.matches(RequestPath.ENGINE_TOKEN_PATH.path)
+                || path.matches(RequestPath.REGISTER_PATH.path) || path.matches(RequestPath.SCREENSHOT_PATH.path)
+                || path.matches(RequestPath.DOWNLOAD_PATH.path) || path.matches(RequestPath.RUN_PATH.path)) {
             // 平台登录注册接口 引擎获取token接口 测试截图预览 不用拦截
             return true;
-        } else if (path.matches(Constant.ENGINE_PATH)){
+        } else if (path.matches(RequestPath.ENGINE_PATH.path)){
             // 引擎拦截验证
             String token = request.getHeader("token");
             if (token == null){

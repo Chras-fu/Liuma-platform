@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.common.exception.LMException;
 import com.autotest.LiuMa.database.mapper.ModuleMapper;
 import com.autotest.LiuMa.dto.ModuleDTO;
@@ -23,7 +23,7 @@ public class ModuleService {
         ModuleDTO oldModule = moduleMapper.getModuleByParentAndName(module.getModuleType(),
                 module.getName(), module.getParentId(), module.getProjectId());
         if(oldModule != null){
-            throw new DuplicateContentException("当前父模块下已有重名模块");
+            throw new DuplicateException("当前父模块下已有重名模块");
         }
         if(module.getId() == null){
             //新增模块

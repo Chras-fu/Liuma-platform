@@ -1,6 +1,5 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
 import com.autotest.LiuMa.database.domain.Control;
 import com.autotest.LiuMa.database.mapper.ControlMapper;
 import com.autotest.LiuMa.dto.ControlDTO;

@@ -1,8 +1,5 @@
 package com.autotest.LiuMa.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
 import com.autotest.LiuMa.database.domain.Element;
 import com.autotest.LiuMa.database.mapper.ElementMapper;
 import com.autotest.LiuMa.dto.ElementDTO;

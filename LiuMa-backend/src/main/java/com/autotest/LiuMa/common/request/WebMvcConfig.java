@@ -1,4 +1,4 @@
-package com.autotest.LiuMa.common.interceptor;
+package com.autotest.LiuMa.common.request;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

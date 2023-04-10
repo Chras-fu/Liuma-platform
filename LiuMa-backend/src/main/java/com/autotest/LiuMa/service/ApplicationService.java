@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Application;
 import com.autotest.LiuMa.database.mapper.ApplicationMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class ApplicationService {
     public void saveApplication(Application application) {
         Application oldApplication = applicationMapper.getApplicationByName(application.getProjectId(), application.getName());
         if(oldApplication != null && !Objects.equals(oldApplication.getId(), application.getId())){
-            throw new DuplicateContentException("当前项目已有重名应用");
+            throw new DuplicateException("当前项目已有重名应用");
         }
         if(application.getId() == null || application.getId().equals("")){
             //新增版本

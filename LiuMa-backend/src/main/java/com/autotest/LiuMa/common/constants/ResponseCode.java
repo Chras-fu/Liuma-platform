@@ -1,4 +1,4 @@
-package com.autotest.LiuMa.common.response;
+package com.autotest.LiuMa.common.constants;
 
 import lombok.Getter;
 

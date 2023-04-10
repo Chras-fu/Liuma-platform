@@ -3,10 +3,9 @@ package com.autotest.LiuMa.common.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.autotest.LiuMa.common.exception.TokenExpireException;
-import com.autotest.LiuMa.common.exception.TokenVerifyException;
 import com.autotest.LiuMa.database.domain.Engine;
 import com.autotest.LiuMa.database.domain.User;
 
@@ -68,10 +67,10 @@ public class JwtUtils {
             jwt = verifier.verify(token);
         } catch (TokenExpiredException e) {
             // 时间校验出错抛出过期
-            throw new TokenExpireException("token已过期");
+            throw new TokenExpiredException("token已过期");
         }catch (Exception e) {
             // 解码异常抛出校验出错
-            throw new TokenVerifyException("token校验出错");
+            throw new JWTVerificationException("token校验出错");
         }
         // 返回基本信息
         return jwt;

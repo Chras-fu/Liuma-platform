@@ -3,7 +3,7 @@ package com.autotest.LiuMa.service;
 import com.autotest.LiuMa.common.constants.EngineStatus;
 import com.autotest.LiuMa.common.constants.EngineType;
 import com.autotest.LiuMa.common.constants.ReportStatus;
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Engine;
 import com.autotest.LiuMa.database.domain.Task;
 import com.autotest.LiuMa.database.mapper.EngineMapper;
@@ -34,7 +34,7 @@ public class EngineService {
     public Engine saveEngine(Engine engine) {
         Engine oldEngine = engineMapper.getEngineByName(engine.getProjectId(), engine.getName());
         if(oldEngine != null){
-            throw new DuplicateContentException("当前项目已有重名引擎");
+            throw new DuplicateException("当前项目已有重名引擎");
         }
         engine.setId(UUID.randomUUID().toString().replace("-", ""));
         engine.setSecret(UUID.randomUUID().toString().replace("-",""));

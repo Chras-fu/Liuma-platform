@@ -3,7 +3,7 @@ package com.autotest.LiuMa.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.OperationType;
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Operation;
 import com.autotest.LiuMa.database.mapper.OperationMapper;
 import com.autotest.LiuMa.dto.OperationDTO;
@@ -37,7 +37,7 @@ public class OperationService {
         if(operation.getId().equals("") || operation.getId() == null){ // 新增操作
             Operation oldOperation = operationMapper.getOperationByName(operation.getName(), operation.getProjectId(), operation.getUiType(), operation.getSystem());
             if(oldOperation != null){
-                throw new DuplicateContentException("操作名称重复");
+                throw new DuplicateException("操作名称重复");
             }
             operation.setId(UUID.randomUUID().toString());
             operation.setCreateTime(System.currentTimeMillis());

@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.ParamData;
 import com.autotest.LiuMa.database.domain.ParamGroup;
 import com.autotest.LiuMa.database.mapper.CommonParamMapper;
@@ -23,7 +23,7 @@ public class CommonParamService {
     public void saveParamData(ParamData paramData) {
         ParamData oldParam = commonParamMapper.getParamByGroupAndName(paramData.getGroupId(), paramData.getName());
         if(oldParam != null && !Objects.equals(oldParam.getId(), paramData.getId())){
-            throw new DuplicateContentException("当前项目已有重名参数");
+            throw new DuplicateException("当前项目已有重名参数");
         }
         if(paramData.getId() == null || paramData.getId().equals("")){
             //新增参数

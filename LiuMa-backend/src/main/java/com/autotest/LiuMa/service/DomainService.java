@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Domain;
 import com.autotest.LiuMa.database.mapper.DomainMapper;
 import com.autotest.LiuMa.dto.DomainDTO;
@@ -22,7 +22,7 @@ public class DomainService {
     public void saveDomain(Domain domain) {
         Domain oldDomain = domainMapper.getDomainByName(domain.getEnvironmentId(), domain.getDomainKey());
         if(oldDomain != null && !Objects.equals(oldDomain.getId(), domain.getId())){
-            throw new DuplicateContentException("当前环境已有重名匹配标识");
+            throw new DuplicateException("当前环境已有重名匹配标识");
         }
         if(domain.getId() == null || domain.getId().equals("")){
             //新增域名

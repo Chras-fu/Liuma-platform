@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.common.response;
 
 import com.autotest.LiuMa.common.exception.LMException;
+import com.autotest.LiuMa.response.TemplateResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
@@ -11,8 +12,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-
-import java.lang.reflect.Type;
 
 @RestControllerAdvice(basePackages = {"com.autotest.LiuMa.controller"})
 public class ResponseControllerAdvice implements ResponseBodyAdvice<Object> {
@@ -30,12 +29,12 @@ public class ResponseControllerAdvice implements ResponseBodyAdvice<Object> {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 // 将数据包装在ResponseTemp里后，再转换为json字符串响应给前端
-                return objectMapper.writeValueAsString(new ResponseTemp<>(data));
+                return objectMapper.writeValueAsString(new TemplateResponse<>(data));
             } catch (JsonProcessingException e) {
                 throw new LMException("String类型返回错误");
             }
         }
         // 将原本的数据包装在ResponseTemp里
-        return new ResponseTemp<>(data);
+        return new TemplateResponse<>(data);
     }
 }

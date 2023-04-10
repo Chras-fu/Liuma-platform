@@ -1,9 +1,10 @@
-package com.autotest.LiuMa.common.response;
+package com.autotest.LiuMa.response;
 
+import com.autotest.LiuMa.common.constants.ResponseCode;
 import lombok.Data;
 
 @Data
-public class ResponseTemp<T> {
+public class TemplateResponse<T> {
 
     private int status;
 
@@ -11,11 +12,11 @@ public class ResponseTemp<T> {
 
     private T data;
 
-    public ResponseTemp(T data) {
+    public TemplateResponse(T data) {
         this(ResponseCode.SUCCESS, data);
     }
 
-    public ResponseTemp(ResponseCode resultCode, T data) {
+    public TemplateResponse(ResponseCode resultCode, T data) {
         this.status = resultCode.getStatus();
         this.message = resultCode.getMessage();
         this.data = data;

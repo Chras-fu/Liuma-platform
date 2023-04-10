@@ -1,7 +1,7 @@
 package com.autotest.LiuMa.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.autotest.LiuMa.common.exception.DuplicateContentException;
+import com.autotest.LiuMa.common.exception.DuplicateException;
 import com.autotest.LiuMa.database.domain.Database;
 import com.autotest.LiuMa.database.mapper.DatabaseMapper;
 import com.autotest.LiuMa.dto.DBConnectInfo;
@@ -24,7 +24,7 @@ public class DatabaseService {
     public void saveDatabase(DatabaseDTO database) {
         Database oldDatabase = databaseMapper.getDatabaseByName(database.getEnvironmentId(), database.getDatabaseKey());
         if(oldDatabase != null && !Objects.equals(oldDatabase.getId(), database.getId())){
-            throw new DuplicateContentException("当前环境已有重名数据库");
+            throw new DuplicateException("当前环境已有重名数据库");
         }
         if(database.getId() == null || database.getId().equals("")){
             //新增数据库

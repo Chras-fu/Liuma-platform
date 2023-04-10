@@ -1,6 +1,6 @@
 package com.autotest.LiuMa.service;
 
-import com.autotest.LiuMa.common.exception.PasswordVerifyException;
+import com.autotest.LiuMa.common.exception.PwdVerifyException;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.UserDTO;
@@ -62,7 +62,7 @@ public class UserService {
     public void updatePassword(PasswordRequest request) {
         User user = userMapper.getUserInfo(request.getUserId());
         if(!user.getPassword().equals(request.getOldPassword())){
-            throw new PasswordVerifyException("旧密码输入错误");
+            throw new PwdVerifyException("旧密码输入错误");
         }
         userMapper.updatePassword(request.getUserId(), request.getNewPassword());
     }
