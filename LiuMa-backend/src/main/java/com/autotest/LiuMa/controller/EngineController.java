@@ -37,7 +37,7 @@ public class EngineController {
 
     @PostMapping("/stop/task")
     public void stopEngineTask(@RequestBody Task task) {
-        engineService.stopEngineTask(task.getId());
+        engineService.stopEngineTask(task);
     }
 
     @PostMapping("/stop/all/task")

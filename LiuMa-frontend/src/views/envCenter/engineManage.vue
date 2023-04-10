@@ -270,7 +270,7 @@ export default {
             })
             .then(() => {
                 let url = '/autotest/engine/stop/task';
-                this.$post(url, {id: taskId}, response => {
+                this.$post(url, {id: taskId, engineId: engineId}, response => {
                     this.$message.success("终止成功");
                     this.viewEngine(engineId);
                 });

@@ -5,6 +5,7 @@ import com.autotest.LiuMa.common.constants.EngineType;
 import com.autotest.LiuMa.common.constants.ReportStatus;
 import com.autotest.LiuMa.common.exception.DuplicateContentException;
 import com.autotest.LiuMa.database.domain.Engine;
+import com.autotest.LiuMa.database.domain.Task;
 import com.autotest.LiuMa.database.mapper.EngineMapper;
 import com.autotest.LiuMa.database.mapper.ReportMapper;
 import com.autotest.LiuMa.database.mapper.TaskMapper;
@@ -50,14 +51,16 @@ public class EngineService {
     public void deleteEngine(Engine engine) {engineMapper.deleteEngine(engine.getId());
     }
 
-    public void stopEngineTask(String taskId) {
-        reportMapper.updateReportStatusByTask(ReportStatus.DISCONTINUE.toString(), taskId);
-        taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), taskId);
+    public void stopEngineTask(Task task) {
+        reportMapper.updateReportStatusByTask(ReportStatus.DISCONTINUE.toString(), task.getId());
+        taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), task.getId());
+        engineMapper.updateStatus(task.getEngineId(), EngineStatus.ONLINE.toString());
     }
 
     public void stopEngineAllTask(String engineId) {
         reportMapper.updateAllReportStatusByEngine(ReportStatus.DISCONTINUE.toString(), engineId);
         taskMapper.updateEngineAllTask(ReportStatus.DISCONTINUE.toString(), engineId);
+        engineMapper.updateStatus(engineId, EngineStatus.ONLINE.toString());
     }
 
     public EngineDTO getEngineById(String id){

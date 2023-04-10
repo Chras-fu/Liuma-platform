@@ -38,12 +38,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
+		<!--	国产工具箱-->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>4.1.2</version>
         </dependency>
-		<!-- flyway sql初始化-->
+		<!-- 	flyway sql初始化-->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -53,7 +54,7 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-	    <!--	日志插件	-->
+	    <!--	java类注解	-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -121,7 +122,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<!--配置mapper文件位置-->
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
