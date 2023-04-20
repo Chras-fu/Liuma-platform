@@ -62,8 +62,6 @@
                                     <dl>
                                         <dt>ATX-AGENT地址: </dt>
                                         <dd><code v-text="device.sources.atxAgentAddress"></code></dd>
-                                        <dt>ADB远程连接: </dt>
-                                        <dd><code v-text="'adb connect '+ device.sources.remoteConnectAddress"></code></dd>
                                     </dl>
                                 </div>
                             </div>
@@ -142,8 +140,7 @@ export default {
                 status: 'using',
                 sources: {
                     url:null,
-                    atxAgentAddress: null,
-                    remoteConnectAddress: null
+                    atxAgentAddress: null
                 }
             },
             screenWidth: 300,

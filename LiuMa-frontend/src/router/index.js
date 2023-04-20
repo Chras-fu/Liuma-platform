@@ -114,7 +114,6 @@ export default new Router({
         path: '/index',
         name: '首页',
         component: index,
-        iconCls: 'el-icon-tickets',
         children: [{
             path: '/home/dashboard',
             name: '主页',
