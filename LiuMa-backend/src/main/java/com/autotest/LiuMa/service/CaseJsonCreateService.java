@@ -161,7 +161,12 @@ public class CaseJsonCreateService {
             // 组装应用信息
             Application application = applicationMapper.getApplicationById(caseRequest.getCommonParam().getString("appId"));
             testCaseApp.setAppId(application.getAppId());
-            testCaseApp.setActivity(caseRequest.getCommonParam().getString("activity"));
+            if(caseRequest.getCommonParam().getString("activity")!=null &&
+                    !caseRequest.getCommonParam().getString("activity").equals("")){
+                testCaseApp.setActivity(caseRequest.getCommonParam().getString("activity"));
+            }else {
+                testCaseApp.setActivity(application.getMainActivity());
+            }
             // 组装设备信息
             Device device = deviceMapper.getDeviceById(deviceId);
             testCaseApp.setDeviceSystem(device.getSystem());
@@ -206,7 +211,12 @@ public class CaseJsonCreateService {
             // 组装应用信息
             Application application = applicationMapper.getApplicationById(commonParam.getString("appId"));
             testCaseApp.setAppId(application.getAppId());
-            testCaseApp.setActivity(commonParam.getString("activity"));
+            if(commonParam.getString("activity")!=null &&
+                    !commonParam.getString("activity").equals("")){
+                testCaseApp.setActivity(commonParam.getString("activity"));
+            }else {
+                testCaseApp.setActivity(application.getMainActivity());
+            }
             // 组装设备信息
             if(deviceId != null) {  // 测试集合或测试计划执行时设备可能不在线 无法执行 将在引擎返回的执行日志中提示
                 Device device = deviceMapper.getDeviceById(deviceId);
