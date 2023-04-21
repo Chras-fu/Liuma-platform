@@ -147,7 +147,9 @@ export default {
             screenHeight: 500,
             activeName: 'common',
             websockets: {
-              winput: null,
+                screen:null,
+                touch:null,
+                winput: null,
             },
             whatsinput: {
               text: "",
@@ -381,21 +383,29 @@ export default {
                 debug: false
             });
             var ws = new WebSocket("ws://" + this.device.sources.scrcpyServerAddress + '/screen');
+            this.websockets.screen = ws;
             ws.binaryType = 'arraybuffer';
             ws.onmessage = (event) => {
                 jmu.feed({
-                video: new Uint8Array(event.data)
+                    video: new Uint8Array(event.data)
                 });
             };
             ws.onclose = (event) => {
-                this.$message.error('设备屏幕同步中断, 请刷新页面');
+                if(this.websockets.screen === ws){
+                    this.$message.error('设备屏幕同步结束, 请刷新页面');
+                    this.websockets.screen = null;
+                }
             };
         },
         syncTouchpad() {
             let element = document.getElementById('screen-player');
             var ws = new WebSocket("ws://" + this.device.sources.scrcpyServerAddress + '/touch');
+            this.websockets.touch = ws;
             ws.onclose = (event) => {
-                this.$message.error('设备操作异常, 请刷新页面');
+                if(this.websockets.touch === ws){
+                    this.$message.error('设备操作异常, 请刷新页面');
+                    this.websockets.touch = null;
+                }
                 
             };
 
