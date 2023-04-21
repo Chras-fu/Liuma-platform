@@ -147,7 +147,6 @@ export default {
             screenHeight: 500,
             activeName: 'common',
             websockets: {
-              remote: null,
               winput: null,
             },
             whatsinput: {
@@ -337,7 +336,7 @@ export default {
                         if(response.data){  // 更新成功
                             this.closeWindowWhenReleased(interval) 
                         }else{  // 设备可能已经离线
-                            this.$message.warning('设备长时间未操作 可能被释放了');
+                            this.$message.warning('设备已经被释放了!');
                             this.device.serial = null;
                         }
                     });
@@ -373,7 +372,7 @@ export default {
                 node: 'screen-player',
                 mode: 'video',
                 flushingTime: 0,
-                fps: 30,
+                fps: 25,
                 onError: function(data) {
                     if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) {
                         jmu.reset();
@@ -382,36 +381,23 @@ export default {
                 debug: false
             });
             var ws = new WebSocket("ws://" + this.device.sources.scrcpyServerAddress + '/screen');
-            this.websockets.remote = ws;
             ws.binaryType = 'arraybuffer';
-            ws.onopen = (event) => {};
             ws.onmessage = (event) => {
-                if(typeof(event.data) === "string"){
-                  this.$message({
-                    showClose: true,
-                    message: event.data,
-                    type: 'error',
-                  });
-                  ws.close()
-                }else{
-                  jmu.feed({
-                    video: new Uint8Array(event.data)
-                  });
-                }
+                jmu.feed({
+                video: new Uint8Array(event.data)
+                });
             };
             ws.onclose = (event) => {
-                if (this.websockets.remote === ws) {
-                    this.websockets.remote = null;
-                    this.$message.error('设备屏幕同步中断');
-                }
-            };
-            ws.onerror = function (event) {
-                this.$message.error('设备屏幕同步错误');
+                this.$message.error('设备屏幕同步中断, 请刷新页面');
             };
         },
         syncTouchpad() {
             let element = document.getElementById('screen-player');
-            let ws = this.websockets.remote;
+            var ws = new WebSocket("ws://" + this.device.sources.scrcpyServerAddress + '/touch');
+            ws.onclose = (event) => {
+                this.$message.error('设备操作异常, 请刷新页面');
+                
+            };
 
             // touch事件
             function inject_touch_event(pix_data, action){
