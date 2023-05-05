@@ -168,6 +168,9 @@ public class CaseGenerateService {
             body.put("form", JSONArray.parseArray(formData));
         }else if(type.equals("json")){
             JSONObject json = JSONObject.parseObject(body.getString("json"));
+            if(json==null){
+                json = new JSONObject();
+            }
             if(verifyDTO.getDelete()){
                 json = this.deleteJsonWithExpression(json, verifyDTO.getName());
             }
@@ -202,6 +205,9 @@ public class CaseGenerateService {
             body.put("form", JSONArray.parseArray(formData));
         }else if(type.equals("json")){
             JSONObject json = JSONObject.parseObject(body.getString("json"));
+            if(json==null){
+                json = new JSONObject();
+            }
             for (ApiParamRuleDTO apiParamRuleDTO: rules){
                 json = this.replaceJsonWithExpression(json, apiParamRuleDTO.getName(),
                         this.convertDataType(apiParamRuleDTO.getType(), apiParamRuleDTO.getValue()));
