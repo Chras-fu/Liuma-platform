@@ -9,9 +9,11 @@
 
 官网地址: [流马官网](http://www.liumatest.cn)
 
-社区地址: [流马社区](http://www.liumatest.cn/community)
+社区地址: [流马社区](http://community.liumatest.cn)
 
 如果本项目对您有帮助，请给我们一个Star，您的支持是我们前进的动力。
+
+如果您需要二次开发，请务必遵循AGPL开源协议，并保留版权信息。我们保留一切对于侵权行为追责的权利。
 
 ## 二、功能介绍
 
