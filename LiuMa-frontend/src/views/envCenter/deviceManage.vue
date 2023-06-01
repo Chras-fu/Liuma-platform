@@ -131,7 +131,7 @@ export default {
       rules: {
         name: [{ required: true, message: '设备名称不能为空', trigger: 'blur' }]
       },
-      filterWidth: 80,
+      filterWidth: 110,
       filterSize: 8,
       boxWidth: 250,
       rowSize: 5,
@@ -215,8 +215,8 @@ export default {
         this.rowSize -= 1;
         this.boxWidth = parseInt(screenWidth / this.rowSize) - 20;
       }
-      this.filterSize = parseInt((screenWidth-350) / 80);
-      this.filterWidth = parseInt((screenWidth-350) / this.filterSize);
+      this.filterSize = parseInt((screenWidth-370) / 110);
+      this.filterWidth = parseInt((screenWidth-370) / this.filterSize)-30;
     },
     // 搜索按钮
     search() {
