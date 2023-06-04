@@ -24,7 +24,9 @@
         <el-button type="primary" id="login" style="width:100%;" @click="submitForm('loginForm')" :loading="logining">登录</el-button>
       </el-form-item>
     </el-form>
-    <el-link class="footer" :underline="false" href="https://beian.miit.gov.cn">苏ICP备2021056394号</el-link>
+    <div style="text-align:center;margin-top:20px">
+      * 当前为社区版，<a style="text-decoration:none;color: #409EFF" href="http://demo-ee.liumatest.cn">点击切换企业版</a>
+    </div>
     <el-dialog title="注册用户" :visible.sync="registerVisible" width="450px" destroy-on-close>
       <el-form ref="registerForm" :rules="rules" :model="registerForm" label-width="80px">
           <el-form-item label="登录账号" prop="newAccount">
