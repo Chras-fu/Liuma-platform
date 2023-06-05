@@ -7,7 +7,7 @@
 
 体验地址1: [社区版](http://demo.liumatest.cn)，用户名密码: demo/123456
 
-体验地址2: [企业版](http://demo-ee.liumatest.cn)
+体验地址2: [企业版](http://demo-ee.liumatest.cn)，企业版更新内容请查看社区[更新公告](http://community.liumatest.cn/p/119)
 
 官网地址: [流马官网](http://www.liumatest.cn)
 
