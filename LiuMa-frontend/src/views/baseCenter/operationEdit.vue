@@ -112,6 +112,7 @@ export default {
                 {id: "browser", name: "浏览器操作"},
                 {id: "system", name: "系统操作"},
                 {id: "page", name: "页面操作"},
+                {id: "view", name: "视图操作"},
                 {id: "relation", name: "关联"},
                 {id: "assertion", name: "断言"},
                 {id: "condition", name: "条件"},
@@ -164,7 +165,8 @@ export default {
                 if(param.operationType == "assertion"){
                     this.operationForm.data = [
                         {paramName:"assertion", type:"String", description: "断言方法"},
-                        {paramName:"expect", type:"String", description: "预期值"}
+                        {paramName:"expect", type:"String", description: "预期值"},
+                        {paramName:"continue", type:"Boolean", description: "预期值"}
                     ];
                 }else if(param.operationType == "condition"){
                     this.operationForm.data = [
@@ -241,10 +243,18 @@ export default {
                         return false;
                     }
                 case 'condition':
-                    if(paramName === 'true' | paramName === 'false'){
-                        return true;
+                    if(field !== 'type'){
+                        if(paramName === "assertion" | paramName === "expect" | paramName === 'true' | paramName === 'false'){
+                            return true;
+                        }else{
+                            return false;
+                        }
                     }else{
-                        return false;
+                        if(paramName === "assertion" | paramName === 'true' | paramName === 'false'){
+                            return true;
+                        }else{
+                            return false;
+                        }
                     }
                 case 'looper':
                     return true;
