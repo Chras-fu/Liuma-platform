@@ -54,13 +54,25 @@ public class EngineService {
     public void stopEngineTask(Task task) {
         reportMapper.updateReportStatusByTask(ReportStatus.DISCONTINUE.toString(), task.getId());
         taskMapper.updateTask(ReportStatus.DISCONTINUE.toString(), task.getId());
-        engineMapper.updateStatus(task.getEngineId(), EngineStatus.ONLINE.toString());
+        Engine engine = engineMapper.getEngineById(task.getEngineId());
+        if(engine.getLastHeartbeatTime()!=null &&
+                (System.currentTimeMillis()-engine.getLastHeartbeatTime()) < 3*60*1000){
+            engineMapper.updateStatus(task.getEngineId(), EngineStatus.ONLINE.toString());
+        }else {
+            engineMapper.updateStatus(task.getEngineId(), EngineStatus.OFFLINE.toString());
+        }
     }
 
     public void stopEngineAllTask(String engineId) {
         reportMapper.updateAllReportStatusByEngine(ReportStatus.DISCONTINUE.toString(), engineId);
         taskMapper.updateEngineAllTask(ReportStatus.DISCONTINUE.toString(), engineId);
-        engineMapper.updateStatus(engineId, EngineStatus.ONLINE.toString());
+        Engine engine = engineMapper.getEngineById(engineId);
+        if(engine.getLastHeartbeatTime()!=null &&
+                (System.currentTimeMillis()-engine.getLastHeartbeatTime()) < 3*60*1000){
+            engineMapper.updateStatus(engineId, EngineStatus.ONLINE.toString());
+        }else {
+            engineMapper.updateStatus(engineId, EngineStatus.OFFLINE.toString());
+        }
     }
 
     public EngineDTO getEngineById(String id){

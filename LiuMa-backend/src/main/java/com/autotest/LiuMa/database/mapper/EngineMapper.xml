@@ -12,7 +12,7 @@
     update engine set last_heartbeat_time=#{time} where id =#{id}
   </update>
   <update id="updateLostHeartbeatEngine" parameterType="java.lang.Long">
-    update engine set status='offline' where last_heartbeat_time &lt; #{minLastHeartbeatTime} and status!='offline'
+    update engine set status='offline' where (last_heartbeat_time &lt; #{minLastHeartbeatTime} or ISNULL(last_heartbeat_time)) and status!='offline'
   </update>
   <select id="getEngineByName" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Engine">
     select * from engine where project_id = #{projectId} and name = #{name}
