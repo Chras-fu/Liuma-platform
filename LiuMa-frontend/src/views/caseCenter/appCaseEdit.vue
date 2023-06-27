@@ -114,6 +114,8 @@
                 <el-select v-else-if="data.paramName === 'continue'" size="small" style="width:100%" v-model="data.value" :placeholder="data.description">
                     <el-option v-for="item in continues" :key="item.id" :label="item.name" :value="item.id"/>
                 </el-select>
+                <el-input-number v-else-if="data.paramName === 'steps'" size="small" style="width: 100%" v-model="data.value" step-strictly :step="1" :min="1"/>
+                <div v-else-if="data.paramName === 'timeout'"><el-input-number size="small" style="width: 95%" v-model="data.value" step-strictly :step="10" :min="0"/>  ms</div>
                 <el-input v-else size="small" v-model="data.value" :placeholder="data.description"/>
               </el-col>
             </el-row>
