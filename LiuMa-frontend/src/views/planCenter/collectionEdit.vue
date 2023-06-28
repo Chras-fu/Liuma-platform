@@ -142,7 +142,8 @@ export default {
                     caseId: this.selections[i].id,
                     caseName: this.selections[i].name,
                     caseModule: this.selections[i].moduleName,
-                    caseType: this.selections[i].type
+                    caseType: this.selections[i].type,
+                    caseSystem: this.selections[i].system,
                 }
                 this.collectionForm.collectionCases.push(collectionCase);
             }

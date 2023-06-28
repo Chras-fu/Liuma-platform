@@ -12,4 +12,6 @@ public class CollectionCaseDTO extends CollectionCase {
     private String caseModule;
 
     private String caseType;
+
+    private String caseSystem;
 }

@@ -11,7 +11,8 @@
     delete from collection_case where collection_id = #{collectionId}
   </delete>
   <select id="getCollectionCaseList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.CollectionCaseDTO">
-    select cc.id, cc.index, cc.case_id, cc.collection_id, c.name as caseName, c.type as caseType, cm.name as caseModule
+    select cc.id, cc.index, cc.case_id, cc.collection_id, c.name as caseName,
+    c.type as caseType, c.system as caseSystem, cm.name as caseModule
     from collection_case cc
     left join `case` c on c.id = cc.case_id
     left join `case_module` cm on cm.id = c.module_id
