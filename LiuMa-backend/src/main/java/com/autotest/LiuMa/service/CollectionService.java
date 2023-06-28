@@ -35,10 +35,10 @@ public class CollectionService {
         boolean hasAppleCase = false;
         List<CollectionCase> collectionCases = new ArrayList<>();
         for(CollectionCaseDTO collectionCaseDTO: collectionDTO.getCollectionCases()){
-            if(collectionCaseDTO.getCaseSystem().equals("android")){
+            if("android".equals(collectionCaseDTO.getCaseSystem())){
                 hasAndroidCase = true;
             }
-            if(collectionCaseDTO.getCaseSystem().equals("apple")){
+            if("apple".equals(collectionCaseDTO.getCaseSystem())){
                 hasAppleCase = true;
             }
             CollectionCase collectionCase = new CollectionCase();
