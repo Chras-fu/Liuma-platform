@@ -40,7 +40,7 @@ public class PlanService {
         if(planDTO.getEnvironmentId() == null || planDTO.getEnvironmentId().equals("")){ // 如果环境未选 则判断每个集合是否都没有API用例和WEB用例
             for(PlanCollectionDTO planCollectionDTO: planDTO.getPlanCollections()){
                 List<String> caseTypes = collectionCaseMapper.getCollectionCaseTypes(planCollectionDTO.getCollectionId());
-                if(caseTypes.contains("API") || caseTypes.contains("WEB")){
+                if(caseTypes.contains(null)){
                     throw new LMException("所选集合中存在API或WEB用例 环境不能为空");
                 }
             }

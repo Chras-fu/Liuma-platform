@@ -21,7 +21,7 @@
     select count(*) from collection_case where collection_id = #{collectionId}
   </select>
   <select id="getCollectionCaseTypes" parameterType="java.lang.String" resultType="java.lang.String">
-    select distinct(c.type) from collection_case cc left join `case` c on c.id = cc.case_id
+    select distinct(c.system) from collection_case cc left join `case` c on c.id = cc.case_id
     where cc.collection_id = #{collectionId}
   </select>
 </mapper>

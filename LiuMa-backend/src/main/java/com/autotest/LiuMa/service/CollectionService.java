@@ -87,17 +87,17 @@ public class CollectionService {
     public Map<String, Boolean> getCollectionCaseTypes(String collectionId){
         List<String> caseTypes = collectionCaseMapper.getCollectionCaseTypes(collectionId);
         Map<String, Boolean> caseTypeMap= new HashMap<>();
-        if(caseTypes.contains("ANDROID")){
+        if(caseTypes.contains("android")){
             caseTypeMap.put("hasAndroid", true);
         }else {
             caseTypeMap.put("hasAndroid", false);
         }
-        if(caseTypes.contains("APPLE")){
+        if(caseTypes.contains("apple")){
             caseTypeMap.put("hasApple", true);
         }else {
             caseTypeMap.put("hasApple", false);
         }
-        if(caseTypes.contains("API") || caseTypes.contains("WEB")){
+        if(caseTypes.contains(null)){
             caseTypeMap.put("needEnvironment", true);
         }else {
             caseTypeMap.put("needEnvironment", false);
