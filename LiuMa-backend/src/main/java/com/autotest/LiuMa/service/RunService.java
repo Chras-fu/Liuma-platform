@@ -125,34 +125,22 @@ public class RunService {
 
     public void stopDeviceWhenRunEnd(String taskId){
         TaskDTO task = taskMapper.getTaskDetail(taskId);
-        if(task.getDeviceId() != null) { // 单用例执行
+        if(task.getDeviceId() != null) {
             Device device = deviceService.getDeviceDetail(task.getDeviceId());
-            if(!(device.getStatus().equals(DeviceStatus.USING.toString())
-                    && task.getCreateUser().equals(device.getUser()))){
-                deviceService.coldDevice(device);    // 非占用中状态调试则释放设备
+            if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
+                    task.getId().equals(device.getUser())){
+                deviceService.coldDevice(device); //当前设备使用者仍然是该任务才会停用
             }
-        }else {
-            if(task.getSourceType().equals(ReportSourceType.COLLECTION.toString())){
-                Collection collection = collectionMapper.getCollectionDetail(task.getSourceId());
-                if(collection == null) return;
+        }else if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
+            List<PlanCollectionDTO> planCollections = planCollectionMapper.getPlanCollectionList(task.getSourceId());
+            for(PlanCollectionDTO planCollectionDTO:planCollections){
+                Collection collection = collectionMapper.getCollectionDetail(planCollectionDTO.getCollectionId());
+                if(collection==null) return;
                 if(collection.getDeviceId() != null){
                     Device device = deviceService.getDeviceDetail(collection.getDeviceId());
                     if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
                             task.getId().equals(device.getUser())){
                         deviceService.coldDevice(device); //当前设备使用者仍然是该任务才会停用
-                    }
-                }
-            }else if(task.getSourceType().equals(ReportSourceType.PLAN.toString())){
-                List<PlanCollectionDTO> planCollections = planCollectionMapper.getPlanCollectionList(task.getSourceId());
-                for(PlanCollectionDTO planCollectionDTO:planCollections){
-                    Collection collection = collectionMapper.getCollectionDetail(planCollectionDTO.getCollectionId());
-                    if(collection==null) return;
-                    if(collection.getDeviceId() != null){
-                        Device device = deviceService.getDeviceDetail(collection.getDeviceId());
-                        if(device.getStatus().equals(DeviceStatus.TESTING.toString()) &&
-                                task.getId().equals(device.getUser())){
-                            deviceService.coldDevice(device); //当前设备使用者仍然是该任务才会停用
-                        }
                     }
                 }
             }

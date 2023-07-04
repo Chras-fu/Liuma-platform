@@ -722,7 +722,7 @@ public class CaseJsonCreateService {
                 taskTestCollection.setCollectionId(planCollectionDTO.getCollectionId());
                 Collection collection = collectionMapper.getCollectionDetail(planCollectionDTO.getCollectionId());
                 if(collection==null) return taskTestCollectionList;
-                if(this.getDeviceCouldUsing(collection.getDeviceId(), task.getCreateUser(), task.getId())){
+                if(this.getDeviceCouldUsing(collection.getDeviceId(), task.getId())){
                     taskTestCollection.setDeviceId(collection.getDeviceId());
                 }else {
                     taskTestCollection.setDeviceId(null);
@@ -737,11 +737,7 @@ public class CaseJsonCreateService {
             taskTestCollection.setCollectionId(task.getSourceId());
             Collection collection = collectionMapper.getCollectionDetail(task.getSourceId());
             if(collection==null) return taskTestCollectionList;
-            if(this.getDeviceCouldUsing(collection.getDeviceId(), task.getCreateUser(), task.getId())){
-                taskTestCollection.setDeviceId(collection.getDeviceId());
-            }else {
-                taskTestCollection.setDeviceId(null);
-            }
+            taskTestCollection.setDeviceId(task.getDeviceId());
             List<TaskTestCaseResponse> taskTestCaseList = this.getTaskTestCaseList(task.getSourceId());
             taskTestCollection.setTestCaseList(taskTestCaseList);
             taskTestCollectionList.add(taskTestCollection);
@@ -790,7 +786,7 @@ public class CaseJsonCreateService {
         return taskTestCaseList;
     }
 
-    private Boolean getDeviceCouldUsing(String deviceId, String user, String taskId){
+    private Boolean getDeviceCouldUsing(String deviceId, String taskId){
         if(null == deviceId){
             return false;
         }
