@@ -23,10 +23,10 @@ public class ApiController {
     private ApiService apiService;
 
     @PostMapping("/save")
-    public void saveApi(@RequestBody ApiRequest apiRequest, HttpServletRequest request) {
+    public String saveApi(@RequestBody ApiRequest apiRequest, HttpServletRequest request) {
         String user = request.getSession().getAttribute("userId").toString();
         apiRequest.setUpdateUser(user);
-        apiService.saveApi(apiRequest);
+        return apiService.saveApi(apiRequest);
     }
 
     @PostMapping("/delete")

@@ -21,7 +21,7 @@
             </el-col>
             <el-col :span="10">
                 <el-form-item label="接口请求" prop="path">
-                    <el-input size="small" v-model="apiForm.path" placeholder="请输入接口地址" style="margin-top: 5px" maxlength="200" show-word-limit>
+                    <el-input size="small" v-model="apiForm.path" placeholder="请输入接口地址" style="margin-top: 5px">
                         <el-select v-model="apiForm.method" slot="prepend" style="width: 80px" size="small">
                             <el-option v-for="item in methods" :key="item" :label="item" :value="item"/>
                         </el-select>
@@ -108,8 +108,8 @@ export default {
                 method: "GET",
                 protocol: "HTTP",
                 domainSign: "",
-                moduleId: "",
-                moduleName: "",
+                moduleId: "0",
+                moduleName: "默认模块",
                 description: "",
                 header: [],
                 body: {},
@@ -124,8 +124,7 @@ export default {
             rules: {
                 name: [{ required: true, message: '接口名称不能为空', trigger: 'blur' }],
                 protocol: [{ required: true, message: '请求协议不能为空', trigger: 'blur' }],
-                path: [{ required: true, message: '接口地址不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '接口模块不能为空', trigger: 'blur' }]
+                path: [{ required: true, message: '接口地址不能为空', trigger: 'blur' }]
             }
         }
     },
@@ -161,6 +160,9 @@ export default {
                 let url = '/autotest/api/detail/' + apiParam.apiId;
                 this.$get(url, response =>{
                     let data = response.data;
+                    if(data.moduleId==='0'){
+                        data.moduleName = "默认模块";
+                    }
                     if(data.header){
                         data.header = JSON.parse(data.header);
                     }

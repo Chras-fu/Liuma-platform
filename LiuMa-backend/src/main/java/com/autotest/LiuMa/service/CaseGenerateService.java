@@ -57,7 +57,7 @@ public class CaseGenerateService {
         testCase.setLevel("P1");
         testCase.setDescription(api.getDescription());
         testCase.setEnvironmentIds("[]");
-        testCase.setModuleId("");
+        testCase.setModuleId("0");
         testCase.setThirdParty("");
         testCase.setProjectId(api.getProjectId());
         testCase.setCommonParam(JSONObject.parseObject(

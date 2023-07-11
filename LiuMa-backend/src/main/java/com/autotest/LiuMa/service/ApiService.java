@@ -21,7 +21,7 @@ public class ApiService {
     @Resource
     private ApiMapper apiMapper;
 
-    public void saveApi(ApiRequest apiRequest) {
+    public String saveApi(ApiRequest apiRequest) {
         JSONObject apiObject = (JSONObject) JSON.toJSON(apiRequest);
         Api api = apiObject.toJavaObject(Api.class);
         if(api.getId().equals("") || api.getId() == null){ // 新增接口
@@ -35,6 +35,7 @@ public class ApiService {
             api.setUpdateTime(System.currentTimeMillis());
             apiMapper.updateApi(api);
         }
+        return api.getId();
     }
 
     public void deleteApi(ApiRequest apiRequest) {

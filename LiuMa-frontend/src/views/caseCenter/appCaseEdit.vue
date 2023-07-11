@@ -189,8 +189,8 @@ export default {
                 system: null,
                 environmentIds: [],
                 thirdParty: "",
-                moduleId: "",
-                moduleName: "",
+                moduleId: "0",
+                moduleName: "默认模块",
                 commonParam: {
                   functions: [],
                   params: [],
@@ -237,7 +237,6 @@ export default {
             rules: {
                 name: [{ required: true, message: '用例名称不能为空', trigger: 'blur' }],
                 type: [{ required: true, message: '用例类型不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '用例模块不能为空', trigger: 'blur' }],
                 operationId: [{ required: true, message: '操作名称不能为空', trigger: 'blur' }],
                 element: [{ required: true, message: '操作对象不能为空', trigger: 'blur' }],
                 data: [{ required: true, message: '操作数据不能为空', trigger: 'blur' }],
@@ -558,6 +557,9 @@ export default {
                 let url = "/autotest/case/detail/" + this.caseForm.type.toLowerCase() + "/" + param.caseId;
                 this.$get(url, response => {
                     let data = response.data;
+                    if(data.moduleId==='0'){
+                        data.moduleName = "默认模块";
+                    }
                     if(data.environmentIds){
                         data.environmentIds = JSON.parse(data.environmentIds);
                     }

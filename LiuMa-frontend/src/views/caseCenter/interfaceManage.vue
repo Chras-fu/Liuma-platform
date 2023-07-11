@@ -287,6 +287,9 @@ export default {
             this.$post(url, param, response => {
                 let data = response.data;
                 for(let i=0;i<data.list.length;i++){
+                    if(data.list[i].moduleId==='0'){
+                        data.list[i].moduleName='默认模块';
+                    }
                     data.list[i].updateTime = timestampToTime(data.list[i].updateTime);
                 }
                 this.apiListData = data.list;
@@ -379,7 +382,7 @@ export default {
 }
 .api-drawer-header{
     border-bottom: 1px solid rgb(219, 219, 219); 
-    height: 60px; 
+    height: 42px; 
     display: flex; 
     justify-content: space-between;
     align-items: center;

@@ -92,8 +92,8 @@ export default {
             elementVisible: false,
             moduleForm: {
                 moduleName: "",
-                fatherId: "",
-                fatherName: "",
+                parentId: "",
+                parentName: "",
                 data: "",
             },
             byList:[
@@ -111,8 +111,8 @@ export default {
                 name:"",
                 by: "",
                 expression: "",
-                moduleId: "",
-                moduleName:"",
+                moduleId: "0",
+                moduleName:"默认模块",
                 description: ""
             },
             searchForm: {
@@ -131,8 +131,7 @@ export default {
             rules: {
                 name: [{ required: true, message: '元素名称不能为空', trigger: 'blur' }],
                 by: [{ required: true, message: '定位方式不能为空', trigger: 'blur' }],
-                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '所属页面不能为空', trigger: 'blur' }]
+                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }]
             }
         }
     },
@@ -230,6 +229,9 @@ export default {
             this.$post(url, param, response => {
                 let data = response.data;
                 for(let i=0;i<data.list.length;i++){
+                    if(data.list[i].moduleId==='0'){
+                        data.list[i].moduleName='默认模块';
+                    }
                     data.list[i].updateTime = timestampToTime(data.list[i].updateTime);
                 }
                 this.elementListData = data.list;
@@ -263,8 +265,8 @@ export default {
                 name:"",
                 by: "",
                 expression: "",
-                moduleId: "",
-                moduleName:"",
+                moduleId: "0",
+                moduleName:"默认模块",
                 description: ""
             };
             this.elementVisible = true;
@@ -299,7 +301,11 @@ export default {
             this.addElementForm.by = row.by;
             this.addElementForm.expression = row.expression;
             this.addElementForm.moduleId = row.moduleId;
-            this.addElementForm.moduleName = row.moduleName;
+            if(row.moduleId==='0'){
+                this.addElementForm.moduleName = "默认模块";
+            }else{
+                this.addElementForm.moduleName = row.moduleName;
+            }
             this.addElementForm.description = row.description;
             this.elementVisible = true;
         },

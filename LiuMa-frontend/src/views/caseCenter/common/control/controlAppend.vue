@@ -40,8 +40,8 @@
                     </div>
                     <el-input v-else size="small" style="width:95%" v-model="controlForm.expression" placeholder="请输入元素定位表达式"/>
                 </el-form-item>
-                <el-form-item label="所属页面" prop="moduleId">
-                    <select-tree style="width:95%;" placeholder="所属页面" :selectedValue="controlForm.moduleId" :selectedLabel="controlForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
+                <el-form-item label="所属视图" prop="moduleId">
+                    <select-tree style="width:95%;" placeholder="所属视图" :selectedValue="controlForm.moduleId" :selectedLabel="controlForm.moduleName" :treeData="treeData" @selectModule="selectModule($event)"/>
                 </el-form-item>
                 <el-form-item label="控件描述">
                     <el-input size="small" style="width:95%" v-model="controlForm.description" :autosize="{ minRows: 3}" type="textarea" maxlength="200" show-word-limit auto-complete="off" placeholder="控件描述"/>
@@ -80,8 +80,7 @@ export default {
                 name: [{ required: true, message: '元素名称不能为空', trigger: 'blur' }],
                 system: [{ required: true, message: '所属系统不能为空', trigger: 'blur' }],
                 by: [{ required: true, message: '定位方式不能为空', trigger: 'blur' }],
-                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }],
-                moduleId: [{ required: true, message: '所属页面不能为空', trigger: 'blur' }]
+                expression: [{ required: true, message: '表达式不能为空', trigger: 'blur' }]
             },
         }
     },

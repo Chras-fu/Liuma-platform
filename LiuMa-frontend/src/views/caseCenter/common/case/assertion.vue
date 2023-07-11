@@ -39,7 +39,7 @@
         </el-table>
         <el-button size="small" icon="el-icon-plus" type="text" @click="add">新增</el-button>
         <el-button size="small" type="text" @click="deleteAll">删除全部</el-button>
-        <el-button size="small" type="text" @click="showJsonpath=true">断言辅助</el-button>
+        <el-button size="small" type="text" @click="showJsonpath=true">Jsonpath辅助</el-button>
 
         <div v-if="showJsonpath" style="margin: 20px 0px">
             <el-row>

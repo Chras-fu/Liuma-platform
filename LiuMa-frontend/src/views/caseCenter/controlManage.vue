@@ -87,14 +87,14 @@ export default {
                 by: "",
                 expression: "XPATH",
                 expressionList: [],
-                moduleId: "",
-                moduleName:"",
+                moduleId: "0",
+                moduleName:"默认模块",
                 description: ""
             },
             moduleForm: {
                 moduleName: "",
-                fatherId: "",
-                fatherName: "",
+                parentId: "",
+                parentName: "",
                 data: "",
             },
             systems:[
@@ -221,6 +221,9 @@ export default {
             this.$post(url, param, response => {
                 let data = response.data;
                 for(let i=0;i<data.list.length;i++){
+                    if(data.list[i].moduleId==='0'){
+                        data.list[i].moduleName='默认模块';
+                    }
                     if(data.list[i].by === "PROP"){
                         let expressions = JSON.parse(data.list[i].expression);
                         let text = "";
@@ -267,8 +270,8 @@ export default {
                 by: "XPATH",
                 expression: "",
                 expressionList: [],
-                moduleId: "",
-                moduleName:"",
+                moduleId: "0",
+                moduleName:"默认模块",
                 description: ""
             };
             this.controlVisible = true;
@@ -284,7 +287,11 @@ export default {
                 this.controlForm.expressionList = JSON.parse(row.expression);
             }
             this.controlForm.moduleId = row.moduleId;
-            this.controlForm.moduleName = row.moduleName;
+            if(row.moduleId==='0'){
+                this.controlForm.moduleName = "默认模块";
+            }else{
+                this.controlForm.moduleName = row.moduleName;
+            }
             this.controlForm.description = row.description;
             this.controlVisible = true;
         },
