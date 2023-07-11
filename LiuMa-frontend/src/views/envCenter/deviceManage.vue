@@ -141,16 +141,19 @@ export default {
         'apple': 'IOS系统',
         'size': '屏幕分辨率'
       },
-      currentUser: ''
+      currentUser: '',
+      screenWidth: 1200
     }
   },
   mounted() {
     let erd = elementResizeDetectorMaker();
     let that = this;
     erd.listenTo(document.getElementsByClassName('device-list'), function(element) {
-      that.getWidth();
-      that.getFilter();
-      that.getData();
+      let res = that.getWidth();
+      if(res){
+        that.getFilter();
+        that.getData();
+      }
     });
     this.getWidth();
     this.getFilter();
@@ -209,14 +212,20 @@ export default {
     // 获取屏幕宽度
     getWidth() {
       let screenWidth = document.getElementsByClassName('device-list')[0].clientWidth + 20;
+      if(this.screenWidth===screenWidth){
+        return false;
+      }else{
+        this.screenWidth = screenWidth;
+      }
       this.rowSize = parseInt(screenWidth / 270) + 1;
       this.boxWidth = parseInt(screenWidth / this.rowSize) - 20;
       if(this.boxWidth < 250){
         this.rowSize -= 1;
         this.boxWidth = parseInt(screenWidth / this.rowSize) - 20;
       }
-      this.filterSize = parseInt((screenWidth-370) / 110);
-      this.filterWidth = parseInt((screenWidth-370) / this.filterSize)-30;
+      this.filterSize = parseInt((screenWidth-390) / 110);
+      this.filterWidth = parseInt((screenWidth-390) / this.filterSize)-30;
+      return true;
     },
     // 搜索按钮
     search() {
