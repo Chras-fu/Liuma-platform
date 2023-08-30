@@ -66,7 +66,7 @@ public class ApiImportService {
             }
         } else if(sourceType.equals("swagger")){
             //swagger3格式文件的基本校验
-            return json.get("openapi") != null && json.get("servers") != null && json.get("paths") != null && json.get("components") != null;
+            return json.get("openapi") != null && json.get("paths") != null && json.get("components") != null;
         }
         return false;
     }
