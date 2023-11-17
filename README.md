@@ -13,6 +13,8 @@
 
 社区地址: [流马社区](http://community.liumatest.cn)
 
+配套开发教程: [B站课堂](https://www.bilibili.com/cheese/play/ss7009)
+
 如果本项目对您有帮助，请给我们一个Star，您的支持是我们前进的动力。
 
 如果您需要二次开发，请务必遵循AGPL开源协议，并保留版权信息。我们保留一切对于侵权行为追责的权利。
