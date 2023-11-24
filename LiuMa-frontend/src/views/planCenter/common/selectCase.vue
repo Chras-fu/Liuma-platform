@@ -129,7 +129,7 @@ export default {
         // 重置按钮
         reset() {
             this.searchForm.condition = "";
-            thhis.searchForm.caseType = "";
+            this.searchForm.caseType = "";
             this.searchForm.moduleId = "";
             this.searchForm.moduleName = "";
             this.getdata(this.searchForm);
