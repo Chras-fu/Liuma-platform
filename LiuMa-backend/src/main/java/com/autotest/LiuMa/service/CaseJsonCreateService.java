@@ -363,7 +363,7 @@ public class CaseJsonCreateService {
                 // 拼接header
                 apiData.setHeaders(this.getApiHeader(caseRequest.getCommonParam().getString("header"), caseApiRequest.getHeader()));
                 // 拼接proxy
-                apiData.setProxies(this.getApiProxy(caseRequest.getCommonParam().getString("proxy")));
+                apiData.setProxies(this.getApiProxy(caseRequest.getCommonParam().getString("proxy"), caseApiRequest.getController()));
                 // 组装body
                 apiData.setBody(caseApiRequest.getBody());
                 // 组装query
@@ -403,7 +403,7 @@ public class CaseJsonCreateService {
                 JSONArray headers = JSONArray.parseArray(caseApiDTO.getHeader());
                 apiData.setHeaders(this.getApiHeader(commonParam.getString("header"), headers));
                 // 拼接proxy
-                apiData.setProxies(this.getApiProxy(commonParam.getString("proxy")));
+                apiData.setProxies(this.getApiProxy(commonParam.getString("proxy"), JSONArray.parseArray(caseApiDTO.getController())));
                 // 组装body
                 apiData.setBody(JSONObject.parseObject(caseApiDTO.getBody()));
                 // 组装query
@@ -556,6 +556,9 @@ public class CaseJsonCreateService {
         for(int i =0; i<controller.size(); i++) {
             JSONObject controllerData = controller.getJSONObject(i);
             String controllerName = controllerData.getString("name");
+            if(controllerName.equals("proxy")){     // 代理不在此处处理
+                continue;
+            }
             String controllerValue = controllerData.getString("value");
             if(controllerName.contains("Sql") && !controllerValue.equals("{}")){ // 处理sql中的数据库连接信息
                 JSONObject value = JSONObject.parseObject(controllerValue);
@@ -610,7 +613,14 @@ public class CaseJsonCreateService {
         return queryObj;
     }
 
-    public JSONObject getApiProxy(String proxyId){
+    public JSONObject getApiProxy(String proxyId, JSONArray controller){
+        for(int i =0; i<controller.size(); i++) {   // 优先从接口配置中获取代理
+            JSONObject controllerData = controller.getJSONObject(i);
+            String controllerName = controllerData.getString("name");
+            if (controllerName.equals("proxy")) {
+                return controllerData.getJSONObject("value");
+            }
+        }
         // 生成接口用例代理
         ParamData paramData = commonParamMapper.getParamById(proxyId);
         try{

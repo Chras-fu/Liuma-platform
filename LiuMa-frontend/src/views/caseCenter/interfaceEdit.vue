@@ -7,9 +7,13 @@
     <el-form ref="apiForm" :rules="rules" :model="apiForm" label-width="80px">
         <p class="tip">基础信息</p>
         <el-row :gutter="40">
-            <el-col :span="8">
-                <el-form-item label="接口名称" prop="name">
-                    <el-input  size="small" v-model="apiForm.name" placeholder="请输入接口名称"/>
+            <el-col :span="18">
+                <el-form-item label="接口请求" prop="path">
+                    <el-input size="small" v-model="apiForm.path" placeholder="请输入接口地址" style="margin-top: 5px">
+                        <el-select v-model="apiForm.method" slot="prepend" style="width: 80px" size="small">
+                            <el-option v-for="item in methods" :key="item" :label="item" :value="item"/>
+                        </el-select>
+                    </el-input>
                 </el-form-item>
             </el-col>
             <el-col :span="6">
@@ -19,42 +23,38 @@
                     </el-select>
                 </el-form-item>
             </el-col>
-            <el-col :span="10">
-                <el-form-item label="接口请求" prop="path">
-                    <el-input size="small" v-model="apiForm.path" placeholder="请输入接口地址" style="margin-top: 5px">
-                        <el-select v-model="apiForm.method" slot="prepend" style="width: 80px" size="small">
-                            <el-option v-for="item in methods" :key="item" :label="item" :value="item"/>
-                        </el-select>
-                    </el-input>
-                </el-form-item>
-            </el-col>
         </el-row>
         <el-row :gutter="40">
-            <el-col :span="8">
+            <el-col :span="10">
+                    <el-form-item label="接口名称" prop="name">
+                        <el-input  size="small" v-model="apiForm.name" placeholder="请输入接口名称"/>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="模块分类" prop="moduleId">
+                        <select-tree placeholder="请选择模块分类" :selectedValue="apiForm.moduleId"
+                            :selectedLabel="apiForm.moduleName" :treeData="modules" @selectModule="selectModule($event)"/>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="域名标识" prop="domainSign">
+                        <el-select size="small" v-model="apiForm.domainSign" clearable placeholder="请选择域名标识">
+                            <el-option v-for="item in domains" :key="item.id" :label="item.name" :value="item.id"/>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+        </el-row>
+        <el-row  :gutter="40">
+            <el-col :span="18">
+                <el-form-item label="接口描述">
+                    <el-input size="small" clearable placeholder="请输入接口描述" v-model="apiForm.description"/>
+                </el-form-item>
+            </el-col>
+            <el-col :span="6">
                 <el-form-item label="接口等级">
                     <el-select size="small" style="width: 100%" v-model="apiForm.level" placeholder="请选择接口等级">
                         <el-option v-for="item in levels" :key="item" :label="item" :value="item"/>
                     </el-select>
-                </el-form-item>
-            </el-col>
-            <el-col :span="6">
-                <el-form-item label="域名标识" prop="domainSign">
-                    <el-select size="small" v-model="apiForm.domainSign" clearable placeholder="请选择域名标识">
-                        <el-option v-for="item in domains" :key="item.id" :label="item.name" :value="item.id"/>
-                    </el-select>
-                </el-form-item>
-            </el-col>
-            <el-col :span="10">
-                <el-form-item label="模块分类" prop="moduleId">
-                    <select-tree placeholder="请选择模块分类" :selectedValue="apiForm.moduleId"
-                        :selectedLabel="apiForm.moduleName" :treeData="modules" @selectModule="selectModule($event)"/>
-                </el-form-item>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="16">
-                <el-form-item label="接口描述">
-                    <el-input size="small" :autosize="{ minRows: 4}" type="textarea" clearable placeholder="请输入接口描述" v-model="apiForm.description" maxlength="200" show-word-limit/>
                 </el-form-item>
             </el-col>
         </el-row>
@@ -70,12 +70,12 @@
                     <request-body :reqBody="apiForm.body" style="width: 100%"/>
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="QUERY参数" name="query">
+            <el-tab-pane label="查询参数" name="query">
                 <div class="request-param">
                     <request-query :reqQuery="apiForm.query" style="width: 100%"/>
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="REST参数" name="rest">
+            <el-tab-pane label="路径参数" name="rest">
                 <div class="request-param">
                     <request-rest :reqRest="apiForm.rest" style="width: 100%"/>
                 </div>

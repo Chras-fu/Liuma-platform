@@ -4,9 +4,9 @@
 <template>
     <div>
         <el-table :data="reqQuery">
-            <el-table-column label="QUERY参数名称" prop="name">
+            <el-table-column label="参数名称" prop="name">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请输入QUERY参数名称" v-model="reqQuery[scope.$index].name"/>
+                    <el-input size="small" style="width: 90%" placeholder="请输入参数名称" v-model="reqQuery[scope.$index].name"/>
                 </template>
             </el-table-column>
             <el-table-column label="必填项" width="200px">
@@ -16,9 +16,9 @@
                     </el-select>
                 </template>
             </el-table-column>
-            <el-table-column label="QUERY参数值" prop="value">
+            <el-table-column label="参数值" prop="value">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请输入QUERY参数值" v-model="reqQuery[scope.$index].value"/>
+                    <el-input size="small" style="width: 90%" placeholder="请输入参数值" v-model="reqQuery[scope.$index].value"/>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="100px">

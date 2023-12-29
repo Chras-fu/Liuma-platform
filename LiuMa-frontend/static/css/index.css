@@ -49,3 +49,31 @@
 .lm-info{
     color: #535457;
 }
+
+.el-table__expand-icon{
+    position: relative;
+    width: 80px;
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+}
+
+.el-icon-arrow-right {
+    width: 80px;
+}
+
+.el-table__expand-icon .el-icon-arrow-right:before{
+    content: "\e7a0";
+    width: 60px;
+    display: inline-block;
+    position: absolute;
+    left: -50px;
+    top: -4px;
+    font-weight: 400;
+    font-size: 18px;
+    color: #67C23A;
+}
+
+.el-table__expand-icon--expanded .el-icon-arrow-right:before{
+    content: "\e7a2";
+    color: #F56C6C;
+}

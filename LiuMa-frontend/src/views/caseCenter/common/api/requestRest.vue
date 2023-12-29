@@ -4,14 +4,14 @@
 <template>
     <div>
         <el-table :data="reqRest">
-            <el-table-column label="REST参数名称" prop="name">
+            <el-table-column label="参数名称" prop="name">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请输入REST参数名称" v-model="reqRest[scope.$index].name"/>
+                    <el-input size="small" style="width: 90%" placeholder="请输入参数名称" v-model="reqRest[scope.$index].name"/>
                 </template>
             </el-table-column>
-            <el-table-column label="REST参数值" prop="value">
+            <el-table-column label="参数值" prop="value">
                 <template slot-scope="scope">
-                    <el-input size="small" style="width: 90%" placeholder="请输入REST参数值" v-model="reqRest[scope.$index].value"/>
+                    <el-input size="small" style="width: 90%" placeholder="请输入参数值" v-model="reqRest[scope.$index].value"/>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="100px">
