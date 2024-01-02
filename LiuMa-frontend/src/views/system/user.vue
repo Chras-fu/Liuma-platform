@@ -19,9 +19,9 @@
     <!--列表-->
     <el-table size="small" :data="userData" v-loading="loading">
         <el-table-column prop="index" label="序号" width="50px" align="center"/>
-        <el-table-column prop="username" label="用户名" min-width="100px"/>
-        <el-table-column prop="account" label="登录账号"/>
-        <el-table-column prop="email" label="邮箱" min-width="200px"/>
+        <el-table-column prop="username" label="用户名" min-width="100px" :show-overflow-tooltip="true"/>
+        <el-table-column prop="account" label="登录账号" :show-overflow-tooltip="true"/>
+        <el-table-column prop="email" label="邮箱" min-width="200px" :show-overflow-tooltip="true"/>
         <el-table-column prop="createTime" label="注册时间" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="100px">
             <template slot-scope="scope">

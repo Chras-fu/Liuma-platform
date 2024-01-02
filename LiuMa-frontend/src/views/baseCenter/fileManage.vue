@@ -19,8 +19,8 @@
     <!--列表-->
     <el-table size="small" :data="fileData" v-loading="loading">
         <el-table-column prop="id" label="UUID" width="250px"/>
-        <el-table-column prop="name" label="文件名称" min-width="200px"/>
-        <el-table-column prop="description" label="文件描述" min-width="240px"/>
+        <el-table-column prop="name" label="文件名称" min-width="200px" :show-overflow-tooltip="true"/>
+        <el-table-column prop="description" label="文件描述" min-width="240px" :show-overflow-tooltip="true"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="createTime" label="上传时间" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="100px">

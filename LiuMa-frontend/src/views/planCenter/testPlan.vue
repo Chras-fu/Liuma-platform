@@ -24,7 +24,7 @@
                     <!-- 报告列表 -->
                     <el-table size="mini" :data="props.row.reportData">
                         <el-table-column label="序号" prop="index" width="50px" align="center"/>
-                        <el-table-column label="报告名称" prop="name" min-width="200px"/>
+                        <el-table-column label="报告名称" prop="name" min-width="200px" :show-overflow-tooltip="true"/>
                         <el-table-column label="报告状态" prop="format" width="100px"/>
                         <el-table-column label="执行进度" prop="runProgress" width="120px">
                             <template slot-scope="scope">
@@ -55,15 +55,15 @@
                 </el-button>
             </template>
         </el-table-column>
-        <el-table-column label="版本" prop="versionName"/>
-        <el-table-column label="计划描述" prop="description" min-width="180px"/>
+        <el-table-column label="版本" prop="versionName" :show-overflow-tooltip="true"/>
+        <el-table-column label="计划描述" prop="description" min-width="180px" :show-overflow-tooltip="true"/>
         <el-table-column label="创建人" prop="username"/>
         <el-table-column label="更新时间" prop="updateTime" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="150px">
             <template slot-scope="scope">
                 <el-button type="text" size="mini" @click="runPlan(scope.row)">执行</el-button>
                 <el-button type="text" size="mini" @click="deletePlan(scope.row)">删除</el-button>
-                <el-button type="text" size="mini" @click="editNotice(scope.row)">通知配置</el-button>
+                <el-button type="text" size="mini" @click="editNotice(scope.row)">通知</el-button>
             </template>
         </el-table-column>
     </el-table>

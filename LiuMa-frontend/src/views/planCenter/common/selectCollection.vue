@@ -18,9 +18,9 @@
             </el-table-column>
             <el-table-column prop="index" label="编号" width="80">
             </el-table-column>
-            <el-table-column prop="name" label="集合名称" min-width="160">
+            <el-table-column prop="name" label="集合名称" min-width="160" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="versionName" label="集合版本" width="160">
+            <el-table-column prop="versionName" label="集合版本" width="160" :show-overflow-tooltip="true">
             </el-table-column>
         </el-table>
         <!-- 分页组件 -->

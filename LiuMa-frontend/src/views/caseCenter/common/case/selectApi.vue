@@ -22,11 +22,11 @@
             </el-table-column>
             <el-table-column prop="num" label="NO" width="80">
             </el-table-column>
-            <el-table-column prop="name" label="接口名称" min-width="160">
+            <el-table-column prop="name" label="接口名称" min-width="160" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="path" label="接口地址" width="160">
+            <el-table-column prop="path" label="接口地址" width="160" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="moduleName" label="所属模块" width="120">
+            <el-table-column prop="moduleName" label="所属模块" width="120" :show-overflow-tooltip="true">
             </el-table-column>
         </el-table>
         <!-- 分页组件 -->

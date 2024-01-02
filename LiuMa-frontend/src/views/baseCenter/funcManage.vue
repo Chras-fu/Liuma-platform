@@ -19,15 +19,15 @@
     <!--列表-->
     <el-table size="small" :data="functionData" v-loading="loading">
         <el-table-column prop="index" label="序号" align="center" width="50px"/>
-        <el-table-column prop="name" label="函数名称" min-width="120px"/>
+        <el-table-column prop="name" label="函数名称" min-width="120px" :show-overflow-tooltip="true"/>
         <el-table-column prop="from" label="函数类型">
             <template slot-scope="scope">
                 <span v-if="scope.row.from==='system'">系统内置函数</span>
                 <span v-if="scope.row.from==='custom'">用户定义函数</span>
             </template>
         </el-table-column>
-        <el-table-column prop="expression" label="调用方式" min-width="200px"/>
-        <el-table-column prop="description" label="函数说明" min-width="200px"/>
+        <el-table-column prop="expression" label="调用方式" min-width="200px" :show-overflow-tooltip="true"/>
+        <el-table-column prop="description" label="函数说明" min-width="200px" :show-overflow-tooltip="true"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="updateTime" label="更新时间" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="100px">

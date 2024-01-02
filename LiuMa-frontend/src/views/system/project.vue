@@ -19,8 +19,8 @@
     <!--列表-->
     <el-table size="small" :data="projectData" v-loading="loading">
         <el-table-column prop="index" label="序号" width="50px" align="center"/>
-        <el-table-column prop="name" label="项目名称" min-width="150px"/>
-        <el-table-column prop="description" label="项目描述" min-width="200px"/>
+        <el-table-column prop="name" label="项目名称" min-width="150px" :show-overflow-tooltip="true"/>
+        <el-table-column prop="description" label="项目描述" min-width="200px" :show-overflow-tooltip="true"/>
         <el-table-column prop="status" label="项目状态">
             <template slot-scope="scope">
                 <span v-if="scope.row.status === 'Trash'"> 已删除</span>

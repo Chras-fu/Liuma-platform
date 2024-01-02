@@ -28,9 +28,9 @@
     <el-col :span="20" class="right-table">
         <el-table size="small" :data="apiListData" v-loading="loading" element-loading-text="拼命加载中">
             <el-table-column prop="num" label="NO" width="60px"/>
-            <el-table-column prop="name" label="接口名称" min-width="180"/>
-            <el-table-column prop="path" label="接口地址" min-width="150"/>
-            <el-table-column prop="moduleName" label="所属模块"/>
+            <el-table-column prop="name" label="接口名称" min-width="180" :show-overflow-tooltip="true"/>
+            <el-table-column prop="path" label="接口地址" min-width="150" :show-overflow-tooltip="true"/>
+            <el-table-column prop="moduleName" label="所属模块" :show-overflow-tooltip="true"/>
             <el-table-column prop="username" label="创建人"/>
             <el-table-column prop="updateTime" label="更新时间" width="150"/>
             <el-table-column fixed="right" align="operation" label="操作" width="150">

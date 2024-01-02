@@ -26,10 +26,10 @@
         <!--列表-->
         <el-table size="small" :data="elementListData" v-loading="loading" element-loading-text="拼命加载中">
             <el-table-column prop="num" label="NO" width="60px"/>
-            <el-table-column prop="name" label="元素名称" min-width="180"/>
+            <el-table-column prop="name" label="元素名称" min-width="180" :show-overflow-tooltip="true"/>
             <el-table-column prop="by" label="定位方式"/>
-            <el-table-column prop="expression" label="表达式" min-width="150"/>
-            <el-table-column prop="moduleName" label="所属页面"/>
+            <el-table-column prop="expression" label="表达式" min-width="150" :show-overflow-tooltip="true"/>
+            <el-table-column prop="moduleName" label="所属页面" :show-overflow-tooltip="true"/>
             <el-table-column prop="username" label="创建人"/>
             <el-table-column prop="updateTime" label="更新时间" width="150px"/>
             <el-table-column fixed="right" align="operation" label="操作" width="100">

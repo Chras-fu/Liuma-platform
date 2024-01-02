@@ -32,7 +32,7 @@
         <!--列表-->
         <el-table size="small" :data="controlListData" v-loading="loading" control-loading-text="拼命加载中">
             <el-table-column prop="num" label="NO" width="60px"/>
-            <el-table-column prop="name" label="控件名称" min-width="150"/>
+            <el-table-column prop="name" label="控件名称" min-width="150" :show-overflow-tooltip="true"/>
             <el-table-column prop="system" label="所属系统"/>
             <el-table-column prop="by" label="定位方式">
                 <template slot-scope="scope">
@@ -42,8 +42,8 @@
                     <span v-if="scope.row.by ==='CLASS'">ClassChain定位</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="expressionText" label="表达式" min-width="120"/>
-            <el-table-column prop="moduleName" label="所属页面"/>
+            <el-table-column prop="expressionText" label="表达式" min-width="120" :show-overflow-tooltip="true"/>
+            <el-table-column prop="moduleName" label="所属页面" :show-overflow-tooltip="true"/>
             <el-table-column prop="username" label="创建人"/>
             <el-table-column prop="updateTime" label="更新时间" width="150px"/>
             <el-table-column fixed="right" align="operation" label="操作" width="100">

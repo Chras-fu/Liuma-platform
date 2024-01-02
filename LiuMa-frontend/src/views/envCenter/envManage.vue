@@ -50,8 +50,8 @@
                 </template>
               </el-table-column>
               <el-table-column v-else label="数据库名" prop="databaseKey"/>
-              <el-table-column v-if="props.row.type==='domain'" label="域名" prop="domainData" min-width="200px"/>
-              <el-table-column v-else label="数据库地址" min-width="200px">
+              <el-table-column v-if="props.row.type==='domain'" label="域名" prop="domainData" min-width="200px" :show-overflow-tooltip="true"/>
+              <el-table-column v-else label="数据库地址" min-width="200px" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
                   {{scope.row.host}}:{{scope.row.port}}
                 </template>
@@ -68,7 +68,7 @@
       </el-table-column>
       <el-table-column label="序号" prop="index" width="50px" align="center"/>
       <el-table-column label="环境名称" prop="name"/>
-      <el-table-column label="环境描述" prop="description" min-width="200px"/>
+      <el-table-column label="环境描述" prop="description" min-width="200px" :show-overflow-tooltip="true"/>
       <el-table-column label="创建人" prop="username"/>
       <el-table-column label="更新时间" prop="updateTime" width="150px"/>
       <el-table-column fixed="right" align="operation" label="操作" width="120px">

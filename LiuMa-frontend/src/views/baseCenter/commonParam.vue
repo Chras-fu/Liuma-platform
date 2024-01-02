@@ -26,8 +26,8 @@
                 <el-table size="mini" :data="props.row.systemParamList">
                   <el-table-column label="序号" prop="index" width="50px" align="center"/>
                   <el-table-column label="参数名" prop="name"/>
-                  <el-table-column label="参数值" prop="paramData" min-width="150px"/>
-                  <el-table-column label="参数描述" prop="description" min-width="150px"/>
+                  <el-table-column label="参数值" prop="paramData" min-width="150px" :show-overflow-tooltip="true"/>
+                  <el-table-column label="参数描述" prop="description" min-width="150px" :show-overflow-tooltip="true"/>
                   <el-table-column label="创建人" prop="username"/>
                   <el-table-column label="更新时间" prop="updateTime" width="150px"/>
                   <el-table-column fixed="right" align="operation" label="操作" width="100px">
@@ -58,8 +58,8 @@
           <el-table-column label="序号" prop="index" width="50px" align="center"/>
             <el-table-column label="参数名" prop="name"/>
             <el-table-column label="参数类型" prop="dataType"/>
-            <el-table-column label="参数值" prop="paramData" min-width="150px"/>
-            <el-table-column label="参数描述" prop="description" min-width="150px"/>
+            <el-table-column label="参数值" prop="paramData" min-width="150px" :show-overflow-tooltip="true"/>
+            <el-table-column label="参数描述" prop="description" min-width="150px" :show-overflow-tooltip="true"/>
             <el-table-column label="创建人" prop="username"/>
             <el-table-column label="更新时间" prop="updateTime" width="150px"/>
             <el-table-column fixed="right" align="operation" label="操作" width="100px">

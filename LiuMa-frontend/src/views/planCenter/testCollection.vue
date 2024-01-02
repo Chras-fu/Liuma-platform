@@ -24,7 +24,7 @@
                     <!-- 报告列表 -->
                     <el-table size="mini" :data="props.row.reportData">
                         <el-table-column label="序号" prop="index" width="50px" align="center"/>
-                        <el-table-column label="报告名称" prop="name" min-width="200px"/>
+                        <el-table-column label="报告名称" prop="name" min-width="200px" :show-overflow-tooltip="true"/>
                         <el-table-column label="报告状态" prop="format" width="100px"/>
                         <el-table-column label="执行进度" prop="runProgress" width="120px">
                             <template slot-scope="scope">
@@ -48,9 +48,9 @@
             </template>
         </el-table-column>
         <el-table-column prop="index" label="序号" width="50px" align="center"/>
-        <el-table-column prop="name" label="集合名称" min-width="160px"/>
-        <el-table-column prop="versionName" label="版本"/>
-        <el-table-column prop="description" label="集合描述" min-width="180px"/>
+        <el-table-column prop="name" label="集合名称" min-width="160px" :show-overflow-tooltip="true"/>
+        <el-table-column prop="versionName" label="版本" :show-overflow-tooltip="true"/>
+        <el-table-column prop="description" label="集合描述" min-width="180px" :show-overflow-tooltip="true"/>
         <el-table-column prop="username" label="创建人"/>
         <el-table-column prop="updateTime" label="更新时间" width="150px"/>
         <el-table-column fixed="right" align="center" label="操作" width="150px">
