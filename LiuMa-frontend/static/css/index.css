@@ -57,10 +57,6 @@
     transform: rotate(0deg);
 }
 
-.el-icon-arrow-right {
-    width: 80px;
-}
-
 .el-table__expand-icon .el-icon-arrow-right:before{
     content: "\e7a0";
     width: 60px;

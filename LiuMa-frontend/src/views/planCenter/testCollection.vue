@@ -17,7 +17,7 @@
         </el-form-item>
     </el-form>
     <!--列表-->
-    <el-table size="small" :data="collectionData" v-loading="loading" @expand-change="expandSelect">
+    <el-table size="small" :data="collectionData" v-loading="loading" row-key="id" :expand-row-keys="expands" @expand-change="expandSelect">
         <el-table-column type="expand" width="40px">
             <template slot-scope="props">
                 <div style="padding-left: 40px">
@@ -80,6 +80,7 @@ export default {
     },
     data() {
         return{
+            expands: [], // 默认展开行
             loading:false,
             searchForm: {
                 page: 1,
@@ -101,6 +102,7 @@ export default {
                 environmentId: null,
                 deviceId: null
             },
+            runRow: null
         }
     },
     created() {
@@ -177,8 +179,13 @@ export default {
             });
         },
         expandSelect(row, expandedRows) {
-            if(expandedRows.length != 0){
-                this.getReportData(row);
+            if(expandedRows.indexOf(row) === -1){  //关闭行
+                this.expands.splice(this.expands.indexOf(row.id), 1);
+            } else{ // 打开行
+                if(this.expands.indexOf(row.id) === -1){
+                    this.expands.push(row.id);
+                    this.getReportData(row);
+                }
             }
         },
         // 分页插件事件
@@ -216,7 +223,7 @@ export default {
                 if(response.data.hasApple){
                     this.deviceSystem = "apple";
                 }
-
+                this.runRow = row;
                 this.runForm.engineId = 'system';
                 this.runForm.environmentId = null;
                 this.runForm.deviceId = null;
@@ -235,6 +242,8 @@ export default {
             let url = '/autotest/run';
             this.$post(url, runForm, response =>{
                 this.$message.success("执行成功 执行结果请查看报告");
+                this.expands.push(this.runRow.id);
+                this.getReportData(this.runRow);
             });
             this.runVisible = false;
         },
