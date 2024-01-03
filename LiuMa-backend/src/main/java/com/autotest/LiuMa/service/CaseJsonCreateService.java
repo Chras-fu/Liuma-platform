@@ -614,11 +614,13 @@ public class CaseJsonCreateService {
     }
 
     public JSONObject getApiProxy(String proxyId, JSONArray controller){
-        for(int i =0; i<controller.size(); i++) {   // 优先从接口配置中获取代理
-            JSONObject controllerData = controller.getJSONObject(i);
-            String controllerName = controllerData.getString("name");
-            if (controllerName.equals("proxy")) {
-                return controllerData.getJSONObject("value");
+        if(controller != null) {
+            for (int i = 0; i < controller.size(); i++) {   // 优先从接口配置中获取代理
+                JSONObject controllerData = controller.getJSONObject(i);
+                String controllerName = controllerData.getString("name");
+                if (controllerName.equals("proxy")) {
+                    return controllerData.getJSONObject("value");
+                }
             }
         }
         // 生成接口用例代理
