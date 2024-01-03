@@ -16,7 +16,7 @@
             @node-click="clickModule" ref="tree" draggable @node-drag-end="dragNode">
                 <span class="custom-tree-node" slot-scope="{ node, data }">
                     <span class="tree-label">{{node.label}}</span>
-                    <span class="tree-opt">
+                    <span class="tree-opt" v-if="data.id !== '0'">
                         &emsp;
                         <el-button size="mini" type="text" icon="el-icon-plus" @click="() => appendModule(data)"></el-button>
                         <el-button size="mini" type="text" icon="el-icon-delete" @click="() => removeModule(node, data)"></el-button>
@@ -62,6 +62,10 @@ export default {
         this.$emit("appendModule", data);
     },
     dragNode(dragNode, tarNode, position, event) {
+        if(dragNode.data.id === '0' | tarNode.data.id === '0'){
+            this.$nextTick()
+            return;
+        }
         if(position === "inner"){
             // 如果是拖拽进目标节点内 且目标节点不是父节点 做更改父节点请求
             if(tarNode.data.id !== dragNode.data.parentId){

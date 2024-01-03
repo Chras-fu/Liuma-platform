@@ -98,6 +98,7 @@ export default {
         getModule(){
             let url = '/autotest/module/list/case/' + this.$store.state.projectId;
             this.$get(url, response =>{
+                response.data.unshift({id: "0", name:"默认模块", label: "默认模块"});
                 this.modules = response.data;
             });
         },
