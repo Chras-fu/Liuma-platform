@@ -77,7 +77,7 @@ export default {
             }else{
                 for(let i=0;i<this.settings.length;i++){
                     if(this.settings[i].name === row.name){
-                        this.settings.slice(i, 1);
+                        this.settings.splice(i, 1);
                         break;
                     }
                 }
