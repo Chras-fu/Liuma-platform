@@ -5,6 +5,7 @@
   <div class = "page-header">
       <span style="font-weight: bold">{{title}}</span>
       <div>
+          <el-button type="text" v-if="showHistory" size="small" @click="viewHistory">历史执行记录</el-button>
           <el-button v-if="showCancel" size="small" @click="cancel">返回</el-button>
           <el-button v-if="showDebug" size="small" type="success" @click="debug">调试</el-button>
           <el-button v-if="showSave" size="small" type="primary" @click="save">保存</el-button>
@@ -16,6 +17,10 @@ export default {
   name: 'PageHeader',
   props:{
     title:{},
+    showHistory:{
+      type: Boolean,
+      default: false,
+    },
     showDebug:{
       type: Boolean,
       default: false,
@@ -37,6 +42,10 @@ export default {
       default: null,
     },
     debug:{
+      type: Function,
+      default: null,
+    },
+    viewHistory: {
       type: Function,
       default: null,
     }

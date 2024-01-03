@@ -3,7 +3,7 @@
  */
 <template>
   <div>
-    <page-header title="编辑计划" :cancel="cancelAdd" :save="saveAdd"/>
+    <page-header title="编辑计划" :showHistory="planForm.id!==''" :viewHistory="viewHistory" :cancel="cancelAdd" :save="saveAdd"/>
     <el-form ref="planForm" :rules="rules" :model="planForm" label-width="80px">
         <el-row :gutter="40">
             <el-col :span="16">
@@ -101,6 +101,30 @@
             <el-button size="small" type="primary" @click="selectCollectionSave">保存</el-button>
         </div>
     </el-dialog>
+    <el-dialog title="计划执行历史" :visible.sync="historyVisible" width="1000px" destroy-on-close>
+        <el-table size="mini" :data="reportData">
+            <el-table-column label="序号" prop="index" width="50px" align="center"/>
+            <el-table-column label="报告名称" prop="name" min-width="150px" :show-overflow-tooltip="true"/>
+            <el-table-column label="报告状态" prop="format" width="80px"/>
+            <el-table-column label="执行进度" prop="runProgress" width="120px">
+                <template slot-scope="scope">
+                    <el-progress :percentage="scope.row.progress" :color="scope.row.color"/>
+                </template>
+            </el-table-column>
+            <el-table-column label="总用例数" prop="total" width="80px"/>
+            <el-table-column label="成功数" prop="passCount" width="80px"/>
+            <el-table-column label="成功率" prop="passRate" width="80px"/>
+            <el-table-column label="创建时间" prop="createTime" width="135px"/>
+            <el-table-column fixed="right" align="center" label="操作" width="90px">
+                <template slot-scope="scope">
+                    <el-button type="text" size="mini" @click="viewReport(scope.row)">查看</el-button>
+                    <el-button type="text" size="mini" @click="deleteReport(scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 分页组件 -->
+        <Pagination v-bind:child-msg="pageparam" @callFather="callFather"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,8 +132,10 @@
 import PageHeader from '../common/components/pageheader'
 import SelectCollection from './common/selectCollection'
 import {getUUID} from '@/utils/util'
+import Pagination from '../common/components/pagination'
+import {timestampToTime} from '@/utils/util'
 export default {
-    components:{PageHeader, SelectCollection},
+    components:{PageHeader, SelectCollection, Pagination},
     data() {
         var validateStartTime = (rule, value, callback) => {
             if (typeof value === 'string'){
@@ -121,6 +147,13 @@ export default {
             }
         };
         return{
+            historyVisible: false,
+            pageparam: {
+                currentPage: 1,
+                pageSize: 10,
+                total: 0
+            },
+            reportData:[],
             selections: [],
             selectCollectionVisible: false,
             planForm: {
@@ -243,6 +276,77 @@ export default {
                 }
             });
             
+        },
+        viewHistory(){
+            this.getReportData();
+            this.historyVisible = true;
+        },
+        callFather(param){
+            this.pageparam.currentPage = param.currentPage;
+            this.pageparam.pageSize = param.pageSize;
+            this.getReportData();
+        },
+        getReportData(){
+            // 获取报告
+            let url = '/autotest/report/list/' + this.pageparam.currentPage + '/' + this.pageparam.pageSize;
+            let param = {
+                projectId: this.$store.state.projectId,
+                planId: this.planForm.id
+            };
+            this.$post(url, param, response => {
+                let data = response.data;
+                for(let i =0; i<data.list.length; i++){
+                    data.list[i].createTime = timestampToTime(data.list[i].createTime);
+                    let status = data.list[i].status
+                    if(status === 'success'){
+                        data.list[i].format = 'SUCCESS';
+                        data.list[i].color = '#67C23A';
+                    }else if(status === 'fail'){
+                        data.list[i].format = 'FAIL';
+                        data.list[i].color = '#E6A23C';
+                    }else if(status === 'error'){
+                        data.list[i].format = 'ERROR';
+                        data.list[i].color = '#F56C6C';
+                    }else if(status === 'skip'){
+                        data.list[i].format = 'SKIP';
+                        data.list[i].color = '#535457';
+                    }else if(status === 'prepared'){
+                        data.list[i].format = '等待执行';
+                        data.list[i].color = '#409EFF';
+                    }else if(status === 'running'){
+                        data.list[i].format = "RUNNING";
+                        data.list[i].color = '#409EFF';
+                    }else if(status === 'discontinue'){
+                        data.list[i].format = "已终止";
+                        data.list[i].color = '#535457';
+                    }
+                    data.list[i].index = (this.pageparam.currentPage-1) * this.pageparam.pageSize + i+1;
+                }
+                this.reportData = data.list;
+                this.pageparam.total = data.total;
+            });
+        },
+        // 查看报告
+        viewReport(row){
+            this.$router.push({path: '/report/testReport/detail/' + row.id});
+        },
+        // 删除报告
+        deleteReport(row){
+            this.$confirm('确定要删除报告吗?', '删除提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            })
+            .then(() => {
+                let url = '/autotest/report/delete';
+                this.$post(url, {id: row.id}, response => {
+                    this.$message.success("删除成功");
+                    this.getReportData();
+                });
+            })
+            .catch(() => {
+                this.$message.success("取消成功");
+            })
         },
     }
 }

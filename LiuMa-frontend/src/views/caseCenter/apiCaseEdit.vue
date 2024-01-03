@@ -3,7 +3,7 @@
  */
 <template>
   <div>
-    <page-header title="用例编辑" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
+    <page-header title="编辑用例" :showDebug="true" :cancel="cancelAdd" :debug="debugCase" :save="saveAdd"/>
     <el-form ref="caseForm" :rules="rules" :model="caseForm" label-width="90px">
         <base-info :caseForm="caseForm"/>
     <p class="tip">接口请求</p>

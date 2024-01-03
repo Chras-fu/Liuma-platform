@@ -17,36 +17,7 @@
         </el-form-item>
     </el-form>
     <!--计划列表-->
-    <el-table size="small" :data="planData" v-loading="loading" @expand-change="expandSelect">
-        <el-table-column type="expand" width="40px">
-            <template slot-scope="props">
-                <div style="padding-left: 40px">
-                    <!-- 报告列表 -->
-                    <el-table size="mini" :data="props.row.reportData">
-                        <el-table-column label="序号" prop="index" width="50px" align="center"/>
-                        <el-table-column label="报告名称" prop="name" min-width="200px" :show-overflow-tooltip="true"/>
-                        <el-table-column label="报告状态" prop="format" width="100px"/>
-                        <el-table-column label="执行进度" prop="runProgress" width="120px">
-                            <template slot-scope="scope">
-                                <el-progress :percentage="props.row.reportData[scope.$index].progress" :color="props.row.reportData[scope.$index].color"/>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="用例总条数" prop="total"/>
-                        <el-table-column label="成功条数" prop="passCount"/>
-                        <el-table-column label="成功率" prop="passRate"/>
-                        <el-table-column label="创建时间" prop="createTime" width="150px"/>
-                        <el-table-column fixed="right" align="center" label="操作" width="150px">
-                            <template slot-scope="scope">
-                                <el-button type="text" size="mini" @click="viewReport(scope.row)">查看</el-button>
-                                <el-button type="text" size="mini" @click="deleteReport(props.row, scope.row)">删除</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                    <!-- 分页组件 -->
-                    <Pagination style="float: right;" size="mini" v-bind:child-msg="props.row.pageparam" @callFather="reportCallFather($event, props.row)"/>
-                </div>
-            </template>
-        </el-table-column>
+    <el-table size="small" :data="planData" v-loading="loading">
         <el-table-column label="序号" prop="index" width="50px" align="center"/>
         <el-table-column label="计划名称" prop="name" min-width="160px" :show-overflow-tooltip="true">
             <template slot-scope="scope">
@@ -59,7 +30,7 @@
         <el-table-column label="计划描述" prop="description" min-width="180px" :show-overflow-tooltip="true"/>
         <el-table-column label="创建人" prop="username"/>
         <el-table-column label="更新时间" prop="updateTime" width="150px"/>
-        <el-table-column fixed="right" align="operation" label="操作" width="150px">
+        <el-table-column fixed="right" align="operation" label="操作" width="130px">
             <template slot-scope="scope">
                 <el-button type="text" size="mini" @click="runPlan(scope.row)">执行</el-button>
                 <el-button type="text" size="mini" @click="deletePlan(scope.row)">删除</el-button>
@@ -68,7 +39,7 @@
         </el-table-column>
     </el-table>
     <!-- 分页组件 -->
-    <Pagination v-bind:child-msg="pageparam" @callFather="planCallFather"/>
+    <Pagination v-bind:child-msg="pageparam" @callFather="callFather"/>
     <!-- 配置计划通知弹框 -->
     <edit-notice :noticeForm="noticeForm" :noticeVisible="noticeVisible" @closeNotice="closeNotice" @submitNotice="submitNotice($event)"/>
     <!-- 计划执行选择引擎和环境 -->
@@ -131,12 +102,6 @@ export default {
                 let data = response.data;
                 for(let i =0; i<data.list.length; i++){
                     data.list[i].updateTime = timestampToTime(data.list[i].updateTime);
-                    data.list[i].reportData = [];
-                    data.list[i].pageparam = {
-                        currentPage: 1,
-                        pageSize: 10,
-                        total: 0
-                    };
                     data.list[i].index = (searchParam.page-1) * searchParam.limit + i+1;
                 }
                 this.planData = data.list;
@@ -147,60 +112,10 @@ export default {
                 this.pageparam.total = data.total;
             });
         },
-        getReportData(row){
-            // 获取报告
-            let url = '/autotest/report/list/' + row.pageparam.currentPage + '/' + row.pageparam.pageSize;
-            let param = {
-                projectId: this.$store.state.projectId,
-                planId: row.id
-            };
-            this.$post(url, param, response => {
-                let data = response.data;
-                for(let i =0; i<data.list.length; i++){
-                    data.list[i].createTime = timestampToTime(data.list[i].createTime);
-                    let status = data.list[i].status
-                    if(status === 'success'){
-                        data.list[i].format = 'SUCCESS';
-                        data.list[i].color = '#67C23A';
-                    }else if(status === 'fail'){
-                        data.list[i].format = 'FAIL';
-                        data.list[i].color = '#E6A23C';
-                    }else if(status === 'error'){
-                        data.list[i].format = 'ERROR';
-                        data.list[i].color = '#F56C6C';
-                    }else if(status === 'skip'){
-                        data.list[i].format = 'SKIP';
-                        data.list[i].color = '#535457';
-                    }else if(status === 'prepared'){
-                        data.list[i].format = '等待执行';
-                        data.list[i].color = '#409EFF';
-                    }else if(status === 'running'){
-                        data.list[i].format = "RUNNING";
-                        data.list[i].color = '#409EFF';
-                    }else if(status === 'discontinue'){
-                        data.list[i].format = "已终止";
-                        data.list[i].color = '#535457';
-                    }
-                    data.list[i].index = (row.pageparam.currentPage-1) * row.pageparam.pageSize + i+1;
-                }
-                row.reportData = data.list;
-                row.pageparam.total = data.total;
-            });
-        },
-        expandSelect(row, expandedRows) {
-            if(expandedRows.length != 0){
-                this.getReportData(row);
-            }
-        },
-        planCallFather(param) {
+        callFather(param) {
             this.searchForm.page = param.currentPage;
             this.searchForm.limit = param.pageSize;
             this.getPlanData(this.searchForm);
-        },
-        reportCallFather(param, row){
-            row.pageparam.currentPage = param.currentPage;
-            row.pageparam.pageSize = param.pageSize;
-            this.getReportData(row);
         },
         // 搜索按钮
         search() {
@@ -270,28 +185,6 @@ export default {
                 this.$message.success("保存成功");
                 this.noticeVisible = false;
             });
-        },
-        // 查看报告
-        viewReport(row){
-            this.$router.push({path: '/report/testReport/detail/' + row.id});
-        },
-        // 删除报告
-        deleteReport(pRow, rRow){
-            this.$confirm('确定要删除报告吗?', '删除提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            })
-            .then(() => {
-                let url = '/autotest/report/delete';
-                this.$post(url, {id: rRow.id}, response => {
-                    this.$message.success("删除成功");
-                    this.getReportData(pRow);
-                });
-            })
-            .catch(() => {
-                this.$message.success("取消成功");
-            })
         },
         // 删除计划
         deletePlan(row){

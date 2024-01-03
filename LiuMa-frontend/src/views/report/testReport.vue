@@ -23,10 +23,10 @@
                 <el-progress :percentage="scope.row.progress" :color="scope.row.color"/>
             </template>
         </el-table-column>
-        <el-table-column prop="total" label="总用例数"/>
-        <el-table-column prop="passCount" label="成功用例数"/>
-        <el-table-column prop="passRate" label="成功率"/>
-        <el-table-column prop="username" label="执行人"/>
+        <el-table-column prop="total" label="总用例数" width="80px"/>
+        <el-table-column prop="passCount" label="成功数" width="80px"/>
+        <el-table-column prop="passRate" label="成功率" width="80px"/>
+        <el-table-column prop="username" label="执行人" width="100px"/>
         <el-table-column prop="createTime" label="创建时间" width="150px"/>
         <el-table-column fixed="right" align="operation" label="操作" width="100px">
             <template slot-scope="scope">
