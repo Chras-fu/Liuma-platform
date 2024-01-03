@@ -110,6 +110,11 @@ export default {
                 let data = response.data;
                 this.caseListData = data.list;
                 this.loading = false;
+                for(let i=0;i<data.list.length;i++){
+                    if(data.list[i].moduleId==='0'){
+                        data.list[i].moduleName='默认模块';
+                    }
+                }
                 // 分页赋值
                 this.pageParam.currentPage = this.searchForm.page;
                 this.pageParam.pageSize = this.searchForm.limit;
