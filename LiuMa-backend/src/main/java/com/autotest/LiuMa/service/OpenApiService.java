@@ -323,7 +323,7 @@ public class OpenApiService {
             request.setEngineId(plan.getEngineId());
         }
         request.setProjectId(plan.getProjectId());
-        Task task = runService.run(request);
+        TaskDTO task = runService.run(request);
         return task.getId();
     }
 

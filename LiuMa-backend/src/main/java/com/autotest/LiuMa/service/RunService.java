@@ -46,9 +46,9 @@ public class RunService {
     @Resource
     private DeviceService deviceService;
 
-    public Task run(RunRequest runRequest) {
+    public TaskDTO run(RunRequest runRequest) {
         // 新增任务
-        Task task = new Task();
+        TaskDTO task = new TaskDTO();
         task.setId(UUID.randomUUID().toString());
         // 判断app用例的设备是否可用
         if(runRequest.getDeviceId() != null && !runRequest.getDeviceId().equals("")){
@@ -120,6 +120,7 @@ public class RunService {
         }
         reportStatistics.setTotal(total);
         reportMapper.addReportStatistics(reportStatistics);
+        task.setReportId(report.getId());
         return task;
     }
 

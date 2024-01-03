@@ -156,7 +156,19 @@ export default {
         run(runForm){
             let url = '/autotest/run';
             this.$post(url, runForm, response =>{
-                this.$message.success("执行成功 执行结果请查看报告");
+                let reportId = response.data.reportId;
+                this.$confirm('执行成功，是否跳转执行报告？', '', {
+                    type: "success",
+                    distinguishCancelAndClose: true,
+                    confirmButtonText: '跳转',
+                    cancelButtonText: '关闭'
+                })
+                .then(() => {
+                    this.$router.push({path: '/report/testReport/detail/' + reportId});
+                })
+                .catch(action => {
+                    
+                });
             });
             this.runVisible = false;
         },
