@@ -24,5 +24,7 @@ public interface EngineMapper {
 
     List<Engine> getAllCustomEngine(String projectId);
 
+    List<Engine> getAllSystemEngine();
+
     List<EngineDTO> getEngineList(String projectId, String condition);
 }

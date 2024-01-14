@@ -23,6 +23,9 @@
   <select id="getAllCustomEngine" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Engine">
     select * from engine where project_id = #{projectId} and engine_type = 'custom' and status != 'offline'
   </select>
+  <select id="getAllSystemEngine" parameterType="java.lang.String" resultType="com.autotest.LiuMa.database.domain.Engine">
+    select * from engine where engine_type = 'system' and status != 'offline'
+  </select>
   <select id="getEngineList" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.EngineDTO">
     select eng.id, eng.name, eng.engine_type, eng.status, eng.project_id, eng.create_time, eng.update_time,
     eng.create_user, eng.update_user, u.username as username

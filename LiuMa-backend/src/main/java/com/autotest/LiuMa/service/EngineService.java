@@ -1,5 +1,6 @@
 package com.autotest.LiuMa.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.autotest.LiuMa.common.constants.EngineStatus;
 import com.autotest.LiuMa.common.constants.EngineType;
 import com.autotest.LiuMa.common.constants.ReportStatus;
@@ -11,8 +12,11 @@ import com.autotest.LiuMa.database.mapper.ReportMapper;
 import com.autotest.LiuMa.database.mapper.TaskMapper;
 import com.autotest.LiuMa.dto.EngineDTO;
 import com.autotest.LiuMa.dto.TaskDTO;
+import com.autotest.LiuMa.websocket.config.WsSessionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -61,6 +65,14 @@ public class EngineService {
         }else {
             engineMapper.updateStatus(task.getEngineId(), EngineStatus.OFFLINE.toString());
         }
+        try {
+            WebSocketSession session = WsSessionManager.get("engine", engine.getId());
+            JSONObject message = new JSONObject();
+            message.put("type", "stop");
+            message.put("data", task.getId());
+            session.sendMessage(new TextMessage(message.toString()));
+        }catch (Exception ignored){
+        }
     }
 
     public void stopEngineAllTask(String engineId) {
@@ -72,6 +84,13 @@ public class EngineService {
             engineMapper.updateStatus(engineId, EngineStatus.ONLINE.toString());
         }else {
             engineMapper.updateStatus(engineId, EngineStatus.OFFLINE.toString());
+        }
+        try {
+            WebSocketSession session = WsSessionManager.get("engine", engine.getId());
+            JSONObject message = new JSONObject();
+            message.put("type", "stopAll");
+            session.sendMessage(new TextMessage(message.toString()));
+        }catch (Exception ignored){
         }
     }
 

@@ -17,7 +17,7 @@
     t.update_time, t.create_user, t.update_user, u.username as username
     from task t left join user u on u.id = t.create_user
     where t.engine_id = #{engineId} and (t.status = 'prepared' or t.status = 'running')
-    order by t.create_time
+    order by t.status desc, t.create_time
   </select>
   <select id="getToRunTask" parameterType="java.lang.String" resultType="com.autotest.LiuMa.dto.TaskDTO">
     select t.id, t.name, t.project_id, t.type, t.status, t.engine_id, r.source_type,

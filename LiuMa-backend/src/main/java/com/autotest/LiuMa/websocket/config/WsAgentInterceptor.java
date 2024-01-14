@@ -15,7 +15,7 @@ import javax.annotation.Resource;
 import java.util.Map;
 
 @Component
-public class WsInterceptor implements HandshakeInterceptor {
+public class WsAgentInterceptor implements HandshakeInterceptor {
 
     @Resource
     private UserMapper userMapper;

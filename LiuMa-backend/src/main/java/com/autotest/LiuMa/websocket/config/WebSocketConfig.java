@@ -1,6 +1,7 @@
 package com.autotest.LiuMa.websocket.config;
 
 import com.autotest.LiuMa.websocket.DeviceHeartBeatHandler;
+import com.autotest.LiuMa.websocket.EngineHeartBeatHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -15,12 +16,21 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private DeviceHeartBeatHandler deviceHeartBeatHandler;
 
     @Autowired
-    private WsInterceptor wsInterceptor;
+    private EngineHeartBeatHandler engineHeartBeatHandler;
+
+    @Autowired
+    private WsAgentInterceptor wsAgentInterceptor;
+
+    @Autowired
+    private WsEngineInterceptor wsEngineInterceptor;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(deviceHeartBeatHandler, "/websocket/heartbeat")
-                .addInterceptors(wsInterceptor)
+        registry.addHandler(deviceHeartBeatHandler, "/websocket/agent/heartbeat")
+                .addInterceptors(wsAgentInterceptor)
+                .setAllowedOrigins("*"); // 解决跨域问题
+        registry.addHandler(engineHeartBeatHandler, "/websocket/engine/heartbeat")
+                .addInterceptors(wsEngineInterceptor)
                 .setAllowedOrigins("*"); // 解决跨域问题
     }
 }

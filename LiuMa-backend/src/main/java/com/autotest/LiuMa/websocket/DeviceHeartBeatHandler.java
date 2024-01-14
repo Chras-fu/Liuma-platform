@@ -43,7 +43,7 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String agentId = UUID.randomUUID().toString();
         session.getAttributes().put("agentId", agentId);
-        WsSessionManager.add(agentId, session);
+        WsSessionManager.add("agent", agentId, session);
         session.sendMessage(new TextMessage(agentId));
     }
 
@@ -98,7 +98,7 @@ public class DeviceHeartBeatHandler extends TextWebSocketHandler {
         Object agent = session.getAttributes().get("agentId");
         if (agent != null) {
             // 心跳关闭 更新设备状态和数据
-            WsSessionManager.remove(agent.toString());
+            WsSessionManager.remove("agent", agent.toString());
             deviceMapper.updateDeviceByAgent(agent.toString());
         }
     }

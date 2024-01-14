@@ -90,28 +90,34 @@
             </el-col>
             <el-col :span="3">
                 <el-form-item >
-                    <el-button size="small" type="primary" @click="stopAllTask(engineForm.id)">一键终止</el-button>
+                    <el-button size="small" type="primary" @click="stopAllTask(engineForm.id)">全部终止</el-button>
                 </el-form-item>
             </el-col>
         </el-form>
         <!--任务列表-->
         <el-table size="small" :data="engineForm.taskList">
             <el-table-column prop="index" label="序号" width="50px"/>
-            <el-table-column prop="name" label="任务名称" min-width="180px"/>
-            <el-table-column prop="type" label="任务类型" min-width="180px">
+            <el-table-column prop="name" label="任务名称" min-width="180px" :show-overflow-tooltip="true"/>
+            <el-table-column prop="type" label="任务类型" min-width="120px">
                 <template slot-scope="scope">
                     <span v-if="scope.row.type==='debug'">用例执行</span>
                     <span v-if="scope.row.type==='run'">集合/计划执行</span>
                     <span v-if="scope.row.type==='schedule'">定时任务</span>
                 </template>
             </el-table-column>
+            <el-table-column prop="status" label="任务状态" min-width="120px">
+                <template slot-scope="scope">
+                    <el-tag v-if="scope.row.status==='prepared'" size="mini" type="info">等待执行</el-tag>
+                    <el-tag v-if="scope.row.status==='running'" size="mini" type="">执行中</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="150px"/>
             <el-table-column prop="username" label="创建人"/>
-            <el-table-column fixed="right" align="operation" label="操作" width="100px">
+            <el-table-column fixed="right" align="operation" label="操作" width="60px">
               <template slot-scope="scope">
                 <el-button type="text" size="mini" @click="stopTask(scope.row.id, engineForm.id)">终止</el-button>
               </template>
-          </el-table-column>
+            </el-table-column>
         </el-table>
     </el-dialog>
   </div>

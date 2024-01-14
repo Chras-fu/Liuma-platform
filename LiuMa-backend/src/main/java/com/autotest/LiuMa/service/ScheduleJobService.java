@@ -6,8 +6,11 @@ import com.autotest.LiuMa.common.constants.*;
 import com.autotest.LiuMa.database.domain.*;
 import com.autotest.LiuMa.database.mapper.*;
 import com.autotest.LiuMa.dto.StatisticsDTO;
+import com.autotest.LiuMa.websocket.config.WsSessionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
@@ -66,6 +69,17 @@ public class ScheduleJobService {
             reportMapper.updateReportEndTime(report.getId(), System.currentTimeMillis(), System.currentTimeMillis());
             // 释放设备
             runService.stopDeviceWhenRunEnd(report.getTaskId());
+            Task task  = taskMapper.getTaskDetail(report.getTaskId());
+            if(!task.getEngineId().equals(EngineType.SYSTEM.toString())){
+                try {
+                    WebSocketSession session = WsSessionManager.get("engine", task.getEngineId());
+                    JSONObject message = new JSONObject();
+                    message.put("type", "stop");
+                    message.put("data", task.getId());
+                    session.sendMessage(new TextMessage(message.toString()));
+                }catch (Exception ignored){
+                }
+            }
         }
     }
 
@@ -127,6 +141,26 @@ public class ScheduleJobService {
                 planSchedule.setNextRunTime(PlanService.getNextRunTime(planSchedule.getNextRunTime(), planSchedule.getFrequency()));
             }
             planScheduleMapper.updatePlanSchedule(planSchedule);
+            if(plan.getEngineId().equals(EngineType.SYSTEM.toString())){
+                List<Engine> engineList = engineMapper.getAllSystemEngine();
+                for(Engine engine: engineList){ // 通知所有在线的引擎来获取任务
+                    try {
+                        WebSocketSession session = WsSessionManager.get("engine", engine.getId());
+                        JSONObject message = new JSONObject();
+                        message.put("type", "start");
+                        session.sendMessage(new TextMessage(message.toString()));
+                    }catch (Exception ignored){
+                    }
+                }
+            }else {
+                try {
+                    WebSocketSession session = WsSessionManager.get("engine", plan.getEngineId());
+                    JSONObject message = new JSONObject();
+                    message.put("type", "start");
+                    session.sendMessage(new TextMessage(message.toString()));
+                }catch (Exception ignored){
+                }
+            }
         }
     }
 

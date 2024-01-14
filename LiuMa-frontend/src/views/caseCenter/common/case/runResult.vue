@@ -110,7 +110,7 @@ export default {
                 setTimeout(() => {
                     this.sendRequest()
                 }, 0)
-            },3000);
+            },1000);
         },
         sendRequest(){
             let url = "/autotest/report/debug/" + this.taskId;

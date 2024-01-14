@@ -41,7 +41,7 @@ public class DeviceService {
         deviceMapper.updateDevice(device);
         // 调用ws通知客户端冷却设备
         try {
-            WebSocketSession session = WsSessionManager.get(device.getAgent());
+            WebSocketSession session = WsSessionManager.get("agent", device.getAgent());
             session.sendMessage(new TextMessage("cold@"+device.getSerial()));
         }catch (Exception ignored){
 
