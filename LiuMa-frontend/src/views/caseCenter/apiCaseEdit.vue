@@ -531,6 +531,10 @@ export default {
                 }
             });
         },
+        selectModule(data){
+            this.caseApiForm.moduleId = data.id;
+            this.caseApiForm.moduleName = data.label;
+        },
         debugCase(){
             // 用例调试
             this.runForm.engineId = 'system';
