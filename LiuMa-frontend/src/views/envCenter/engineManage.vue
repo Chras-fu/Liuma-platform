@@ -286,7 +286,7 @@ export default {
             })
         },
         downloadEngine(){
-            window.open("https://github.com/Chras-fu/LiuMa-engine.git");
+            window.open("http://www.liumatest.cn/downloadDoc");
         }
 
     }

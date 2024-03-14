@@ -109,7 +109,7 @@ export default {
           this.$router.push({path: '/setting/userSetting'});
           break;
         case "help":
-          window.open("https://docs.qq.com/doc/p/1e36932d41b40df896c1627a004068df9a28fc3f");
+          window.open("http://www.liumatest.cn/productDoc");
           break;
         case "follow":
           this.showQR = true;

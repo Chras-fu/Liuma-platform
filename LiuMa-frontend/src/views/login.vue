@@ -2,7 +2,7 @@
   <div class="login-wrap">
     <div class="welcome-title">
       <img class="logoimg" src="../assets/img/logo.png">
-      <span>欢 迎 使 用 流 马 测 试 平 台 <span style="color:#409EFF">(社区版)</span></span>
+      <span>欢 迎 使 用 流 马 测 试 平 台</span>
     </div>
     <el-form label-position="left" :model="loginForm" :rules="rules" ref="loginForm" label-width="0px" class="demo-loginForm login-container">
       <h3 class="title">用户登录</h3>
@@ -24,9 +24,6 @@
         <el-button type="primary" id="login" style="width:100%;" @click="submitForm('loginForm')" :loading="logining">登录</el-button>
       </el-form-item>
     </el-form>
-    <div style="text-align:center;margin-top:20px">
-      <a style="text-decoration:none;color: #409EFF" href="http://demo-ee.liumatest.cn">点击切换企业版</a>
-    </div>
     <el-dialog title="注册用户" :visible.sync="registerVisible" width="450px" destroy-on-close>
       <el-form ref="registerForm" :rules="rules" :model="registerForm" label-width="80px">
           <el-form-item label="登录账号" prop="newAccount">
